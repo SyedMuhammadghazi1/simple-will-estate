@@ -70,6 +70,16 @@ export async function hitRateLimit(
   };
 }
 
+/**
+ * Per-IP bucket. When the client IP is unknown (no trusted proxy header), all such requests share
+ * one bucket, so its limit is scaled up to avoid locking everyone out — set TRUST_PROXY=true
+ * behind a load balancer to get real per-IP limits.
+ */
+export function ipBucket(rule: RateLimitRule, ip: string | null): [RateLimitRule, string] {
+  if (ip) return [rule, `ip:${ip}`];
+  return [{ ...rule, limit: rule.limit * 20 }, "ip:unknown"];
+}
+
 /** Throws RateLimitedError when the limit is exceeded. */
 export async function enforceRateLimit(rule: RateLimitRule, identifier: string): Promise<void> {
   const result = await hitRateLimit(rule, identifier);

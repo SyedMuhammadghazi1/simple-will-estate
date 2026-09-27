@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getActor } from "@/server/session";
+import { safeNext } from "@/lib/safe-next";
 import { SignUpForm } from "./sign-up-form";
 
 export const metadata: Metadata = { title: "Create your account" };
@@ -10,6 +13,7 @@ export default async function SignUpPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const { next } = await searchParams;
+  if (await getActor().catch(() => null)) redirect(safeNext(next));
   return (
     <div className="mx-auto max-w-md px-4 py-12">
       <div className="card space-y-5">

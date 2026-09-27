@@ -140,3 +140,29 @@ describe("Postgres fixed-window rate limiter", () => {
     );
   });
 });
+
+describe("per-IP buckets", () => {
+  it("uses a per-IP key when the IP is known and a larger shared bucket otherwise", async () => {
+    const { ipBucket } = await import("@/server/rate-limit");
+    const rule = { name: "r", limit: 5, windowSeconds: 60 };
+    expect(ipBucket(rule, "203.0.113.9")).toEqual([rule, "ip:203.0.113.9"]);
+    expect(ipBucket(rule, null)).toEqual([{ ...rule, limit: 100 }, "ip:unknown"]);
+  });
+});
+
+describe("password reset", () => {
+  it("creates a single-use reset token without revealing whether the account exists", async () => {
+    const { getAuth } = await import("@/server/auth");
+    const { verification } = await import("@/db/schema");
+    const customer = await createUser();
+    await getAuth().api.requestPasswordReset({
+      body: { email: customer.actor.email, redirectTo: "/reset-password" },
+    });
+    await getAuth().api.requestPasswordReset({
+      body: { email: "nobody@example.test", redirectTo: "/reset-password" },
+    });
+    const tokens = await db.select().from(verification);
+    expect(tokens).toHaveLength(1);
+    expect(tokens[0]!.identifier).toMatch(/^reset-password:/);
+  });
+});

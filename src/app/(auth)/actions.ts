@@ -4,10 +4,11 @@ import { APIError } from "better-auth/api";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { safeNext } from "@/lib/safe-next";
 import { getAuth, MIN_PASSWORD_LENGTH } from "@/server/auth";
 import { isAppError } from "@/server/errors";
 import { errorInfo, logger } from "@/server/logger";
-import { enforceRateLimit, RATE_LIMITS } from "@/server/rate-limit";
+import { enforceRateLimit, ipBucket, RATE_LIMITS } from "@/server/rate-limit";
 import { requestMeta } from "@/server/request";
 
 export interface AuthFormState {
@@ -15,11 +16,6 @@ export interface AuthFormState {
   fieldErrors?: Record<string, string>;
   message?: string;
   values?: Record<string, string>;
-}
-
-function safeNext(value: FormDataEntryValue | null): string {
-  const v = typeof value === "string" ? value : "";
-  return v.startsWith("/") && !v.startsWith("//") && !v.startsWith("/\\") ? v : "/dashboard";
 }
 
 function fieldErrors(error: z.ZodError): Record<string, string> {
@@ -31,8 +27,9 @@ function fieldErrors(error: z.ZodError): Record<string, string> {
   return out;
 }
 
-async function clientKey(): Promise<string> {
-  return requestMeta(await headers()).ip ?? "unknown";
+async function enforceIpLimit(rule: (typeof RATE_LIMITS)[keyof typeof RATE_LIMITS]) {
+  const [bucketRule, key] = ipBucket(rule, requestMeta(await headers()).ip);
+  await enforceRateLimit(bucketRule, key);
 }
 
 const signInSchema = z.object({
@@ -51,7 +48,7 @@ export async function signInAction(
   const values = { email: String(formData.get("email") ?? "") };
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error), values };
   try {
-    await enforceRateLimit(RATE_LIMITS.signIn, `ip:${await clientKey()}`);
+    await enforceIpLimit(RATE_LIMITS.signIn);
     await enforceRateLimit(RATE_LIMITS.signIn, `email:${parsed.data.email}`);
     await getAuth().api.signInEmail({ body: parsed.data, headers: await headers() });
   } catch (err) {
@@ -94,7 +91,7 @@ export async function signUpAction(
   const parsed = signUpSchema.safeParse(raw);
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error), values };
   try {
-    await enforceRateLimit(RATE_LIMITS.signUp, `ip:${await clientKey()}`);
+    await enforceIpLimit(RATE_LIMITS.signUp);
     await getAuth().api.signUpEmail({
       body: { name: parsed.data.name, email: parsed.data.email, password: parsed.data.password },
       headers: await headers(),
@@ -135,7 +132,7 @@ export async function forgotPasswordAction(
   const parsed = forgotSchema.safeParse({ email: formData.get("email") });
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
   try {
-    await enforceRateLimit(RATE_LIMITS.authOther, `forgot:${await clientKey()}`);
+    await enforceIpLimit(RATE_LIMITS.authOther);
     await getAuth().api.requestPasswordReset({
       body: { email: parsed.data.email, redirectTo: "/reset-password" },
       headers: await headers(),
@@ -173,7 +170,7 @@ export async function resetPasswordAction(
   });
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
   try {
-    await enforceRateLimit(RATE_LIMITS.authOther, `reset:${await clientKey()}`);
+    await enforceIpLimit(RATE_LIMITS.authOther);
     await getAuth().api.resetPassword({
       body: { token: parsed.data.token, newPassword: parsed.data.password },
       headers: await headers(),

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getActor } from "@/server/session";
+import { safeNext } from "@/lib/safe-next";
 import { FormMessage } from "@/components/forms/field";
 import { SignInForm } from "./sign-in-form";
 
@@ -11,6 +14,7 @@ export default async function SignInPage({
   searchParams: Promise<{ next?: string; reset?: string }>;
 }) {
   const { next, reset } = await searchParams;
+  if (await getActor().catch(() => null)) redirect(safeNext(next));
   return (
     <div className="mx-auto max-w-md px-4 py-12">
       <div className="card space-y-5">
