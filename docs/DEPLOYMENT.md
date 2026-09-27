@@ -47,12 +47,12 @@ docker run -d -p 3000:3000 --env-file prod.env plainwill
 
 - `.github/workflows/ci.yml` — lint, format, typecheck, migrate, unit + integration, build, Playwright
   e2e and a Docker build + container smoke test on every PR and push to `main`.
-- `.github/workflows/deploy.yml` — on push to `main` (or manually): builds and pushes
-  `ghcr.io/<owner>/<repo>:<sha>` and `:latest`, runs `node migrate.mjs` with
-  `secrets.PRODUCTION_DATABASE_URL`, then POSTs `secrets.DEPLOY_HOOK_URL`. Both jobs run in the
-  `production` environment (add required reviewers there) and are skipped with a notice when the
-  secrets are not configured. Optional repository variables: `NEXT_PUBLIC_APP_NAME`,
-  `NEXT_PUBLIC_APP_URL`.
+- `.github/workflows/deploy.yml` — after CI succeeds for a push to `main` (or manually): builds
+  and pushes `ghcr.io/<owner>/<repo>:<sha>` (the commit CI tested) and `:latest`, runs
+  `node migrate.mjs` with `secrets.PRODUCTION_DATABASE_URL`, then POSTs `secrets.DEPLOY_HOOK_URL`.
+  Both jobs run in the `production` environment (add required reviewers there) and are skipped
+  with a notice when the secrets are not configured. Optional repository variables:
+  `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_APP_URL`.
 
 ## Option B — Vercel + managed Postgres (e.g. Neon)
 
