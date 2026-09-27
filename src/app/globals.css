@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #1c1917;
+  --color-muted: #57534e;
+  --color-paper: #fafaf9;
+  --color-line: #e7e5e4;
+  --color-brand: #1e3a5f;
+  --color-brand-dark: #142a45;
+  --color-brand-light: #e8eef6;
+  --color-accent: #b45309;
+  --color-danger: #b91c1c;
+  --color-danger-light: #fef2f2;
+  --color-warn: #92400e;
+  --color-warn-light: #fffbeb;
+  --color-ok: #166534;
+  --color-ok-light: #f0fdf4;
+  --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer base {
+  html {
+    color: var(--color-ink);
+    background: var(--color-paper);
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply bg-brand hover:bg-brand-dark text-white;
+  }
+  .btn-secondary {
+    @apply border-line text-ink border bg-white hover:bg-stone-100;
+  }
+  .btn-danger {
+    @apply bg-danger text-white hover:bg-red-800;
+  }
+  .card {
+    @apply border-line rounded-lg border bg-white p-5 shadow-sm sm:p-6;
+  }
+  .input {
+    @apply border-line text-ink focus:border-brand block w-full rounded-md border bg-white px-3 py-2 text-base shadow-sm;
+  }
+  .input[aria-invalid="true"] {
+    @apply border-danger;
+  }
+  .label {
+    @apply text-ink block text-sm font-semibold;
+  }
+  .hint {
+    @apply text-muted mt-1 text-sm;
+  }
+  .field-error {
+    @apply text-danger mt-1 text-sm font-medium;
+  }
+  .link {
+    @apply text-brand hover:text-brand-dark underline underline-offset-2;
+  }
+  .prose-legal p {
+    @apply mb-4 leading-relaxed;
+  }
+  .prose-legal h2 {
+    @apply mt-8 mb-3 text-xl font-semibold;
+  }
+  .prose-legal ul {
+    @apply mb-4 list-disc pl-6;
+  }
+}
