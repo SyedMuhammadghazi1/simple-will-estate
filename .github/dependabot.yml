@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # TypeScript 7 (Go port) breaks Next.js/typescript-eslint; Playwright is pinned to the
+      # browser build available in CI images; ESLint 10 is not yet supported by eslint-config-next plugins.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      - dependency-name: "@playwright/test"
+        update-types: [version-update:semver-minor, version-update:semver-major]
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly

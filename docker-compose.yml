@@ -1,0 +1,58 @@
+# Local development services. Start with:
+#   docker compose up -d db mailpit
+# Full stack (app + one-off migration) with the "full" profile:
+#   docker compose --profile full up --build
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: simple_will_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # web UI → http://localhost:8025
+
+  migrate:
+    profiles: ["full"]
+    build: .
+    command: ["node", "migrate.mjs"]
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/simple_will_dev
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    profiles: ["full"]
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/simple_will_dev
+      APP_URL: http://localhost:3001
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      # test-bypass is refused in production images; use Stripe test keys instead.
+      PAYMENTS_MODE: stripe
+    ports:
+      - "3001:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:

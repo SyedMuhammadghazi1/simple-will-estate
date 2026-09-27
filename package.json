@@ -25,7 +25,8 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx --tsconfig tsconfig.scripts.json scripts/seed.ts",
     "db:studio": "drizzle-kit studio",
-    "job:signing-reminders": "tsx --tsconfig tsconfig.scripts.json scripts/job-signing-reminders.ts"
+    "job:signing-reminders": "tsx --tsconfig tsconfig.scripts.json scripts/job-signing-reminders.ts",
+    "job:reencrypt": "tsx --tsconfig tsconfig.scripts.json scripts/reencrypt.ts"
   },
   "dependencies": {
     "better-auth": "^1.7.6",

@@ -10,8 +10,6 @@ test-results
 .env.*
 !.env.example
 docs
-tests
 *.md
 !README.md
-Dockerfile
 docker-compose.yml

@@ -65,6 +65,9 @@ const SIGNED_PDF = new Uint8Array(
 );
 
 async function main() {
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_PRODUCTION_SEED !== "1") {
+    throw new Error("Refusing to seed demo data with NODE_ENV=production.");
+  }
   const [admin, staff, customer] = await Promise.all(USERS.map(ensureUser));
   if (!admin || !staff || !customer) throw new Error("seed users missing");
 
