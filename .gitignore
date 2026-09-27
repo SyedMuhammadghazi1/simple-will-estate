@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+
+# next.js / build output
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# testing
+coverage/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# env files (never commit real secrets)
+.env
+.env.*
+!.env.example
+
+# logs / os
+npm-debug.log*
+*.log
+.DS_Store
+*.pem
