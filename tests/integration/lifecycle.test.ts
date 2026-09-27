@@ -102,6 +102,22 @@ describe("will updates within the 12-month window", () => {
       .where(eq(orders.id, order.id));
     await expect(publishWillUpdate(customer.actor, will.id)).rejects.toBeInstanceOf(ConflictError);
   });
+
+  it("moves the order to the state the new version was made for", async () => {
+    const customer = await createUser();
+    const { order, will } = await createPaidOrder(customer.actor); // Texas
+    await saveDraftSection(customer.actor, will.id, "about", {
+      ...sampleAnswers().about,
+      stateCode: "CA",
+      county: "Alameda",
+      city: "Oakland",
+      postalCode: "94612",
+    });
+    await publishWillUpdate(customer.actor, will.id);
+    // The order page derives witness/notary guidance and the filing options from this.
+    const [o] = await db.select().from(orders).where(eq(orders.id, order.id));
+    expect(o!.stateCode).toBe("CA");
+  });
 });
 
 describe("account deletion requests", () => {

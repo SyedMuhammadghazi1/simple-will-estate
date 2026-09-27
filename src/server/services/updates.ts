@@ -1,5 +1,7 @@
 import "server-only";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
+import { orders } from "@/db/schema";
 import { canonicalJson, sha256Hex } from "@/lib/crypto";
 import { getStateRule, isStateCode } from "@/lib/states";
 import { screenAnswers } from "@/lib/will/screening";
@@ -53,6 +55,8 @@ export async function publishWillUpdate(actor: Actor, willId: string) {
   const version = await db.transaction(async (tx) => {
     const v = await createWillVersion(tx, will, answers, "update", actor.userId);
     await generateDocumentsForVersion(tx, v, will.position);
+    // The order page's signing guidance and filing options follow the latest documents' state.
+    await tx.update(orders).set({ stateCode: v.stateCode }).where(eq(orders.id, order.id));
     await writeAudit(
       actorRef,
       {
