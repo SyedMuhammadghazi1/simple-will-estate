@@ -8,6 +8,34 @@ import { requireApiActor } from "@/server/session";
 
 export const dynamic = "force-dynamic";
 
+/** Multipart overhead allowed on top of the file itself. */
+const MAX_BODY_BYTES = MAX_UPLOAD_BYTES + 64 * 1024;
+
+/**
+ * Reads the form, giving up as soon as the body exceeds MAX_BODY_BYTES. Content-Length is only a
+ * hint (a chunked request has none), and `req.formData()` would buffer any amount in memory.
+ */
+async function readForm(req: Request): Promise<FormData> {
+  const tooLarge = () => new ValidationError("The file is larger than 10 MB.");
+  if (Number(req.headers.get("content-length") ?? "0") > MAX_BODY_BYTES) throw tooLarge();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  const reader = req.body?.getReader();
+  for (;;) {
+    const next = await reader?.read();
+    if (!next || next.done) break;
+    size += next.value.byteLength;
+    if (size > MAX_BODY_BYTES) {
+      await reader?.cancel();
+      throw tooLarge();
+    }
+    chunks.push(next.value);
+  }
+  return new Response(new Uint8Array(Buffer.concat(chunks)), {
+    headers: { "content-type": req.headers.get("content-type") ?? "" },
+  }).formData();
+}
+
 /**
  * Upload of a signed will scan. Accepts a regular multipart form post (works without JS) and
  * redirects back to the order page; `Accept: application/json` clients get JSON instead.
@@ -20,10 +48,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ orderId: strin
   try {
     if (!isSameOrigin(req.headers)) throw new ForbiddenError("Cross-origin upload rejected.");
     const actor = await requireApiActor(req);
-    const declared = Number(req.headers.get("content-length") ?? "0");
-    if (declared > MAX_UPLOAD_BYTES + 64 * 1024)
-      throw new ValidationError("The file is larger than 10 MB.");
-    const form = await req.formData();
+    const form = await readForm(req);
     const file = form.get("file");
     const willId = String(form.get("willId") ?? "");
     if (!(file instanceof File) || file.size === 0)

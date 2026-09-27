@@ -161,6 +161,53 @@ describe("IDOR protection — user B cannot touch user A's data", () => {
   });
 });
 
+describe("signed-will upload size limit", () => {
+  it("stops reading a body without Content-Length once it exceeds the limit", async () => {
+    const a = await createUser();
+    const { order, will } = await createPaidOrder(a.actor);
+    const boundary = "----plainwill-test-boundary";
+    const encoder = new TextEncoder();
+    const head = encoder.encode(
+      `--${boundary}\r\nContent-Disposition: form-data; name="willId"\r\n\r\n${will.id}\r\n` +
+        `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="big.pdf"\r\n` +
+        `Content-Type: application/pdf\r\n\r\n%PDF-`,
+    );
+    const tail = encoder.encode(`\r\n--${boundary}--\r\n`);
+    const chunk = new Uint8Array(256 * 1024);
+    const total = 64 * 1024 * 1024; // what a client streams with chunked encoding
+    let sent = 0;
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (sent === 0) controller.enqueue(head);
+        if (sent >= total) {
+          controller.enqueue(tail);
+          controller.close();
+          return;
+        }
+        sent += chunk.length;
+        controller.enqueue(chunk);
+      },
+    });
+    const req = authedRequest(`/api/orders/${order.id}/uploads`, a.cookie, {
+      method: "POST",
+      body,
+      headers: {
+        accept: "application/json",
+        "content-type": `multipart/form-data; boundary=${boundary}`,
+      },
+      // @ts-expect-error -- Node's fetch Request needs this for streamed bodies.
+      duplex: "half",
+    });
+    expect(req.headers.get("content-length")).toBeNull();
+    const res = await uploadRoute(req, params({ orderId: order.id }));
+    expect(res.status).toBe(422);
+    expect(await res.json()).toMatchObject({
+      error: { message: expect.stringMatching(/larger than 10 MB/) },
+    });
+    expect(sent).toBeLessThan(12 * 1024 * 1024);
+  });
+});
+
 describe("admin-only routes reject customers", () => {
   it("rejects customers from staff JSON routes with 403", async () => {
     const customer = await createUser();
