@@ -12,7 +12,7 @@ import { writeAudit } from "../audit";
 import { aad, decryptBuffer, decryptText, encryptBuffer, encryptText } from "../encryption";
 import { ConflictError, NotFoundError, ValidationError } from "../errors";
 import { enforceRateLimit, RATE_LIMITS } from "../rate-limit";
-import { isStaff, type Actor } from "../session";
+import { isStaff, type Actor } from "../actor";
 import {
   auditActor,
   getOrderForActor,

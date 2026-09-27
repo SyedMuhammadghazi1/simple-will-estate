@@ -2,29 +2,12 @@ import "server-only";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import type { UserRole } from "@/db/schema";
+import { normalizeRole, type Actor } from "./actor";
 import { getAuth } from "./auth";
 import { ForbiddenError, UnauthorizedError } from "./errors";
 import { requestMeta } from "./request";
 
-/** The authenticated principal passed to every service call. */
-export interface Actor {
-  userId: string;
-  role: UserRole;
-  email: string;
-  name: string;
-  ip: string | null;
-  userAgent: string | null;
-}
-
-export const STAFF_ROLES: readonly UserRole[] = ["staff", "admin"];
-
-export function isStaff(actor: Pick<Actor, "role">): boolean {
-  return STAFF_ROLES.includes(actor.role);
-}
-
-function normalizeRole(role: unknown): UserRole {
-  return role === "admin" || role === "staff" ? role : "customer";
-}
+export { isStaff, STAFF_ROLES, type Actor } from "./actor";
 
 export async function actorFromHeaders(h: Headers): Promise<Actor | null> {
   const session = await getAuth().api.getSession({ headers: h });

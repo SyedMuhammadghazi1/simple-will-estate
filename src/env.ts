@@ -45,6 +45,11 @@ export const serverEnvSchema = z
     PAYMENTS_MODE: z.enum(["stripe", "test-bypass"]).default("stripe"),
     STRIPE_SECRET_KEY: z.string().optional(),
     STRIPE_WEBHOOK_SECRET: z.string().optional(),
+    /**
+     * Points the Stripe SDK at an API emulator (e.g. stripe-mock or the e2e emulator).
+     * Only honoured with a TEST secret key (sk_test_…) — live keys always talk to Stripe.
+     */
+    STRIPE_API_BASE: z.string().url().optional(),
 
     SMTP_HOST: z.string().optional(),
     SMTP_PORT: z.coerce.number().int().default(587),

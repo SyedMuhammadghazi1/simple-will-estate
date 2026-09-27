@@ -16,7 +16,7 @@ import { deletionRequestedEmail } from "../emails";
 import { ConflictError } from "../errors";
 import { sendEmailOnce } from "../mailer";
 import { enforceRateLimit, RATE_LIMITS } from "../rate-limit";
-import type { Actor } from "../session";
+import type { Actor } from "../actor";
 import { decryptVersionAnswers } from "./documents";
 import { auditActor } from "./orders";
 import { decryptDraft } from "./wills";

@@ -15,7 +15,7 @@ import { ConflictError, ValidationError } from "../errors";
 import { errorInfo, logger } from "../logger";
 import { sendEmailOnce } from "../mailer";
 import { enforceRateLimit, RATE_LIMITS } from "../rate-limit";
-import type { Actor } from "../session";
+import type { Actor } from "../actor";
 import { getStripe } from "../stripe";
 import { createWillVersion, generateDocumentsForVersion } from "./documents";
 import {

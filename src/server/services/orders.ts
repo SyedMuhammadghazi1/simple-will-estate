@@ -19,7 +19,7 @@ import { writeAudit, type AuditActor } from "../audit";
 import { aad, encryptJson } from "../encryption";
 import { ConflictError, NotFoundError } from "../errors";
 import { enforceRateLimit, RATE_LIMITS } from "../rate-limit";
-import { isStaff, type Actor } from "../session";
+import { isStaff, type Actor } from "../actor";
 
 export function orderRef(orderId: string): string {
   return orderId.slice(0, 8).toUpperCase();

@@ -8,7 +8,7 @@ import { writeAudit } from "../audit";
 import { documentsReadyEmail } from "../emails";
 import { ConflictError, ValidationError } from "../errors";
 import { sendEmailOnce } from "../mailer";
-import type { Actor } from "../session";
+import type { Actor } from "../actor";
 import { createWillVersion, generateDocumentsForVersion } from "./documents";
 import { auditActor, getWillForActor, latestVersions, statusOf, transitionOrder } from "./orders";
 import { decryptDraft, editMode } from "./wills";

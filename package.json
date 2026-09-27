@@ -8,7 +8,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "next dev --port 3001",
+    "dev": "next dev --port 3001 | pino-pretty",
     "build": "next build && npm run build:scripts",
     "build:scripts": "node scripts/build-scripts.mjs",
     "start": "next start --port 3001",
@@ -23,9 +23,9 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
-    "db:seed": "tsx scripts/seed.ts",
+    "db:seed": "tsx --tsconfig tsconfig.scripts.json scripts/seed.ts",
     "db:studio": "drizzle-kit studio",
-    "job:signing-reminders": "tsx scripts/job-signing-reminders.ts"
+    "job:signing-reminders": "tsx --tsconfig tsconfig.scripts.json scripts/job-signing-reminders.ts"
   },
   "dependencies": {
     "better-auth": "^1.7.6",

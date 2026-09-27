@@ -36,7 +36,16 @@ describe("wizard save & resume", () => {
     const [raw] = await db.select().from(wills).where(eq(wills.id, will!.id));
     expect(raw!.draftCiphertext).not.toContain("Jordan");
     expect(raw!.currentStep).toBe("children");
-    expect(raw!.completedSteps).toContain("about");
+    // Autosave alone doesn't mark a step complete — submitting it does.
+    expect(raw!.completedSteps).toEqual([]);
+    await submitStep(actor, will!.id, "about", "about", about);
+    const [submitted] = await db.select().from(wills).where(eq(wills.id, will!.id));
+    expect(submitted!.completedSteps).toEqual(["about"]);
+    // Invalidating a completed step removes it from the progress
+    await saveDraftSection(actor, will!.id, "about", { ...about, postalCode: "x" });
+    const [invalid] = await db.select().from(wills).where(eq(wills.id, will!.id));
+    expect(invalid!.completedSteps).toEqual([]);
+    await saveDraftSection(actor, will!.id, "about", about);
 
     const resumed = await loadWillForEditing(actor, will!.id);
     expect(resumed.answers.about).toEqual(about);

@@ -17,7 +17,7 @@ import { completedSteps, validateStep, type ValidationResult } from "@/lib/will/
 import { aad, decryptJson, encryptJson } from "../encryption";
 import { ConflictError, ValidationError } from "../errors";
 import { enforceRateLimit, RATE_LIMITS } from "../rate-limit";
-import type { Actor } from "../session";
+import type { Actor } from "../actor";
 import { getWillForActor, listWills, statusOf } from "./orders";
 
 export function decryptDraft(will: Pick<WillRow, "id" | "draftCiphertext">): WillAnswers {
@@ -77,7 +77,10 @@ export async function saveDraftSection(
     .set({
       draftCiphertext: encryptJson(next, aad.willDraft(will.id)),
       draftUpdatedAt: savedAt,
-      completedSteps: completedSteps(next, { today: savedAt }),
+      // A step counts as complete once the customer has submitted it AND it is still valid.
+      completedSteps: will.completedSteps.filter((s) =>
+        completedSteps(next, { today: savedAt }).includes(s as StepId),
+      ),
       ...(currentStep && isStepId(currentStep) ? { currentStep } : {}),
     })
     .where(eq(wills.id, will.id));
@@ -101,8 +104,14 @@ export async function submitStep(
   const result = validateStep(step, answers, { today: new Date() });
   const idx = STEP_IDS.indexOf(step);
   const nextStep = result.errors.length === 0 ? (STEP_IDS[idx + 1] ?? null) : null;
-  if (nextStep) {
-    await db.update(wills).set({ currentStep: nextStep }).where(eq(wills.id, will.id));
+  if (result.errors.length === 0) {
+    await db
+      .update(wills)
+      .set({
+        ...(nextStep ? { currentStep: nextStep } : {}),
+        completedSteps: [...new Set([...will.completedSteps, step])].filter((s) => s !== "review"),
+      })
+      .where(eq(wills.id, will.id));
   }
   return { ...result, nextStep };
 }
@@ -123,7 +132,7 @@ export async function mirrorFromPartner(actor: Actor, willId: string): Promise<v
       draftCiphertext: encryptJson(mirrored, aad.willDraft(will.id)),
       draftUpdatedAt: new Date(),
       currentStep: "about",
-      completedSteps: completedSteps(mirrored, { today: new Date() }),
+      completedSteps: [],
     })
     .where(eq(wills.id, will.id));
 }

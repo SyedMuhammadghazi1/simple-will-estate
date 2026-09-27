@@ -15,7 +15,7 @@ import { isPlanId } from "@/lib/pricing";
 import { writeAudit } from "../audit";
 import { aad, decryptText, encryptText } from "../encryption";
 import { ForbiddenError, NotFoundError, ValidationError } from "../errors";
-import { isStaff, type Actor } from "../session";
+import { isStaff, type Actor } from "../actor";
 import { decryptVersionAnswers } from "./documents";
 import { auditActor, isUuid, orderOverview } from "./orders";
 import { willVersions } from "@/db/schema";

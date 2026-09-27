@@ -16,7 +16,7 @@ import { aad, decryptBuffer, decryptJson, encryptBuffer, encryptJson } from "../
 import { ConflictError, NotFoundError, ValidationError } from "../errors";
 import { logger } from "../logger";
 import { enforceRateLimit, RATE_LIMITS } from "../rate-limit";
-import { isStaff, type Actor } from "../session";
+import { isStaff, type Actor } from "../actor";
 import { auditActor, getWillForActor, isUuid, orderRef, transitionOrder } from "./orders";
 import { decryptDraft } from "./wills";
 import { orders } from "@/db/schema";

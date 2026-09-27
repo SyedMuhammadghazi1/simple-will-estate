@@ -15,7 +15,7 @@ import { filingCompletedEmail } from "../emails";
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "../errors";
 import { errorInfo, logger } from "../logger";
 import { sendEmailOnce } from "../mailer";
-import { isStaff, type Actor } from "../session";
+import { isStaff, type Actor } from "../actor";
 import { auditActor, isUuid, transitionOrder } from "./orders";
 
 export const filingActionSchema = z.discriminatedUnion("action", [
