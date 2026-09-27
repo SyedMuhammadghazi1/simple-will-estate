@@ -105,6 +105,7 @@ jobs:
         run: |
           docker run -d --name app -p 3000:3000 \
             -e DATABASE_URL=postgres://nobody:nobody@127.0.0.1:1/none \
+            -e APP_URL=http://localhost:3000 \
             -e BETTER_AUTH_SECRET=ci-smoke-secret-0123456789abcdefghijklmnop \
             -e DATA_ENCRYPTION_KEY=$(openssl rand -base64 32) \
             -e STRIPE_SECRET_KEY=sk_test_ci -e STRIPE_WEBHOOK_SECRET=whsec_ci \

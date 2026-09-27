@@ -49,4 +49,19 @@ describe("env validation", () => {
       /STRIPE_SECRET_KEY[\s\S]*STRIPE_WEBHOOK_SECRET[\s\S]*CRON_SECRET/,
     );
   });
+
+  it("requires APP_URL in production instead of defaulting to localhost", () => {
+    // Session cookies are only marked Secure when APP_URL is https; links and redirects use it.
+    const production = {
+      ...base,
+      NODE_ENV: "production",
+      STRIPE_SECRET_KEY: "sk_live_x",
+      STRIPE_WEBHOOK_SECRET: "whsec_x",
+      CRON_SECRET: "c".repeat(16),
+    } as const;
+    expect(() => parseServerEnv(production)).toThrow(/APP_URL/);
+    expect(parseServerEnv({ ...production, APP_URL: "https://plainwill.example" }).APP_URL).toBe(
+      "https://plainwill.example",
+    );
+  });
 });

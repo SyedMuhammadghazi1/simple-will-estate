@@ -30,7 +30,8 @@ export const serverEnvSchema = z
     DATABASE_URL: z.string().url(),
     DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
 
-    APP_URL: z.string().url().default("http://localhost:3001"),
+    /** Required in production; defaults to http://localhost:3001 otherwise (see transform). */
+    APP_URL: z.string().url().optional(),
     BETTER_AUTH_SECRET: z.string().min(32, "must be at least 32 characters"),
     TRUST_PROXY: booleanString,
 
@@ -79,7 +80,12 @@ export const serverEnvSchema = z
     if (env.NODE_ENV === "production" && !env.CRON_SECRET) {
       ctx.addIssue({ code: "custom", path: ["CRON_SECRET"], message: "required in production" });
     }
-  });
+    if (env.NODE_ENV === "production" && !env.APP_URL) {
+      // Better Auth derives the session cookie's Secure flag from it; links and redirects use it.
+      ctx.addIssue({ code: "custom", path: ["APP_URL"], message: "required in production" });
+    }
+  })
+  .transform((env) => ({ ...env, APP_URL: env.APP_URL ?? "http://localhost:3001" }));
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 
