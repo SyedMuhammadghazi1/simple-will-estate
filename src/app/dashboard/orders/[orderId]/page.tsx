@@ -62,7 +62,9 @@ export default async function OrderPage({
       progress: progressPercent(w.completedSteps as StepId[]),
     };
   });
-  const readiness = status === "draft" ? await checkoutReadiness(order) : null;
+  // "paid" without documents: payment arrived while the answers no longer passed these checks.
+  const collecting = status === "draft" || status === "paid";
+  const readiness = collecting ? await checkoutReadiness(order) : null;
   const docs = status === "draft" ? [] : await currentDocuments(order);
   const missingUploads = canRecordExecution(status) ? await willsMissingSignedCopy(order.id) : [];
   const stateCode = order.stateCode ?? overview.versions[0]?.stateCode ?? null;
@@ -160,17 +162,17 @@ export default async function OrderPage({
               <div>
                 <p className="font-semibold">{labelFor(will.position, name)}</p>
                 <p className="text-muted text-sm">
-                  {status === "draft"
+                  {collecting
                     ? `${progress}% of questions complete`
                     : `Version ${overview.versions.find((v) => v.willId === will.id)?.version ?? "–"}`}
                 </p>
               </div>
               {mode !== "locked" && (
                 <Link
-                  href={`/dashboard/wills/${will.id}/${status === "draft" ? will.currentStep : "review"}`}
+                  href={`/dashboard/wills/${will.id}/${collecting ? will.currentStep : "review"}`}
                   className="btn btn-secondary"
                 >
-                  {status === "draft" ? (progress > 0 ? "Continue" : "Start") : "Update this will"}
+                  {collecting ? (progress > 0 ? "Continue" : "Start") : "Update this will"}
                 </Link>
               )}
             </li>
@@ -188,10 +190,21 @@ export default async function OrderPage({
       {readiness && (
         <section id="checkout" aria-labelledby="checkout-title" className="card space-y-4">
           <h2 id="checkout-title" className="text-xl font-semibold">
-            Checkout
+            {status === "paid" ? "Finish your order" : "Checkout"}
           </h2>
+          {status === "paid" && (
+            <Alert tone="info" title="Payment received">
+              Your answers changed while you were paying, so we haven&apos;t prepared your documents
+              yet. Check the items below and confirm to get them — you won&apos;t be charged again.
+            </Alert>
+          )}
           {readiness.problems.length > 0 && (
-            <Alert tone={readiness.blocked ? "error" : "warn"} title="Before you can pay">
+            <Alert
+              tone={readiness.blocked ? "error" : "warn"}
+              title={
+                status === "paid" ? "Before we can prepare your documents" : "Before you can pay"
+              }
+            >
               <ul className="list-disc pl-5">
                 {readiness.problems.map((p) => (
                   <li key={p}>{p}</li>
@@ -215,13 +228,16 @@ export default async function OrderPage({
               )}
             </div>
           )}
-          <p>
-            <span className="text-3xl font-bold">{formatCents(plan.amountCents)}</span>{" "}
-            <span className="text-muted text-sm">one-time</span>
-          </p>
+          {status === "draft" && (
+            <p>
+              <span className="text-3xl font-bold">{formatCents(plan.amountCents)}</span>{" "}
+              <span className="text-muted text-sm">one-time</span>
+            </p>
+          )}
           <CheckoutForm
             orderId={order.id}
             priceLabel={formatCents(plan.amountCents)}
+            paid={status === "paid"}
             disabled={!readiness.ready}
             bypass={isPaymentBypassEnabled()}
             acknowledgements={[
@@ -233,12 +249,14 @@ export default async function OrderPage({
               ).values(),
             ]}
           />
-          <form action={cancelOrderAction}>
-            <input type="hidden" name="orderId" value={order.id} />
-            <SubmitButton variant="secondary" pendingText="Cancelling…">
-              Cancel this order
-            </SubmitButton>
-          </form>
+          {status === "draft" && (
+            <form action={cancelOrderAction}>
+              <input type="hidden" name="orderId" value={order.id} />
+              <SubmitButton variant="secondary" pendingText="Cancelling…">
+                Cancel this order
+              </SubmitButton>
+            </form>
+          )}
         </section>
       )}
 

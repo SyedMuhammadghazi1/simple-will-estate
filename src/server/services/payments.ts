@@ -1,15 +1,15 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type Stripe from "stripe";
 import { db, type Tx } from "@/db";
 import { orders, stripeEvents, user, type OrderRow } from "@/db/schema";
 import { getEnv, isPaymentBypassEnabled } from "@/env";
 import { formatCents, getPlan, updateWindowEnd } from "@/lib/pricing";
-import { getStateRule, isStateCode } from "@/lib/states";
+import { isStateCode } from "@/lib/states";
 import type { WillAnswers } from "@/lib/will/answers";
 import { screenAnswers, type ScreeningCode, type ScreeningResult } from "@/lib/will/screening";
 import { validateAnswers, type Issue } from "@/lib/will/validation";
-import { SYSTEM_ACTOR, writeAudit } from "../audit";
+import { SYSTEM_ACTOR, writeAudit, type AuditActor } from "../audit";
 import { documentsReadyEmail, orderConfirmationEmail } from "../emails";
 import { ConflictError, ValidationError } from "../errors";
 import { errorInfo, logger } from "../logger";
@@ -100,6 +100,10 @@ export async function checkoutReadiness(order: Pick<OrderRow, "id">): Promise<Ch
 /**
  * Starts payment for a draft order. Returns the URL to send the customer to: Stripe Checkout, or
  * (test-bypass mode outside production only) straight back to the order page, already paid.
+ *
+ * For an order that is already paid but whose documents were held (its answers stopped passing
+ * these checks while the customer was on the Stripe page), this generates the documents once the
+ * answers are fixed — without charging again.
  */
 export async function startCheckout(
   actor: Actor,
@@ -108,7 +112,10 @@ export async function startCheckout(
 ): Promise<{ redirectUrl: string }> {
   await enforceRateLimit(RATE_LIMITS.checkout, actor.userId);
   const order = await getOrderForActor(actor, orderId);
-  if (statusOf(order) !== "draft") throw new ConflictError("This order has already been paid.");
+  const status = statusOf(order);
+  if (status !== "draft" && status !== "paid") {
+    throw new ConflictError("This order has already been paid.");
+  }
   const readiness = await checkoutReadiness(order);
   if (!readiness.ready) throw new ValidationError(readiness.problems.join(" "), readiness.problems);
   const ack = readiness.acknowledgementRequired.filter((c) => acknowledged.includes(c));
@@ -116,14 +123,31 @@ export async function startCheckout(
     throw new ValidationError("Please confirm you have read each recommendation before paying.");
   }
   const plan = getPlan(order.plan);
-  await db
+  const updated = await db
     .update(orders)
     .set({
       screeningAcknowledged: ack,
       stateCode: readiness.stateCode,
-      amountCents: plan.amountCents,
+      // The amount of a paid order is what was charged; never change it afterwards.
+      ...(status === "draft" ? { amountCents: plan.amountCents } : {}),
     })
-    .where(eq(orders.id, order.id));
+    .where(and(eq(orders.id, order.id), eq(orders.status, status)))
+    .returning({ id: orders.id });
+  if (updated.length === 0) {
+    throw new ConflictError("This order changed while we were updating it. Please refresh.");
+  }
+
+  if (status === "paid") {
+    const result = await db.transaction((tx) =>
+      generateInitialDocuments(tx, order.id, { actor: auditActor(actor), actorType: "customer" }),
+    );
+    if (result.outcome !== "paid") {
+      throw new ValidationError("Some answers changed. Please review them and try again.");
+    }
+    await sendPaidEmails(order.id);
+    return { redirectUrl: `/dashboard/orders/${order.id}?paid=1` };
+  }
+
   await writeAudit(auditActor(actor), {
     action: "checkout.started",
     targetType: "order",
@@ -181,13 +205,25 @@ export interface PaymentInfo {
 
 export type MarkPaidResult =
   | { outcome: "paid"; versionIds: string[] }
+  /** Payment recorded, but the answers need fixing before documents can be generated. */
+  | { outcome: "needs_attention" }
   | { outcome: "already_processed" }
   | { outcome: "amount_mismatch" };
+
+/** Whether `payment` is the one already recorded on the order (a re-delivery, not a new charge). */
+function isRecordedPayment(order: OrderRow, payment: PaymentInfo): boolean {
+  return (
+    order.paidAt !== null &&
+    order.paymentSource === payment.source &&
+    (payment.checkoutSessionId === undefined ||
+      order.stripeCheckoutSessionId === payment.checkoutSessionId)
+  );
+}
 
 /**
  * Marks a draft order paid, snapshots every will into an immutable version, generates the final
  * documents and moves the order to documents_ready — atomically. Idempotent: an order that is
- * no longer a draft is left untouched.
+ * no longer a draft is left untouched (a different payment for it is flagged for a refund).
  */
 export async function markOrderPaid(
   tx: Tx,
@@ -201,7 +237,32 @@ export async function markOrderPaid(
     .for("update")
     .limit(1);
   if (!order) throw new Error(`Order ${orderId} not found`);
-  if (order.status !== "draft") return { outcome: "already_processed" };
+  if (order.status !== "draft") {
+    if (!isRecordedPayment(order, payment)) {
+      // e.g. a second checkout session paid, or the order was cancelled during checkout.
+      logger.error(
+        { orderId, status: order.status, checkoutSessionId: payment.checkoutSessionId ?? null },
+        "payment received for an order that is not awaiting payment — refund needed",
+      );
+      await writeAudit(
+        SYSTEM_ACTOR,
+        {
+          action: "payment.unexpected",
+          targetType: "order",
+          targetId: orderId,
+          orderId,
+          metadata: {
+            status: order.status,
+            source: payment.source,
+            checkoutSessionId: payment.checkoutSessionId ?? null,
+            amountTotalCents: payment.amountTotalCents,
+          },
+        },
+        tx,
+      );
+    }
+    return { outcome: "already_processed" };
+  }
   if (payment.amountTotalCents !== null && payment.amountTotalCents !== order.amountCents) {
     logger.error(
       { orderId, expected: order.amountCents, received: payment.amountTotalCents },
@@ -234,29 +295,84 @@ export async function markOrderPaid(
       stripePaymentIntentId: payment.paymentIntentId ?? null,
     },
   });
+  return generateInitialDocuments(tx, orderId, { actor: SYSTEM_ACTOR, actorType: "system" });
+}
 
-  const willRows = await listWills(orderId, tx);
+/**
+ * Snapshots every will of a paid order into an immutable version, generates the final documents
+ * and moves the order to documents_ready. Drafts stay editable while the customer is on the
+ * Stripe page, so they are checked again exactly like at checkout; if they no longer pass (or
+ * raise a warning that wasn't acknowledged) the order stays "paid" with no documents until the
+ * customer fixes them and confirms again (see startCheckout).
+ */
+async function generateInitialDocuments(
+  tx: Tx,
+  orderId: string,
+  by: { actor: AuditActor; actorType: "customer" | "system" },
+): Promise<{ outcome: "paid"; versionIds: string[] } | { outcome: "needs_attention" }> {
+  const [order] = await tx
+    .select()
+    .from(orders)
+    .where(eq(orders.id, orderId))
+    .for("update")
+    .limit(1);
+  if (!order) throw new Error(`Order ${orderId} not found`);
+  if (order.status !== "paid")
+    throw new ConflictError("Your documents have already been prepared.");
+
+  const drafts = (await listWills(orderId, tx)).map((will) => ({
+    will,
+    answers: decryptDraft(will),
+  }));
+  const readiness = evaluateReadiness(
+    drafts.map(({ will, answers }) => ({ willId: will.id, position: will.position, answers })),
+  );
+  const missingAcknowledgements = readiness.acknowledgementRequired.filter(
+    (code) => !order.screeningAcknowledged.includes(code),
+  );
+  if (!readiness.ready || missingAcknowledgements.length > 0) {
+    logger.warn(
+      { orderId: orderRef(orderId), blocked: readiness.blocked, missingAcknowledgements },
+      "answers no longer pass checkout checks — documents held until the customer fixes them",
+    );
+    await writeAudit(
+      by.actor,
+      {
+        action: "order.documents_held",
+        targetType: "order",
+        targetId: orderId,
+        orderId,
+        metadata: {
+          errors: readiness.wills.reduce((n, w) => n + w.errors.length, 0),
+          blocked: readiness.blocked,
+          missingAcknowledgements,
+        },
+      },
+      tx,
+    );
+    return { outcome: "needs_attention" };
+  }
+
   const versionIds: string[] = [];
-  for (const will of willRows) {
-    const answers = decryptDraft(will);
-    if (!isStateCode(answers.about.stateCode) || !getStateRule(answers.about.stateCode).supported) {
-      throw new Error(`Order ${orderId} has an unsupported state at payment time`);
-    }
+  for (const { will, answers } of drafts) {
     const version = await createWillVersion(tx, will, answers, "initial", order.userId);
     await generateDocumentsForVersion(tx, version, will.position);
     versionIds.push(version.id);
   }
 
   await transitionOrder(tx, orderId, "documents_ready", {
-    actor: SYSTEM_ACTOR,
-    actorType: "system",
+    actor: by.actor,
+    actorType: by.actorType,
     reason: "documents_generated",
-    set: { documentsReadyAt: new Date() },
+    set: { documentsReadyAt: new Date(), stateCode: readiness.stateCode },
   });
   return { outcome: "paid", versionIds };
 }
 
-/** Sends confirmation + documents-ready emails once per order (safe to call repeatedly). */
+/**
+ * Sends the confirmation email, and the documents-ready email once documents exist, at most once
+ * per order (safe to call repeatedly).
+ */
 export async function sendPaidEmails(orderId: string): Promise<void> {
   try {
     const [row] = await db
@@ -277,6 +393,7 @@ export async function sendPaidEmails(orderId: string): Promise<void> {
       ),
       { orderId, userId: row.order.userId },
     );
+    if (!row.order.documentsReadyAt) return;
     await sendEmailOnce(
       `documents-ready:${orderId}:initial`,
       "documents_ready",
@@ -327,7 +444,7 @@ export async function processStripeEvent(
             ? session.payment_intent
             : (session.payment_intent?.id ?? null),
       });
-      if (res.outcome === "paid") paidOrderId = orderId;
+      if (res.outcome === "paid" || res.outcome === "needs_attention") paidOrderId = orderId;
       logger.info(
         { eventId: event.id, orderId: orderRef(orderId), outcome: res.outcome },
         "checkout processed",

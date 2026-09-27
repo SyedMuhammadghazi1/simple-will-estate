@@ -18,8 +18,9 @@ import { canonicalJson, sha256Hex } from "@/lib/crypto";
 import { sampleAnswers } from "@/lib/will/sample";
 import { ConflictError, ValidationError } from "@/server/errors";
 import { currentDocuments, decryptVersionAnswers } from "@/server/services/documents";
+import { cancelDraftOrder } from "@/server/services/orders";
 import { startCheckout } from "@/server/services/payments";
-import { loadWillForEditing } from "@/server/services/wills";
+import { loadWillForEditing, saveDraftSection } from "@/server/services/wills";
 import { authedRequest, createCompletedOrder, createUser, params } from "./helpers";
 
 const stripe = new Stripe("sk_test_integration_dummy");
@@ -204,6 +205,115 @@ describe("checkout webhook → paid → version snapshot → documents unlocked"
     );
     await expect(getPool().query("delete from documents")).rejects.toThrow(/immutable/);
     await expect(getPool().query("delete from audit_log")).rejects.toThrow(/immutable/);
+  });
+});
+
+describe("answers edited while the customer is on the Stripe page", () => {
+  async function auditActions(orderId: string) {
+    const rows = await db.select().from(auditLog).where(eq(auditLog.orderId, orderId));
+    return rows.map((r) => r.action);
+  }
+
+  it("records the payment but does not snapshot answers that no longer pass checkout checks", async () => {
+    const { actor } = await createUser();
+    const { order, will } = await createCompletedOrder(actor);
+    // Checkout was started with valid answers; the draft stays editable during payment.
+    const residuary = sampleAnswers().residuary;
+    residuary.beneficiaries[0]!.shareBps = 1_000; // shares now total 30%
+    await saveDraftSection(actor, will.id, "residuary", residuary);
+
+    const res = await stripeWebhook(signedWebhookRequest(checkoutEvent(order.id, 9_900)));
+    expect(res.status).toBe(200);
+    const [o] = await db.select().from(orders).where(eq(orders.id, order.id));
+    expect(o!.status).toBe("paid");
+    expect(o!.paymentSource).toBe("stripe");
+    expect(o!.paidAt).toBeInstanceOf(Date);
+    expect(await db.select().from(willVersions).where(eq(willVersions.orderId, order.id))).toEqual(
+      [],
+    );
+    expect(await currentDocuments(order)).toEqual([]);
+    expect(await auditActions(order.id)).toContain("order.documents_held");
+    const emailKinds = async () =>
+      (await db.select().from(emailLog).where(eq(emailLog.orderId, order.id)))
+        .map((e) => e.kind)
+        .sort();
+    expect(await emailKinds()).toEqual(["order_confirmation"]);
+
+    // The customer fixes the answers and finishes without paying again.
+    await saveDraftSection(actor, will.id, "residuary", sampleAnswers().residuary);
+    const { redirectUrl } = await startCheckout(actor, order.id, []);
+    expect(redirectUrl).toBe(`/dashboard/orders/${order.id}?paid=1`);
+    const [done] = await db.select().from(orders).where(eq(orders.id, order.id));
+    expect(done!.status).toBe("documents_ready");
+    expect(done!.paymentSource).toBe("stripe");
+    expect(done!.paidAt!.getTime()).toBe(o!.paidAt!.getTime());
+    const [version] = await db.select().from(willVersions).where(eq(willVersions.willId, will.id));
+    expect(decryptVersionAnswers(version!).residuary).toEqual(sampleAnswers().residuary);
+    expect(await emailKinds()).toEqual(["documents_ready", "order_confirmation"]);
+    await expect(startCheckout(actor, order.id, [])).rejects.toBeInstanceOf(ConflictError);
+  });
+
+  it("does not fail the webhook forever when the state became unsupported", async () => {
+    const { actor } = await createUser();
+    const { order, will } = await createCompletedOrder(actor);
+    await saveDraftSection(actor, will.id, "about", { ...sampleAnswers().about, stateCode: "LA" });
+    const res = await stripeWebhook(signedWebhookRequest(checkoutEvent(order.id, 9_900)));
+    expect(res.status).toBe(200);
+    const [o] = await db.select().from(orders).where(eq(orders.id, order.id));
+    expect(o!.status).toBe("paid");
+    expect(await currentDocuments(order)).toEqual([]);
+  });
+
+  it("requires acknowledging a screening warning added during checkout", async () => {
+    const { actor } = await createUser();
+    const { order, will } = await createCompletedOrder(actor);
+    await saveDraftSection(actor, will.id, "situation", {
+      ...sampleAnswers().situation,
+      ownsBusiness: true,
+    });
+    await stripeWebhook(signedWebhookRequest(checkoutEvent(order.id, 9_900)));
+    const [o] = await db.select().from(orders).where(eq(orders.id, order.id));
+    expect(o!.status).toBe("paid");
+    await expect(startCheckout(actor, order.id, [])).rejects.toThrow(/confirm/);
+    await startCheckout(actor, order.id, ["business_ownership"]);
+    const [done] = await db.select().from(orders).where(eq(orders.id, order.id));
+    expect(done!.status).toBe("documents_ready");
+    expect(done!.screeningAcknowledged).toEqual(["business_ownership"]);
+  });
+
+  it("keeps the order's state in sync with the state the documents were made for", async () => {
+    const { actor } = await createUser();
+    const { order, will } = await createCompletedOrder(actor);
+    await db.update(orders).set({ stateCode: "TX" }).where(eq(orders.id, order.id)); // at checkout
+    await saveDraftSection(actor, will.id, "about", { ...sampleAnswers().about, stateCode: "CA" });
+    await stripeWebhook(signedWebhookRequest(checkoutEvent(order.id, 9_900)));
+    const [o] = await db.select().from(orders).where(eq(orders.id, order.id));
+    expect(o!.status).toBe("documents_ready");
+    expect(o!.stateCode).toBe("CA");
+  });
+
+  it("flags a payment for an order that is no longer awaiting payment for a refund", async () => {
+    const { actor } = await createUser();
+    const { order } = await createCompletedOrder(actor);
+    await db
+      .update(orders)
+      .set({ stripeCheckoutSessionId: `cs_test_${order.id.slice(0, 8)}` })
+      .where(eq(orders.id, order.id));
+    await cancelDraftOrder(actor, order.id); // cancelled while the Stripe page was open
+    const res = await stripeWebhook(signedWebhookRequest(checkoutEvent(order.id, 9_900)));
+    expect(res.status).toBe(200);
+    expect(await auditActions(order.id)).toContain("payment.unexpected");
+
+    // A second checkout session paid for an order that is already paid is flagged too...
+    const { order: paid } = await createCompletedOrder(actor);
+    await stripeWebhook(signedWebhookRequest(checkoutEvent(paid.id, 9_900, "evt_first")));
+    const second = checkoutEvent(paid.id, 9_900, "evt_second");
+    second.data.object.id = "cs_test_second_session";
+    await stripeWebhook(signedWebhookRequest(second));
+    expect((await auditActions(paid.id)).filter((a) => a === "payment.unexpected")).toHaveLength(1);
+    // ...but another event for the session that already paid is not.
+    await stripeWebhook(signedWebhookRequest(checkoutEvent(paid.id, 9_900, "evt_again")));
+    expect((await auditActions(paid.id)).filter((a) => a === "payment.unexpected")).toHaveLength(1);
   });
 });
 

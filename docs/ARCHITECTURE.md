@@ -78,6 +78,7 @@ sequenceDiagram
   S->>A: checkout.session.completed (signed)
   A->>A: tx: insert stripe_events(id) — duplicate? stop
   A->>A: lock order, verify amount, draft→paid
+  A->>A: re-check every will, screening, acknowledgements
   A->>A: snapshot each will → will_versions (sha256)
   A->>A: render PDFs from snapshot → documents (encrypted)
   A->>A: paid→documents_ready, commit
@@ -86,6 +87,14 @@ sequenceDiagram
 
 Everything inside the transaction rolls back on failure (including the event id), so Stripe's retry
 is processed cleanly.
+
+Answers stay editable while the customer is on the Stripe page, so the webhook re-runs the checkout
+checks on the drafts it snapshots. If they no longer pass (or raise an unacknowledged warning), the
+payment is recorded but the order stays `paid` without documents (`order.documents_held` in the
+audit log); the order page asks the customer to fix the answers and confirm, which generates the
+documents without charging again. A payment for an order that is no longer awaiting one (a second
+checkout session, or an order cancelled during checkout) is logged as `payment.unexpected` for a
+manual refund.
 
 ### Order status machine
 

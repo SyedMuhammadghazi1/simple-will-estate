@@ -12,12 +12,15 @@ export function CheckoutForm({
   acknowledgements,
   disabled,
   bypass,
+  paid = false,
 }: {
   orderId: string;
   priceLabel: string;
   acknowledgements: { code: string; title: string }[];
   disabled: boolean;
   bypass: boolean;
+  /** Already paid; the documents are prepared without charging again. */
+  paid?: boolean;
 }) {
   const [state, action] = useActionState<ActionResult, FormData>(startCheckoutAction, { ok: true });
   return (
@@ -44,7 +47,7 @@ export function CheckoutForm({
           ))}
         </fieldset>
       )}
-      {bypass && (
+      {bypass && !paid && (
         <p
           className="bg-warn-light text-warn rounded-md p-3 text-xs"
           data-testid="payment-bypass-notice"
@@ -53,12 +56,20 @@ export function CheckoutForm({
           production.
         </p>
       )}
-      <SubmitButton disabled={disabled} pendingText="Starting secure checkout…">
-        Pay {priceLabel} and get my documents
-      </SubmitButton>
-      <p className="text-muted text-xs">
-        Secure payment by Stripe. One-time fee — no subscription.
-      </p>
+      {paid ? (
+        <SubmitButton disabled={disabled} pendingText="Preparing your documents…">
+          Prepare my documents
+        </SubmitButton>
+      ) : (
+        <>
+          <SubmitButton disabled={disabled} pendingText="Starting secure checkout…">
+            Pay {priceLabel} and get my documents
+          </SubmitButton>
+          <p className="text-muted text-xs">
+            Secure payment by Stripe. One-time fee — no subscription.
+          </p>
+        </>
+      )}
     </form>
   );
 }

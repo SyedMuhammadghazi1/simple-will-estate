@@ -29,7 +29,8 @@ export type EditMode = "draft" | "update" | "locked";
 /** Whether the customer can currently change the answers of this order's wills. */
 export function editMode(order: Pick<OrderRow, "status" | "paidAt">, now = new Date()): EditMode {
   const status = statusOf(order);
-  if (status === "draft") return "draft";
+  // "paid" without documents: the answers must be fixed before documents can be generated.
+  if (status === "draft" || status === "paid") return "draft";
   if (canStartUpdate(status) && isWithinUpdateWindow(order.paidAt, now)) return "update";
   return "locked";
 }
