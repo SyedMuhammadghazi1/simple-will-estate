@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { db } from "@/db";
 import { accountDeletionRequests, orders, willVersions } from "@/db/schema";
 import { addDays } from "@/lib/dates";
@@ -147,6 +147,36 @@ describe("per-IP buckets", () => {
     const rule = { name: "r", limit: 5, windowSeconds: 60 };
     expect(ipBucket(rule, "203.0.113.9")).toEqual([rule, "ip:203.0.113.9"]);
     expect(ipBucket(rule, null)).toEqual([{ ...rule, limit: 100 }, "ip:unknown"]);
+  });
+});
+
+describe("auth API route rate limits", () => {
+  it("throttles password guessing per account, not only per IP", async () => {
+    const { POST } = await import("@/app/api/auth/[...all]/route");
+    const customer = await createUser();
+    const attempt = (email: string, password: string) =>
+      POST(
+        new Request("http://localhost:3001/api/auth/sign-in/email", {
+          method: "POST",
+          headers: { "content-type": "application/json", origin: "http://localhost:3001" },
+          body: JSON.stringify({ email, password }),
+        }),
+      );
+    // Keep every attempt inside one fixed rate-limit window.
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-09-27T12:00:05Z") });
+    try {
+      const statuses: number[] = [];
+      for (let i = 0; i < 11; i++) {
+        statuses.push((await attempt(customer.actor.email, `wrong-guess-${i}`)).status);
+      }
+      expect(statuses.slice(0, 10)).toEqual(Array(10).fill(401));
+      expect(statuses[10]).toBe(429);
+      // Same bucket as the sign-in server action: case/whitespace variants don't reset it.
+      const variant = await attempt(` ${customer.actor.email.toUpperCase()} `, "x");
+      expect(variant.status).toBe(429);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 
