@@ -6,10 +6,13 @@ import { errorInfo, logger } from "./logger";
 type Handler<C> = (req: Request, ctx: C) => Promise<Response>;
 
 /** Wraps a route handler: typed errors → JSON responses, unknown errors → generic 500. */
-export function withErrorHandling<C>(name: string, handler: Handler<C>): Handler<C> {
+export function withErrorHandling<C = undefined>(
+  name: string,
+  handler: Handler<C>,
+): (req: Request, ctx?: C) => Promise<Response> {
   return async (req, ctx) => {
     try {
-      return await handler(req, ctx);
+      return await handler(req, ctx as C);
     } catch (err) {
       if (isAppError(err)) {
         const res = NextResponse.json(

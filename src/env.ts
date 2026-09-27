@@ -80,8 +80,17 @@ export type ServerEnv = z.infer<typeof serverEnvSchema>;
 
 let cached: ServerEnv | undefined;
 
+/** Empty strings (e.g. `LOG_LEVEL=` in .env) are treated as "not set". */
+function withoutEmpty(source: NodeJS.ProcessEnv): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(source).filter(
+      (e): e is [string, string] => typeof e[1] === "string" && e[1] !== "",
+    ),
+  );
+}
+
 export function parseServerEnv(source: NodeJS.ProcessEnv): ServerEnv {
-  const result = serverEnvSchema.safeParse(source);
+  const result = serverEnvSchema.safeParse(withoutEmpty(source));
   if (!result.success) {
     const details = result.error.issues
       .map((i) => `  - ${i.path.join(".") || "(root)"}: ${i.message}`)
@@ -100,7 +109,7 @@ export function getEnv(): ServerEnv {
       DATABASE_URL: "postgres://build:build@localhost:5432/build",
       BETTER_AUTH_SECRET: "build-time-placeholder-secret-not-used-at-runtime",
       DATA_ENCRYPTION_KEY: Buffer.alloc(32).toString("base64"),
-      ...process.env,
+      ...withoutEmpty(process.env),
     };
     const result = serverEnvSchema.safeParse(placeholder);
     if (result.success) return result.data;

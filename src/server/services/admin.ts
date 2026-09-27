@@ -141,14 +141,12 @@ export async function addOrderNote(actor: Actor, orderId: string, body: string) 
   const [order] = await db.select({ id: orders.id }).from(orders).where(eq(orders.id, orderId));
   if (!order) throw new NotFoundError();
   const id = randomUUID();
-  await db
-    .insert(orderNotes)
-    .values({
-      id,
-      orderId,
-      authorUserId: actor.userId,
-      bodyCiphertext: encryptText(text, aad.note(id)),
-    });
+  await db.insert(orderNotes).values({
+    id,
+    orderId,
+    authorUserId: actor.userId,
+    bodyCiphertext: encryptText(text, aad.note(id)),
+  });
   await writeAudit(auditActor(actor), {
     action: "staff.note.added",
     targetType: "order_note",
