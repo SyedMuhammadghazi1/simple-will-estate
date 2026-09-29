@@ -131,6 +131,12 @@ test("customer makes, pays for, downloads, signs and files a will; staff complet
   const orderUrl = page.url().replace(/#checkout$/, "");
   await page.getByRole("button", { name: /Pay \$99/ }).click();
   await expect(page.getByRole("heading", { name: /Stripe test checkout/ })).toBeVisible();
+  // Going back and paying again returns to the same Checkout Session (no second charge possible).
+  const checkoutSessionUrl = page.url();
+  await page.goto(`${orderUrl}#checkout`);
+  await page.getByRole("button", { name: /Pay \$99/ }).click();
+  await expect(page.getByRole("heading", { name: /Stripe test checkout/ })).toBeVisible();
+  expect(page.url()).toBe(checkoutSessionUrl);
   await page.getByRole("button", { name: "Pay (test)" }).click();
   await expect(page).toHaveURL(/checkout=success/);
   await expect(page.getByTestId("order-status")).toHaveAttribute("data-status", "documents_ready");

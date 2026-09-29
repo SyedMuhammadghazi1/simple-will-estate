@@ -1,0 +1,1 @@
+ALTER TABLE "orders" ADD COLUMN "checkout_attempts" integer DEFAULT 0 NOT NULL;

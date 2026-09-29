@@ -115,7 +115,10 @@ export const orders = pgTable(
     amountCents: integer("amount_cents").notNull(),
     currency: text("currency").notNull().default("usd"),
     stateCode: text("state_code"),
+    /** The order's current (latest) Stripe Checkout Session; reused while it can still be paid. */
     stripeCheckoutSessionId: text("stripe_checkout_session_id").unique(),
+    /** Checkout Sessions created so far; part of each creation's Stripe idempotency key. */
+    checkoutAttempts: integer("checkout_attempts").notNull().default(0),
     stripePaymentIntentId: text("stripe_payment_intent_id"),
     paymentSource: text("payment_source").$type<"stripe" | "test_bypass">(),
     screeningAcknowledged: jsonb("screening_acknowledged").$type<string[]>().notNull().default([]),

@@ -1,10 +1,10 @@
 import "server-only";
 import { and, eq } from "drizzle-orm";
-import type Stripe from "stripe";
+import Stripe from "stripe";
 import { db, type Tx } from "@/db";
 import { orders, stripeEvents, user, type OrderRow } from "@/db/schema";
 import { getEnv, isPaymentBypassEnabled } from "@/env";
-import { formatCents, getPlan, updateWindowEnd } from "@/lib/pricing";
+import { formatCents, getPlan, updateWindowEnd, type Plan } from "@/lib/pricing";
 import { isStateCode } from "@/lib/states";
 import type { WillAnswers } from "@/lib/will/answers";
 import { screenAnswers, type ScreeningCode, type ScreeningResult } from "@/lib/will/screening";
@@ -165,35 +165,154 @@ export async function startCheckout(
     return { redirectUrl: `/dashboard/orders/${order.id}?paid=1` };
   }
 
-  const session = await getStripe().checkout.sessions.create({
-    mode: "payment",
-    client_reference_id: order.id,
-    customer_email: actor.email,
-    metadata: { orderId: order.id, plan: plan.id },
-    payment_intent_data: { metadata: { orderId: order.id } },
-    line_items: [
-      {
-        quantity: 1,
-        price_data: {
-          currency: plan.currency,
-          unit_amount: plan.amountCents,
-          product_data: {
-            name: `${process.env.NEXT_PUBLIC_APP_NAME || "Plainwill"} — ${plan.name}`,
-            description:
-              "Will documents, signing kit, 12 months of updates, vault storage and managed filing.",
+  return { redirectUrl: await checkoutSessionUrl(actor, order.id, plan, appUrl) };
+}
+
+/**
+ * New sessions expire after 30 minutes (Stripe's minimum), plus a minute so clock skew or latency
+ * can't push the requested time below that minimum.
+ */
+const CHECKOUT_SESSION_TTL_SECONDS = 31 * 60;
+/** A stored session is reused only while the customer still has this long to pay. */
+const CHECKOUT_SESSION_MIN_REMAINING_SECONDS = 5 * 60;
+
+/** Stripe idempotency key for an order's n-th Checkout Session. */
+export function checkoutIdempotencyKey(orderId: string, attempt: number): string {
+  return `plainwill-checkout-${orderId}-${attempt}`;
+}
+
+/** A Checkout Session with its PaymentIntent, or null if Stripe doesn't know it (e.g. test data). */
+async function retrieveSession(
+  stripe: Stripe,
+  id: string,
+): Promise<Stripe.Checkout.Session | null> {
+  try {
+    return await stripe.checkout.sessions.retrieve(id, { expand: ["payment_intent"] });
+  } catch (err) {
+    if (err instanceof Stripe.errors.StripeInvalidRequestError && err.code === "resource_missing") {
+      return null;
+    }
+    throw err;
+  }
+}
+
+/** Whether a completed session's payment failed for good (an async method such as a bank debit). */
+function paymentFailed(session: Stripe.Checkout.Session): boolean {
+  const intent = session.payment_intent;
+  return (
+    session.payment_status === "unpaid" &&
+    typeof intent === "object" &&
+    intent !== null &&
+    (intent.status === "requires_payment_method" || intent.status === "canceled")
+  );
+}
+
+/**
+ * URL to send the customer to for paying a draft order. Every "Pay" click used to create a new
+ * Checkout Session, so two tabs (or Back + Pay) could both be paid. Now the order keeps one
+ * session: while it is open, for the right amount and not about to expire, the customer goes
+ * back to it; a completed one (the webhook may not have arrived yet) is never replaced. A new
+ * session is created only when there is no usable one — any still-open predecessor is expired
+ * first — with a Stripe idempotency key from the order id + attempt counter, so a retried create
+ * can't open a second session. The order row stays locked meanwhile, so concurrent clicks for one
+ * order are serialized and share the session. A payment that still gets through for an order
+ * that is no longer awaiting one is flagged for a refund by markOrderPaid.
+ */
+async function checkoutSessionUrl(
+  actor: Actor,
+  orderId: string,
+  plan: Plan,
+  appUrl: string,
+): Promise<string> {
+  const stripe = getStripe();
+  const processingUrl = `/dashboard/orders/${orderId}?checkout=success`;
+  return db.transaction(async (tx) => {
+    const [order] = await tx
+      .select()
+      .from(orders)
+      .where(eq(orders.id, orderId))
+      .for("update")
+      .limit(1);
+    if (!order || order.status !== "draft") {
+      throw new ConflictError("This order has already been paid.");
+    }
+
+    let current = order.stripeCheckoutSessionId
+      ? await retrieveSession(stripe, order.stripeCheckoutSessionId)
+      : null;
+    if (current) {
+      const now = Math.floor(Date.now() / 1000);
+      if (
+        current.status === "open" &&
+        current.url &&
+        current.expires_at - now >= CHECKOUT_SESSION_MIN_REMAINING_SECONDS &&
+        current.amount_total === plan.amountCents &&
+        current.currency === plan.currency
+      ) {
+        return current.url;
+      }
+      if (current.status === "open") {
+        // About to expire (or for another price): close it so it can't be paid alongside the new one.
+        try {
+          current = await stripe.checkout.sessions.expire(current.id);
+        } catch (err) {
+          logger.warn({ err: errorInfo(err), orderId }, "could not expire checkout session");
+          current = await retrieveSession(stripe, current.id);
+          if (current?.status === "open") throw err;
+        }
+      }
+      if (current?.status === "complete" && !paymentFailed(current)) return processingUrl;
+    }
+
+    for (let attempt = order.checkoutAttempts + 1; ; attempt++) {
+      let session: Stripe.Checkout.Session;
+      try {
+        session = await stripe.checkout.sessions.create(
+          {
+            mode: "payment",
+            client_reference_id: order.id,
+            customer_email: actor.email,
+            metadata: { orderId: order.id, plan: plan.id },
+            payment_intent_data: { metadata: { orderId: order.id } },
+            line_items: [
+              {
+                quantity: 1,
+                price_data: {
+                  currency: plan.currency,
+                  unit_amount: plan.amountCents,
+                  product_data: {
+                    name: `${process.env.NEXT_PUBLIC_APP_NAME || "Plainwill"} — ${plan.name}`,
+                    description:
+                      "Will documents, signing kit, 12 months of updates, vault storage and managed filing.",
+                  },
+                },
+              },
+            ],
+            expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_SESSION_TTL_SECONDS,
+            success_url: `${appUrl}/dashboard/orders/${order.id}?checkout=success`,
+            cancel_url: `${appUrl}/dashboard/orders/${order.id}?checkout=cancelled`,
           },
-        },
-      },
-    ],
-    success_url: `${appUrl}/dashboard/orders/${order.id}?checkout=success`,
-    cancel_url: `${appUrl}/dashboard/orders/${order.id}?checkout=cancelled`,
+          { idempotencyKey: checkoutIdempotencyKey(order.id, attempt) },
+        );
+      } catch (err) {
+        // The key was already used with other parameters: an earlier attempt created a session
+        // but its transaction didn't commit, so that session's URL was never handed out.
+        if (
+          err instanceof Stripe.errors.StripeIdempotencyError &&
+          attempt < order.checkoutAttempts + 3
+        ) {
+          continue;
+        }
+        throw err;
+      }
+      if (!session.url) throw new Error("Stripe did not return a checkout URL");
+      await tx
+        .update(orders)
+        .set({ stripeCheckoutSessionId: session.id, checkoutAttempts: attempt })
+        .where(eq(orders.id, order.id));
+      return session.url;
+    }
   });
-  await db
-    .update(orders)
-    .set({ stripeCheckoutSessionId: session.id })
-    .where(eq(orders.id, order.id));
-  if (!session.url) throw new Error("Stripe did not return a checkout URL");
-  return { redirectUrl: session.url };
 }
 
 export interface PaymentInfo {

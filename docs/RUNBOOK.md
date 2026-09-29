@@ -27,6 +27,18 @@ The Docker image has a `HEALTHCHECK` on `/api/health`. Point load-balancer readi
    **Resend** the event from Stripe. Processing is idempotent (`stripe_events`).
 3. If `payment amount mismatch` was logged, the charged amount differs from the server price —
    investigate before doing anything (possible tampering or a price change mid-checkout).
+4. Until the order leaves `draft`, "Pay" shows "payment processing" instead of opening a new
+   Checkout Session, because the order's stored session is already complete — this is what
+   prevents a second charge. Resolve the payment above rather than clearing
+   `stripe_checkout_session_id`.
+
+### Customer charged twice
+
+The app keeps one Checkout Session per order, but a payment for an order that is no longer
+awaiting one (e.g. paid through a session that was being replaced, or cancelled during checkout)
+is still possible. It is logged as `payment received for an order that is not awaiting payment`
+and audited as `payment.unexpected` (with the session id): refund that payment in the Stripe
+Dashboard.
 
 ### Replaying webhooks
 

@@ -73,7 +73,9 @@ sequenceDiagram
   participant S as Stripe
   C->>A: Pay (server action)
   A->>A: validate every will, screening, acknowledgements
-  A->>S: create Checkout Session (price from server config)
+  A->>A: lock order row
+  A->>S: retrieve the order's stored session — still open? reuse it
+  A->>S: otherwise create one (price from server config, expires in 30 min, idempotency key)
   S-->>C: hosted checkout
   S->>A: checkout.session.completed (signed)
   A->>A: tx: insert stripe_events(id) — duplicate? stop
@@ -87,6 +89,15 @@ sequenceDiagram
 
 Everything inside the transaction rolls back on failure (including the event id), so Stripe's retry
 is processed cleanly.
+
+An order has one Checkout Session at a time (`orders.stripe_checkout_session_id`), so a second
+"Pay" click (another tab, Back + Pay) can't open a second chargeable session. While the stored
+session is open, for the plan's amount and has at least 5 minutes left, the customer is sent back
+to it. A completed one is never replaced (the webhook may still be on its way — the customer sees
+"payment processing"), unless its asynchronous payment failed. Otherwise a still-open session is
+expired and a new one is created that expires after 30 minutes (Stripe's minimum, plus a minute of
+slack), with the idempotency key `plainwill-checkout-<order id>-<attempt>` (`orders.checkout_attempts`).
+The order row is locked while this happens, so concurrent clicks share one session.
 
 Answers stay editable while the customer is on the Stripe page, so the webhook re-runs the checkout
 checks on the drafts it snapshots. If they no longer pass (or raise an unacknowledged warning), the

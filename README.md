@@ -13,7 +13,8 @@ keep it in our vault. The product name is configurable via `NEXT_PUBLIC_APP_NAME
 
 - **Flat-fee pricing** (server-side config): Individual $99, Couple (two mirror wills) $169 —
   will PDF, state signing kit, 12 months of updates, vault storage, managed filing. Stripe Checkout
-  one-time payment; idempotent `checkout.session.completed` webhook.
+  one-time payment with one Checkout Session per order (reused while open, 30-minute expiry,
+  idempotency keys); idempotent `checkout.session.completed` webhook.
 - **Guided will wizard**: 10 steps (about you, situation screening, children, guardians, executor,
   beneficiaries & residuary with basis-point shares, specific gifts, UTMA-style custodianship, other
   wishes, review), encrypted autosave, resumable, progress indicator, per-step validation, plain
@@ -147,7 +148,8 @@ Every variable is documented in [.env.example](.env.example). Summary:
   global setup, tables truncated between tests. Covers wizard save/resume, Stripe webhook → paid →
   version snapshot → documents unlocked (+ idempotency, bad signatures, amount mismatch), IDOR
   protection on every object route, admin-only routes, the staff filing flow, uploads, reminders,
-  updates, rate limiting and data export.
+  updates, rate limiting and data export. Checkout Session reuse/expiry/idempotency runs the real
+  Stripe SDK against the Stripe API emulator.
 - **E2E** (`tests/e2e`, Playwright): against `next start` (production build). The payment step runs the
   real Stripe Checkout + signed webhook code path against a local Stripe API emulator
   (`tests/e2e/stripe-emulator.mjs`). The `PAYMENTS_MODE=test-bypass` shortcut is used for local
