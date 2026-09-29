@@ -1,0 +1,1 @@
+ALTER TABLE "wills" ADD COLUMN "draft_version" integer DEFAULT 0 NOT NULL;

@@ -1,7 +1,8 @@
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
-import { db } from "@/db";
+import { db, getPool } from "@/db";
 import { orders, wills } from "@/db/schema";
+import { SECTION_SCHEMAS, type WillSectionKey } from "@/lib/will/answers";
 import { sampleAnswers } from "@/lib/will/sample";
 import { ConflictError, NotFoundError, ValidationError } from "@/server/errors";
 import { createOrder, listWills } from "@/server/services/orders";
@@ -136,5 +137,94 @@ describe("wizard save & resume", () => {
     expect(mirrored.answers.about.fullLegalName).toBe("Casey Morgan Sample");
     expect(mirrored.answers.residuary.beneficiaries[0]?.name).toBe("Jordan Avery Sample");
     await expect(mirrorFromPartner(actor, first!.id)).rejects.toBeInstanceOf(ConflictError);
+  });
+});
+
+describe("concurrent autosaves (two tabs)", () => {
+  /** Holds the will row locked until `release` so concurrent saves read first and write after. */
+  async function lockWillRow(willId: string) {
+    const client = await getPool().connect();
+    await client.query("begin");
+    await client.query("select id from wills where id = $1 for update", [willId]);
+    return {
+      /** Waits until `count` statements are blocked on the lock. */
+      async waitForWaiters(count: number) {
+        for (let i = 0; i < 400; i++) {
+          // Polled from another connection: stats views are frozen within a transaction.
+          const { rows } = await getPool().query<{ n: number }>(
+            `select count(*)::int as n from pg_stat_activity
+              where datname = current_database() and wait_event_type = 'Lock'`,
+          );
+          if ((rows[0]?.n ?? 0) >= count) return;
+          await new Promise((r) => setTimeout(r, 25));
+        }
+        throw new Error(`expected ${count} statements waiting for the lock`);
+      },
+      async release() {
+        await client.query("commit");
+        client.release();
+      },
+    };
+  }
+
+  it("keeps both sections when two tabs save different sections at the same time", async () => {
+    const { actor } = await createUser();
+    const order = await createOrder(actor, "individual");
+    const [will] = await listWills(order.id);
+    const answers = sampleAnswers();
+
+    const lock = await lockWillRow(will!.id);
+    // Both saves read the same draft, then wait to write it.
+    const saves = Promise.all([
+      saveDraftSection(actor, will!.id, "about", answers.about),
+      saveDraftSection(actor, will!.id, "executor", answers.executor),
+    ]);
+    try {
+      await lock.waitForWaiters(2);
+    } finally {
+      await lock.release();
+    }
+    await saves;
+
+    const { answers: saved } = await loadWillForEditing(actor, will!.id);
+    expect(saved.about).toEqual(answers.about);
+    expect(saved.executor).toEqual(answers.executor);
+    const [row] = await db.select().from(wills).where(eq(wills.id, will!.id));
+    expect(row!.draftVersion).toBe(2);
+  });
+
+  it("keeps every section when all of them are saved concurrently", async () => {
+    const { actor } = await createUser();
+    const order = await createOrder(actor, "individual");
+    const [will] = await listWills(order.id);
+    const answers = sampleAnswers();
+    const sections = Object.keys(SECTION_SCHEMAS) as WillSectionKey[];
+    await Promise.all(sections.map((key) => saveDraftSection(actor, will!.id, key, answers[key])));
+    const { answers: saved } = await loadWillForEditing(actor, will!.id);
+    expect(saved).toEqual(answers);
+  });
+
+  it("does not let a save that read the draft before a mirror undo the mirror", async () => {
+    const { actor } = await createUser();
+    const order = await createOrder(actor, "couple");
+    const [first, second] = await listWills(order.id);
+    await fillWill(actor, first!.id);
+    const wishes = { ...sampleAnswers().wishes, funeralNotes: "A quiet service." };
+
+    const lock = await lockWillRow(second!.id);
+    const mirror = mirrorFromPartner(actor, second!.id); // writes first…
+    let save: Promise<unknown> = Promise.resolve();
+    try {
+      await lock.waitForWaiters(1);
+      save = saveDraftSection(actor, second!.id, "wishes", wishes); // …but was read before it
+      await lock.waitForWaiters(2);
+    } finally {
+      await lock.release();
+    }
+    await Promise.all([mirror, save]);
+
+    const { answers } = await loadWillForEditing(actor, second!.id);
+    expect(answers.about.fullLegalName).toBe("Casey Morgan Sample");
+    expect(answers.wishes.funeralNotes).toBe("A quiet service.");
   });
 });

@@ -42,7 +42,7 @@ tests/e2e/             Playwright + Stripe API emulator
 | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `user`, `session`, `account`, `verification` | Better Auth (user has `role`: customer / staff / admin)                                                     |
 | `orders`                                     | One purchase (plan, status, amount in cents, payment refs, timestamps, update window, reminder bookkeeping) |
-| `wills`                                      | 1 (individual) or 2 (couple) per order; encrypted autosaved draft, current step, completed steps            |
+| `wills`                                      | 1 (individual) or 2 (couple) per order; encrypted autosaved draft + version, current step, completed steps  |
 | `will_versions`                              | **Immutable** snapshot of answers at payment/update: encrypted canonical JSON + SHA-256, state code         |
 | `documents`                                  | **Immutable** generated PDFs (will, signing instructions) per version, encrypted, with SHA-256              |
 | `uploads`                                    | Encrypted signed-will scans (bytea) linked to the version they sign                                         |
@@ -63,6 +63,12 @@ The client step form keeps the section in state, autosaves (debounced 1.2 s) thr
 action, and on "Save and continue" validates locally and again on the server with the same pure
 `validateStep`. Drafts are stored as AES-256-GCM ciphertext bound to the will id (AAD). A step is
 "complete" once submitted and still valid.
+
+Each autosave replaces one section of the encrypted draft, which is a read-modify-write. Writes use
+optimistic concurrency (`wills.draft_version`): the update only applies if the version is still
+the one read, and otherwise the section is re-applied to the newer draft — so two tabs saving
+different sections at the same time both keep their answers. Mirroring a partner's will also bumps
+the version, so a save that read the old draft can't write it back.
 
 ### Payment → documents
 

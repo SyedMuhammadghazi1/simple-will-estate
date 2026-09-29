@@ -22,6 +22,13 @@
       "when": 1790716190252,
       "tag": "0002_checkout_attempts",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790717045602,
+      "tag": "0003_will_draft_version",
+      "breakpoints": true
     }
   ]
 }

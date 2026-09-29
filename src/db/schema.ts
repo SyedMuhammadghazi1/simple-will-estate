@@ -153,6 +153,11 @@ export const wills = pgTable(
     currentStep: text("current_step").notNull().default("about"),
     completedSteps: jsonb("completed_steps").$type<string[]>().notNull().default([]),
     draftUpdatedAt: timestamp("draft_updated_at", { withTimezone: true }).notNull().defaultNow(),
+    /**
+     * Optimistic-concurrency counter: every write of the draft or progress increments it and is
+     * conditional on the value that was read (see services/wills.ts).
+     */
+    draftVersion: integer("draft_version").notNull().default(0),
     ...timestamps,
   },
   (t) => [uniqueIndex("wills_order_position_uq").on(t.orderId, t.position)],
