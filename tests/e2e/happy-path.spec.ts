@@ -177,6 +177,9 @@ test("customer makes, pays for, downloads, signs and files a will; staff complet
 
   // --- Staff marks the will as filed ----------------------------------------
   await page.getByRole("button", { name: "Sign out" }).click();
+  // Wait for the sign-out action to finish: navigating earlier lets the still-signed-in customer
+  // be bounced through the admin guard, which replaces ?next with /admin.
+  await expect(page.getByRole("button", { name: "Sign out" })).toBeHidden();
   await page.goto("/sign-in?next=/admin/filing");
   await page.getByLabel("Email").fill("admin@plainwill.test");
   await page.getByLabel("Password").fill("Plainwill-demo-2026");
