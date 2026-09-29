@@ -11,7 +11,7 @@ import { requestAccountDeletion } from "@/server/services/account";
 import { currentDocuments } from "@/server/services/documents";
 import { publishWillUpdate } from "@/server/services/updates";
 import { saveDraftSection } from "@/server/services/wills";
-import { createPaidOrder, createUser } from "./helpers";
+import { createPaidOrder, createUser, streamedBody } from "./helpers";
 
 describe("signing reminders job", () => {
   it("reminds after 7 days, never twice within 7 days, and skips signed orders", async () => {
@@ -288,6 +288,24 @@ describe("auth API route rate limits", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("rejects oversized auth bodies with 413 before reading them into memory", async () => {
+    const { POST } = await import("@/app/api/auth/[...all]/route");
+    const stream = streamedBody(4 * 1024 * 1024, 16 * 1024);
+    const res = await POST(
+      new Request("http://localhost:3001/api/auth/sign-in/email", {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "http://localhost:3001" },
+        ...stream.init,
+      }),
+    );
+    expect(res.status).toBe(413);
+    expect(stream.sent()).toBeLessThan(256 * 1024);
+    const padded = await POST(
+      authRequest("/sign-in/email", { email: "a@example.test", password: "x".repeat(70_000) }),
+    );
+    expect(padded.status).toBe(413);
   });
 
   it("records the resolved client IP on the session, ignoring a forged internal header", async () => {

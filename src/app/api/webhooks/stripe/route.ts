@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getEnv } from "@/env";
+import { PayloadTooLargeError } from "@/server/errors";
+import { readBodyCapped } from "@/server/http";
 import { errorInfo, logger } from "@/server/logger";
 import { processStripeEvent } from "@/server/services/payments";
 import { getStripe } from "@/server/stripe";
 
 export const dynamic = "force-dynamic";
+
+/** Stripe events are a few KB; nothing this large comes from Stripe. */
+const MAX_BODY_BYTES = 1024 * 1024;
 
 /**
  * Stripe webhook. The signature is verified against the RAW body; processing is idempotent
@@ -20,7 +25,14 @@ export async function POST(req: Request) {
   const signature = req.headers.get("stripe-signature");
   if (!signature) return NextResponse.json({ error: "missing signature" }, { status: 400 });
 
-  const rawBody = await req.text();
+  let rawBody: Buffer;
+  try {
+    rawBody = Buffer.from(await readBodyCapped(req, MAX_BODY_BYTES));
+  } catch (err) {
+    if (!(err instanceof PayloadTooLargeError)) throw err;
+    logger.warn({ maxBytes: MAX_BODY_BYTES }, "stripe webhook body too large");
+    return NextResponse.json({ error: "payload too large" }, { status: 413 });
+  }
   let event: Stripe.Event;
   try {
     event = getStripe().webhooks.constructEvent(rawBody, signature, secret);

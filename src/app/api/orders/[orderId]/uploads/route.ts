@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { MAX_UPLOAD_BYTES } from "@/lib/config";
-import { ForbiddenError, isAppError, ValidationError } from "@/server/errors";
+import { ForbiddenError, isAppError, PayloadTooLargeError, ValidationError } from "@/server/errors";
+import { readBodyCapped } from "@/server/http";
 import { errorInfo, logger } from "@/server/logger";
 import { isSameOrigin } from "@/server/request";
 import { uploadSignedWill } from "@/server/services/execution";
@@ -10,28 +11,11 @@ export const dynamic = "force-dynamic";
 
 /** Multipart overhead allowed on top of the file itself. */
 const MAX_BODY_BYTES = MAX_UPLOAD_BYTES + 64 * 1024;
+const TOO_LARGE = "The file is larger than 10 MB.";
 
-/**
- * Reads the form, giving up as soon as the body exceeds MAX_BODY_BYTES. Content-Length is only a
- * hint (a chunked request has none), and `req.formData()` would buffer any amount in memory.
- */
+/** Reads the form, giving up as soon as the body exceeds MAX_BODY_BYTES (`req.formData()` wouldn't). */
 async function readForm(req: Request): Promise<FormData> {
-  const tooLarge = () => new ValidationError("The file is larger than 10 MB.");
-  if (Number(req.headers.get("content-length") ?? "0") > MAX_BODY_BYTES) throw tooLarge();
-  const chunks: Uint8Array[] = [];
-  let size = 0;
-  const reader = req.body?.getReader();
-  for (;;) {
-    const next = await reader?.read();
-    if (!next || next.done) break;
-    size += next.value.byteLength;
-    if (size > MAX_BODY_BYTES) {
-      await reader?.cancel();
-      throw tooLarge();
-    }
-    chunks.push(next.value);
-  }
-  return new Response(new Uint8Array(Buffer.concat(chunks)), {
+  return new Response(await readBodyCapped(req, MAX_BODY_BYTES, TOO_LARGE), {
     headers: { "content-type": req.headers.get("content-type") ?? "" },
   }).formData();
 }
@@ -53,7 +37,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ orderId: strin
     const willId = String(form.get("willId") ?? "");
     if (!(file instanceof File) || file.size === 0)
       throw new ValidationError("Choose a file to upload.");
-    if (file.size > MAX_UPLOAD_BYTES) throw new ValidationError("The file is larger than 10 MB.");
+    if (file.size > MAX_UPLOAD_BYTES) throw new PayloadTooLargeError(TOO_LARGE);
     const bytes = new Uint8Array(await file.arrayBuffer());
     const result = await uploadSignedWill(actor, orderId, willId, { bytes, filename: file.name });
     return wantsJson

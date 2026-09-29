@@ -200,7 +200,7 @@ describe("signed-will upload size limit", () => {
     });
     expect(req.headers.get("content-length")).toBeNull();
     const res = await uploadRoute(req, params({ orderId: order.id }));
-    expect(res.status).toBe(422);
+    expect(res.status).toBe(413);
     expect(await res.json()).toMatchObject({
       error: { message: expect.stringMatching(/larger than 10 MB/) },
     });

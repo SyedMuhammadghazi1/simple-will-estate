@@ -45,6 +45,12 @@ export class ConflictError extends AppError {
   }
 }
 
+export class PayloadTooLargeError extends AppError {
+  constructor(message = "The request is too large.") {
+    super(message, 413, "payload_too_large");
+  }
+}
+
 export class RateLimitedError extends AppError {
   constructor(public readonly retryAfterSeconds: number) {
     super("Too many requests. Please wait a moment and try again.", 429, "rate_limited");

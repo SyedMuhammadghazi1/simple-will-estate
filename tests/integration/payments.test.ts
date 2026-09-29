@@ -21,7 +21,7 @@ import { currentDocuments, decryptVersionAnswers } from "@/server/services/docum
 import { cancelDraftOrder } from "@/server/services/orders";
 import { startCheckout } from "@/server/services/payments";
 import { loadWillForEditing, saveDraftSection } from "@/server/services/wills";
-import { authedRequest, createCompletedOrder, createUser, params } from "./helpers";
+import { authedRequest, createCompletedOrder, createUser, params, streamedBody } from "./helpers";
 
 const stripe = new Stripe("sk_test_integration_dummy");
 const WEBHOOK_SECRET = "whsec_integration_test_secret";
@@ -171,6 +171,28 @@ describe("checkout webhook → paid → version snapshot → documents unlocked"
     expect(missing.status).toBe(400);
     const [o] = await db.select().from(orders).where(eq(orders.id, order.id));
     expect(o!.status).toBe("draft");
+  });
+
+  it("rejects oversized bodies with 413 without reading them", async () => {
+    const stream = streamedBody(8 * 1024 * 1024);
+    const req = new Request("http://localhost:3001/api/webhooks/stripe", {
+      method: "POST",
+      headers: { "stripe-signature": "t=1,v1=abc", "content-type": "application/json" },
+      ...stream.init,
+    });
+    expect(req.headers.get("content-length")).toBeNull();
+    const res = await stripeWebhook(req);
+    expect(res.status).toBe(413);
+    expect(stream.sent()).toBeLessThan(2 * 1024 * 1024);
+
+    const declared = await stripeWebhook(
+      new Request("http://localhost:3001/api/webhooks/stripe", {
+        method: "POST",
+        headers: { "stripe-signature": "t=1,v1=abc", "content-length": String(2 * 1024 * 1024) },
+        body: "{}",
+      }),
+    );
+    expect(declared.status).toBe(413);
   });
 
   it("does not mark an order paid when the amount doesn't match the server price", async () => {

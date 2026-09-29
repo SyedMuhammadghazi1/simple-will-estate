@@ -86,3 +86,20 @@ export function authedRequest(url: string, cookie: string | null, init: RequestI
 export function params<T extends Record<string, string>>(p: T) {
   return { params: Promise.resolve(p) };
 }
+
+/**
+ * A request body streamed in chunks without a Content-Length (like chunked encoding), counting
+ * how many bytes the server actually pulled.
+ */
+export function streamedBody(totalBytes: number, chunkBytes = 64 * 1024) {
+  const chunk = new Uint8Array(chunkBytes).fill(0x61);
+  let sent = 0;
+  const body = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (sent >= totalBytes) return controller.close();
+      sent += chunk.length;
+      controller.enqueue(chunk);
+    },
+  });
+  return { body, sent: () => sent, init: { body, duplex: "half" } as RequestInit };
+}

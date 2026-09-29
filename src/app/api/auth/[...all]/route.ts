@@ -1,10 +1,15 @@
 import { toNextJsHandler } from "better-auth/next-js";
 import { NextResponse } from "next/server";
 import { getAuth } from "@/server/auth";
+import { PayloadTooLargeError } from "@/server/errors";
+import { readBodyCapped } from "@/server/http";
 import { authBuckets, hitRateLimit, RATE_LIMITS, type RateLimitRule } from "@/server/rate-limit";
 import { authHeaders, clientIp } from "@/server/request";
 
 export const dynamic = "force-dynamic";
+
+/** Auth bodies hold credentials, a name or a token — a few hundred bytes. */
+const MAX_BODY_BYTES = 64 * 1024;
 
 function handlers() {
   return toNextJsHandler(getAuth());
@@ -62,10 +67,20 @@ async function limit(rule: RateLimitRule, key: string): Promise<Response | null>
  * is throttled too.
  */
 export async function POST(req: Request) {
+  let body: Uint8Array<ArrayBuffer>;
+  try {
+    body = await readBodyCapped(req, MAX_BODY_BYTES);
+  } catch (err) {
+    if (!(err instanceof PayloadTooLargeError)) throw err;
+    return NextResponse.json(
+      { error: { code: err.code, message: err.message } },
+      { status: err.status },
+    );
+  }
   const forwarded = new Request(req.url, {
     method: req.method,
     headers: authHeaders(req.headers),
-    body: await req.arrayBuffer(),
+    body,
   });
   const path = new URL(req.url).pathname;
   const endpoint = ACCOUNT_ENDPOINTS.find((e) => path.endsWith(e.path));

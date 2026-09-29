@@ -136,7 +136,8 @@ for Unicode font embedding).
 See [SECURITY.md](../SECURITY.md). Highlights: owner-scoped queries returning 404 for foreign ids,
 staff PII views audited, encryption with row-bound AAD and key rotation, DB-level immutability for
 legal records, rate limits in Postgres (per IP and per account; the client IP comes from
-`lib/client-ip.ts` only, see DEPLOYMENT.md), strict headers.
+`lib/client-ip.ts` only, see DEPLOYMENT.md), request bodies read with a cap (`readBodyCapped`:
+webhook 1 MB, auth 64 KB, uploads 10 MB → 413), strict headers.
 
 ## Honest limitations
 
