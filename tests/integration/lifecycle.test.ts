@@ -324,6 +324,15 @@ describe("auth API route rate limits", () => {
     expect(rows.map((r) => r.ipAddress)).toContain("203.0.113.7");
     expect(rows.map((r) => r.ipAddress)).not.toContain("6.6.6.7");
     expect(rows.map((r) => r.ipAddress)).not.toContain("6.6.6.6");
+
+    const { GET } = await import("@/app/api/auth/[...all]/route");
+    const current = await GET(
+      new Request("http://localhost:3001/api/auth/get-session", {
+        headers: { cookie: customer.cookie },
+      }),
+    );
+    expect(current.status).toBe(200);
+    expect((await current.json()).user.email).toBe(customer.actor.email);
   });
 });
 
