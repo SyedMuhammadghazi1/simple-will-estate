@@ -136,7 +136,7 @@ Every variable is documented in [.env.example](.env.example). Summary:
 | `EMAIL_FROM` / `SUPPORT_EMAIL`                                            | no         | Sender and support addresses                                       |
 | `CRON_SECRET`                                                             | yes (prod) | Bearer token for `/api/cron/*`                                     |
 | `LOG_LEVEL`                                                               | no         | pino level                                                         |
-| `SKIP_ENV_VALIDATION`                                                     | build only | Skip env validation during `next build`                            |
+| `SKIP_ENV_VALIDATION`                                                     | build only | Skip env validation in `next build`; ignored by production servers |
 
 ## Testing
 

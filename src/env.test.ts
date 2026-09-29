@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { parseServerEnv } from "./env";
+import { afterEach, describe, expect, it } from "vitest";
+import { getEnv, parseServerEnv, resetEnvCache, shouldSkipEnvValidation } from "./env";
 
 const base = {
   NODE_ENV: "development",
@@ -63,5 +63,61 @@ describe("env validation", () => {
     expect(parseServerEnv({ ...production, APP_URL: "https://plainwill.example" }).APP_URL).toBe(
       "https://plainwill.example",
     );
+  });
+});
+
+describe("SKIP_ENV_VALIDATION", () => {
+  const original = process.env;
+  afterEach(() => {
+    process.env = original;
+    resetEnvCache();
+  });
+
+  /** Runs getEnv() against exactly `vars` (no secrets unless given). */
+  function getEnvWith(vars: Record<string, string>) {
+    process.env = { ...vars } as NodeJS.ProcessEnv;
+    resetEnvCache();
+    return getEnv();
+  }
+
+  it("applies to builds and non-production runs only", () => {
+    const skip = (vars: Record<string, string>) =>
+      shouldSkipEnvValidation(vars as unknown as NodeJS.ProcessEnv);
+    expect(skip({ NODE_ENV: "development" })).toBe(false);
+    expect(skip({ NODE_ENV: "development", SKIP_ENV_VALIDATION: "1" })).toBe(true);
+    expect(skip({ NODE_ENV: "test", SKIP_ENV_VALIDATION: "true" })).toBe(true);
+    expect(
+      skip({
+        NODE_ENV: "production",
+        SKIP_ENV_VALIDATION: "1",
+        NEXT_PHASE: "phase-production-build",
+      }),
+    ).toBe(true);
+    expect(skip({ NODE_ENV: "production", SKIP_ENV_VALIDATION: "1" })).toBe(false);
+    expect(
+      skip({
+        NODE_ENV: "production",
+        SKIP_ENV_VALIDATION: "true",
+        NEXT_PHASE: "phase-production-server",
+      }),
+    ).toBe(false);
+  });
+
+  it("is ignored by a production server: missing secrets fail fast instead of using placeholders", () => {
+    expect(() => getEnvWith({ NODE_ENV: "production", SKIP_ENV_VALIDATION: "1" })).toThrow(
+      /Invalid environment variables[\s\S]*DATABASE_URL[\s\S]*BETTER_AUTH_SECRET/,
+    );
+    expect(() =>
+      getEnvWith({ ...base, NODE_ENV: "production", SKIP_ENV_VALIDATION: "true" }),
+    ).toThrow(/STRIPE_SECRET_KEY/);
+  });
+
+  it("still lets `next build` load modules without secrets", () => {
+    const env = getEnvWith({
+      NODE_ENV: "production",
+      SKIP_ENV_VALIDATION: "1",
+      NEXT_PHASE: "phase-production-build",
+    });
+    expect(env.BETTER_AUTH_SECRET).toBe("build-time-placeholder-secret-not-used-at-runtime");
   });
 });

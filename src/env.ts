@@ -5,7 +5,8 @@ import { z } from "zod";
  *
  * Validation is lazy (on first access) so that `next build` can run without
  * secrets when SKIP_ENV_VALIDATION=1. At runtime the first access fails fast
- * with a readable error listing every invalid variable.
+ * with a readable error listing every invalid variable — SKIP_ENV_VALIDATION is
+ * ignored by a production server (see shouldSkipEnvValidation).
  */
 
 const booleanString = z
@@ -111,10 +112,21 @@ export function parseServerEnv(source: NodeJS.ProcessEnv): ServerEnv {
   return result.data;
 }
 
+/**
+ * Whether SKIP_ENV_VALIDATION applies. It exists for `next build` / CI, where runtime secrets are
+ * unavailable. A production server (`NODE_ENV=production` outside Next's build phase) always
+ * validates and fails fast, so a leftover flag can never swap missing secrets for placeholders.
+ */
+export function shouldSkipEnvValidation(source: NodeJS.ProcessEnv = process.env): boolean {
+  if (source.SKIP_ENV_VALIDATION !== "1" && source.SKIP_ENV_VALIDATION !== "true") return false;
+  if (source.NODE_ENV !== "production") return true;
+  return source.NEXT_PHASE === "phase-production-build";
+}
+
 /** Returns validated server env. Throws on first access if invalid. */
 export function getEnv(): ServerEnv {
   if (cached) return cached;
-  if (process.env.SKIP_ENV_VALIDATION === "1" || process.env.SKIP_ENV_VALIDATION === "true") {
+  if (shouldSkipEnvValidation()) {
     // Build-time only: best-effort parse with placeholders so modules can load.
     const placeholder = {
       DATABASE_URL: "postgres://build:build@localhost:5432/build",

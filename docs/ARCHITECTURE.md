@@ -27,7 +27,7 @@ src/
     services/          orders, wills, payments, documents, execution, filing, updates, admin, account
   jobs/                signing-reminders (idempotent)
   db/                  Drizzle schema + pooled client
-  env.ts               Zod env validation (lazy, SKIP_ENV_VALIDATION for builds)
+  env.ts               Zod env validation (lazy; SKIP_ENV_VALIDATION for `next build` only)
   proxy.ts             optimistic auth redirect (Next 16 "middleware")
   instrumentation.ts   startup warning for unreviewed state rules
 drizzle/               committed SQL migrations (0001 adds immutability triggers + CHECK constraints)

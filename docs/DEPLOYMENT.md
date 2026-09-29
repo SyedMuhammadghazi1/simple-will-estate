@@ -18,7 +18,8 @@ documents, uploads) lives in Postgres, so you can run several instances behind a
 | `TRUST_PROXY=true`                                                   | When behind a load balancer that sets `X-Forwarded-For`                                           |
 
 The app refuses to start requests with an invalid configuration (e.g. `PAYMENTS_MODE=test-bypass`
-in production, missing Stripe or cron secrets).
+in production, missing Stripe or cron secrets). `SKIP_ENV_VALIDATION` only applies to `next build`;
+a production server ignores it, so it can never run on placeholder secrets.
 
 ## Option A — Docker on any container host (Render, Fly.io, Railway, ECS, Kubernetes)
 
