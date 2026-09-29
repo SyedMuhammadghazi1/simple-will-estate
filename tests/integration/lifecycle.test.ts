@@ -159,25 +159,41 @@ describe("Postgres fixed-window rate limiter", () => {
 
 describe("per-IP buckets", () => {
   it("uses a per-IP key when the IP is known and a larger shared bucket otherwise", async () => {
-    const { ipBucket } = await import("@/server/rate-limit");
+    const { ipBucket, ipOrSharedBucket } = await import("@/server/rate-limit");
     const rule = { name: "r", limit: 5, windowSeconds: 60 };
     expect(ipBucket(rule, "203.0.113.9")).toEqual([rule, "ip:203.0.113.9"]);
-    expect(ipBucket(rule, null)).toEqual([{ ...rule, limit: 100 }, "ip:unknown"]);
+    expect(ipBucket(rule, null)).toBeNull();
+    expect(ipOrSharedBucket(rule, "203.0.113.9")).toEqual([rule, "ip:203.0.113.9"]);
+    expect(ipOrSharedBucket(rule, null)).toEqual([{ ...rule, limit: 100 }, "ip:unknown"]);
+  });
+
+  it("never puts per-account endpoints of clients with an unknown IP in one shared bucket", async () => {
+    const { authBuckets } = await import("@/server/rate-limit");
+    const rule = { name: "r", limit: 5, windowSeconds: 60 };
+    const account = { rule, email: " Someone@Example.test " };
+    expect(authBuckets(rule, null, account)).toEqual([[rule, "email:someone@example.test"]]);
+    expect(authBuckets(rule, "203.0.113.9", account)).toEqual([
+      [rule, "ip:203.0.113.9"],
+      [rule, "email:someone@example.test"],
+    ]);
+    expect(authBuckets(rule, null)).toEqual([[{ ...rule, limit: 100 }, "ip:unknown"]]);
   });
 });
+
+function authRequest(path: string, body: unknown, headers: Record<string, string> = {}) {
+  return new Request(`http://localhost:3001/api/auth${path}`, {
+    method: "POST",
+    headers: { "content-type": "application/json", origin: "http://localhost:3001", ...headers },
+    body: JSON.stringify(body),
+  });
+}
 
 describe("auth API route rate limits", () => {
   it("throttles password guessing per account, not only per IP", async () => {
     const { POST } = await import("@/app/api/auth/[...all]/route");
     const customer = await createUser();
     const attempt = (email: string, password: string) =>
-      POST(
-        new Request("http://localhost:3001/api/auth/sign-in/email", {
-          method: "POST",
-          headers: { "content-type": "application/json", origin: "http://localhost:3001" },
-          body: JSON.stringify({ email, password }),
-        }),
-      );
+      POST(authRequest("/sign-in/email", { email, password }));
     // Keep every attempt inside one fixed rate-limit window.
     vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-09-27T12:00:05Z") });
     try {
@@ -193,6 +209,103 @@ describe("auth API route rate limits", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+  it("keys per-IP limits on the address the proxy appended, not a spoofed leftmost entry", async () => {
+    const { POST } = await import("@/app/api/auth/[...all]/route");
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-09-27T12:00:05Z") });
+    try {
+      const statuses: number[] = [];
+      for (let i = 0; i < 11; i++) {
+        const res = await POST(
+          authRequest(
+            "/sign-in/email",
+            { email: `nobody${i}@example.test`, password: "wrong-password" },
+            { "X-Forwarded-For": `198.51.100.${i}, 203.0.113.7` }, // TRUSTED_PROXY_HOPS=1
+          ),
+        );
+        statuses.push(res.status);
+      }
+      expect(statuses.slice(0, 10)).toEqual(Array(10).fill(401));
+      expect(statuses[10]).toBe(429);
+      // Another client behind the same proxy is unaffected.
+      const other = await POST(
+        authRequest(
+          "/sign-in/email",
+          { email: "nobody@example.test", password: "wrong-password" },
+          { "X-Forwarded-For": "203.0.113.7, 203.0.113.8" },
+        ),
+      );
+      expect(other.status).toBe(401);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not let clients with an unknown IP lock each other out of sign-in", async () => {
+    const { POST } = await import("@/app/api/auth/[...all]/route");
+    const a = await createUser();
+    const b = await createUser();
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-09-27T12:00:05Z") });
+    try {
+      for (let i = 0; i < 10; i++) {
+        await POST(authRequest("/sign-in/email", { email: a.actor.email, password: `x${i}` }));
+      }
+      const lockedOut = await POST(
+        authRequest("/sign-in/email", { email: a.actor.email, password: "correct-horse-battery" }),
+      );
+      expect(lockedOut.status).toBe(429);
+      const res = await POST(
+        authRequest("/sign-in/email", { email: b.actor.email, password: "correct-horse-battery" }),
+      );
+      expect(res.status).toBe(200);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("rate limits sign-up through the HTTP endpoint per IP and per account", async () => {
+    const { POST } = await import("@/app/api/auth/[...all]/route");
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-09-27T12:00:05Z") });
+    try {
+      const signUp = (email: string, ip: string) =>
+        POST(
+          authRequest(
+            "/sign-up/email",
+            { name: "Sign Up", email, password: "correct-horse-battery" },
+            { "X-Forwarded-For": ip },
+          ),
+        );
+      const perIp: number[] = [];
+      for (let i = 0; i < 6; i++)
+        perIp.push((await signUp(`new${i}@example.test`, "203.0.113.30")).status);
+      expect(perIp.slice(0, 5).every((s) => s !== 429)).toBe(true);
+      expect(perIp[5]).toBe(429);
+      const perAccount: number[] = [];
+      for (let i = 0; i < 6; i++)
+        perAccount.push((await signUp("same@example.test", `198.51.100.${i}`)).status);
+      expect(perAccount.slice(0, 5).every((s) => s !== 429)).toBe(true);
+      expect(perAccount[5]).toBe(429);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("records the resolved client IP on the session, ignoring a forged internal header", async () => {
+    const { POST } = await import("@/app/api/auth/[...all]/route");
+    const { session } = await import("@/db/schema");
+    const customer = await createUser();
+    const res = await POST(
+      authRequest(
+        "/sign-in/email",
+        { email: customer.actor.email, password: "correct-horse-battery" },
+        { "X-Forwarded-For": "6.6.6.6, 203.0.113.7", "x-plainwill-client-ip": "6.6.6.7" },
+      ),
+    );
+    expect(res.status).toBe(200);
+    const rows = await db.select().from(session).where(eq(session.userId, customer.actor.userId));
+    expect(rows.map((r) => r.ipAddress)).toContain("203.0.113.7");
+    expect(rows.map((r) => r.ipAddress)).not.toContain("6.6.6.7");
+    expect(rows.map((r) => r.ipAddress)).not.toContain("6.6.6.6");
   });
 });
 

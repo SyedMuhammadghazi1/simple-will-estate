@@ -61,7 +61,8 @@ engineering-complete for a pilot, but **it has not had any legal review**.
       `PRODUCTION_DATABASE_URL`, `DEPLOY_HOOK_URL`; variables `NEXT_PUBLIC_APP_NAME`,
       `NEXT_PUBLIC_APP_URL`; branch protection on `main` requiring CI.
 - [ ] Scheduler for `/api/cron/signing-reminders` (daily).
-- [ ] `TRUST_PROXY=true` only if your load balancer overwrites `X-Forwarded-For`.
+- [ ] Client IP detection set for your host (`CLIENT_IP_HEADER` or `TRUSTED_PROXY_HOPS`, see
+      DEPLOYMENT.md "Client IP addresses") and checked: a new session/audit row shows your real IP.
 
 ## 4. Payments
 

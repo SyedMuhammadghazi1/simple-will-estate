@@ -15,11 +15,37 @@ documents, uploads) lives in Postgres, so you can run several instances behind a
 | `PAYMENTS_MODE=stripe`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Live keys only after launch checklist sign-off                                                    |
 | `CRON_SECRET`                                                        | ≥16 chars, used by the scheduler                                                                  |
 | `SMTP_*`, `EMAIL_FROM`, `SUPPORT_EMAIL`                              | Verified sending domain (SPF/DKIM/DMARC)                                                          |
-| `TRUST_PROXY=true`                                                   | When behind a load balancer that sets `X-Forwarded-For`                                           |
+| `CLIENT_IP_HEADER` or `TRUSTED_PROXY_HOPS`                           | Per host, see [Client IP addresses](#client-ip-addresses)                                         |
 
 The app refuses to start requests with an invalid configuration (e.g. `PAYMENTS_MODE=test-bypass`
 in production, missing Stripe or cron secrets). `SKIP_ENV_VALIDATION` only applies to `next build`;
 a production server ignores it, so it can never run on placeholder secrets.
+
+## Client IP addresses
+
+Rate limits, the audit log and sessions use the client IP from `src/lib/client-ip.ts`, which never
+trusts the leftmost `X-Forwarded-For` entry (the client can send any value there):
+
+- `CLIENT_IP_HEADER` — a single header your platform sets and clients cannot forge. When set,
+  only that header is read (first value).
+- Otherwise `TRUSTED_PROXY_HOPS` (default `1`) — the number of reverse proxies in front of the app
+  that **append** to `X-Forwarded-For`; the client IP is the entry that many positions from the
+  right. `0` never trusts the header.
+
+| Host                                                                      | Setting                              |
+| ------------------------------------------------------------------------- | ------------------------------------ |
+| Vercel                                                                    | `CLIENT_IP_HEADER=x-real-ip`         |
+| Fly.io                                                                    | `CLIENT_IP_HEADER=fly-client-ip`     |
+| Cloudflare in front of the app (origin only reachable through Cloudflare) | `CLIENT_IP_HEADER=cf-connecting-ip`  |
+| Render, Railway, Heroku, a single nginx / load balancer                   | `TRUSTED_PROXY_HOPS=1` (the default) |
+| Two appending proxies (e.g. CDN → load balancer)                          | `TRUSTED_PROXY_HOPS=2`               |
+| App port exposed directly, no proxy                                       | `TRUSTED_PROXY_HOPS=0`               |
+
+A wrong setting either lets clients pick their IP (too many hops / a forgeable header) or puts
+everyone behind one proxy address (too few). Check after deploying: sign in and confirm that the
+IP on your newest `audit_log` / `session` row is your own public address. When the IP is unknown
+(null), sign-in, sign-up and password-reset requests are still limited per account, and other
+auth requests share one generous bucket.
 
 ## Option A — Docker on any container host (Render, Fly.io, Railway, ECS, Kubernetes)
 

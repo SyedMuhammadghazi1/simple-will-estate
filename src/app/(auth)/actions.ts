@@ -8,8 +8,13 @@ import { safeNext } from "@/lib/safe-next";
 import { getAuth, MIN_PASSWORD_LENGTH } from "@/server/auth";
 import { isAppError } from "@/server/errors";
 import { errorInfo, logger } from "@/server/logger";
-import { enforceRateLimit, ipBucket, RATE_LIMITS } from "@/server/rate-limit";
-import { requestMeta } from "@/server/request";
+import {
+  authBuckets,
+  enforceRateLimit,
+  RATE_LIMITS,
+  type RateLimitRule,
+} from "@/server/rate-limit";
+import { authHeaders, clientIp } from "@/server/request";
 
 export interface AuthFormState {
   error?: string;
@@ -27,9 +32,14 @@ function fieldErrors(error: z.ZodError): Record<string, string> {
   return out;
 }
 
-async function enforceIpLimit(rule: (typeof RATE_LIMITS)[keyof typeof RATE_LIMITS]) {
-  const [bucketRule, key] = ipBucket(rule, requestMeta(await headers()).ip);
-  await enforceRateLimit(bucketRule, key);
+/** Per-IP limit, plus a per-account one for actions on an account (see authBuckets). */
+async function enforceAuthLimits(
+  ipRule: RateLimitRule,
+  account?: { rule: RateLimitRule; email: string },
+) {
+  for (const bucket of authBuckets(ipRule, clientIp(await headers()), account)) {
+    await enforceRateLimit(...bucket);
+  }
 }
 
 const signInSchema = z.object({
@@ -48,9 +58,11 @@ export async function signInAction(
   const values = { email: String(formData.get("email") ?? "") };
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error), values };
   try {
-    await enforceIpLimit(RATE_LIMITS.signIn);
-    await enforceRateLimit(RATE_LIMITS.signIn, `email:${parsed.data.email}`);
-    await getAuth().api.signInEmail({ body: parsed.data, headers: await headers() });
+    await enforceAuthLimits(RATE_LIMITS.signIn, {
+      rule: RATE_LIMITS.signIn,
+      email: parsed.data.email,
+    });
+    await getAuth().api.signInEmail({ body: parsed.data, headers: authHeaders(await headers()) });
   } catch (err) {
     if (isAppError(err)) return { error: err.message, values };
     if (err instanceof APIError) return { error: "Incorrect email or password.", values };
@@ -91,10 +103,13 @@ export async function signUpAction(
   const parsed = signUpSchema.safeParse(raw);
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error), values };
   try {
-    await enforceIpLimit(RATE_LIMITS.signUp);
+    await enforceAuthLimits(RATE_LIMITS.signUp, {
+      rule: RATE_LIMITS.signUp,
+      email: parsed.data.email,
+    });
     await getAuth().api.signUpEmail({
       body: { name: parsed.data.name, email: parsed.data.email, password: parsed.data.password },
-      headers: await headers(),
+      headers: authHeaders(await headers()),
     });
   } catch (err) {
     if (isAppError(err)) return { error: err.message, values };
@@ -114,7 +129,7 @@ export async function signUpAction(
 
 export async function signOutAction(): Promise<void> {
   try {
-    await getAuth().api.signOut({ headers: await headers() });
+    await getAuth().api.signOut({ headers: authHeaders(await headers()) });
   } catch (err) {
     logger.warn({ err: errorInfo(err) }, "sign-out failed");
   }
@@ -132,10 +147,13 @@ export async function forgotPasswordAction(
   const parsed = forgotSchema.safeParse({ email: formData.get("email") });
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
   try {
-    await enforceIpLimit(RATE_LIMITS.authOther);
+    await enforceAuthLimits(RATE_LIMITS.authOther, {
+      rule: RATE_LIMITS.passwordReset,
+      email: parsed.data.email,
+    });
     await getAuth().api.requestPasswordReset({
       body: { email: parsed.data.email, redirectTo: "/reset-password" },
-      headers: await headers(),
+      headers: authHeaders(await headers()),
     });
   } catch (err) {
     if (isAppError(err)) return { error: err.message };
@@ -170,10 +188,10 @@ export async function resetPasswordAction(
   });
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
   try {
-    await enforceIpLimit(RATE_LIMITS.authOther);
+    await enforceAuthLimits(RATE_LIMITS.authOther);
     await getAuth().api.resetPassword({
       body: { token: parsed.data.token, newPassword: parsed.data.password },
-      headers: await headers(),
+      headers: authHeaders(await headers()),
     });
   } catch (err) {
     if (isAppError(err)) return { error: err.message };

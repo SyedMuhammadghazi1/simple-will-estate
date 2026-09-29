@@ -46,6 +46,8 @@ services:
       SMTP_PORT: "1025"
       # test-bypass is refused in production images; use Stripe test keys instead.
       PAYMENTS_MODE: stripe
+      # Port published directly (no reverse proxy): never trust X-Forwarded-For.
+      TRUSTED_PROXY_HOPS: "0"
     ports:
       - "3001:3000"
     depends_on:

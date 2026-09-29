@@ -7,6 +7,7 @@ import * as schema from "@/db/schema";
 import { getEnv } from "@/env";
 import { passwordResetEmail } from "./emails";
 import { sendEmail } from "./mailer";
+import { AUTH_CLIENT_IP_HEADER } from "./request";
 
 export const MIN_PASSWORD_LENGTH = 10;
 
@@ -51,10 +52,14 @@ function createAuth() {
       expiresIn: 60 * 60 * 24 * 7,
       updateAge: 60 * 60 * 24,
     },
-    // Our own Postgres-backed limiter wraps the auth route (works across instances).
+    // Our own Postgres-backed limiter (per IP and per account, shared across instances) wraps
+    // the auth route and the auth server actions instead.
     rateLimit: { enabled: false },
     advanced: {
-      ipAddress: { ipAddressHeaders: env.TRUST_PROXY ? ["x-forwarded-for"] : [] },
+      // Better Auth records the client IP on new sessions. It reads it only from the internal
+      // header authHeaders() sets from the app's own resolution (CLIENT_IP_HEADER /
+      // TRUSTED_PROXY_HOPS), never from X-Forwarded-For; 128 keeps IPv6 addresses whole.
+      ipAddress: { ipAddressHeaders: [AUTH_CLIENT_IP_HEADER], ipv6Subnet: 128 },
     },
     telemetry: { enabled: false },
     plugins: [nextCookies()],

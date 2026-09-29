@@ -31,6 +31,33 @@ describe("env validation", () => {
     ).toThrow(/DATA_ENCRYPTION_KEY/);
   });
 
+  it("configures client IP resolution with a platform header or a proxy hop count", () => {
+    const defaults = parseServerEnv({ ...base });
+    expect(defaults.TRUSTED_PROXY_HOPS).toBe(1);
+    expect(defaults.CLIENT_IP_HEADER).toBeUndefined();
+    const env = parseServerEnv({
+      ...base,
+      CLIENT_IP_HEADER: " X-Real-IP ",
+      TRUSTED_PROXY_HOPS: "2",
+    });
+    expect(env.CLIENT_IP_HEADER).toBe("x-real-ip");
+    expect(env.TRUSTED_PROXY_HOPS).toBe(2);
+    expect(parseServerEnv({ ...base, TRUSTED_PROXY_HOPS: "0" }).TRUSTED_PROXY_HOPS).toBe(0);
+    expect(() => parseServerEnv({ ...base, TRUSTED_PROXY_HOPS: "-1" })).toThrow(
+      /TRUSTED_PROXY_HOPS/,
+    );
+    expect(() => parseServerEnv({ ...base, TRUSTED_PROXY_HOPS: "true" })).toThrow(
+      /TRUSTED_PROXY_HOPS/,
+    );
+    // The leftmost X-Forwarded-For entry is whatever the client sent.
+    expect(() => parseServerEnv({ ...base, CLIENT_IP_HEADER: "X-Forwarded-For" })).toThrow(
+      /CLIENT_IP_HEADER/,
+    );
+    expect(() => parseServerEnv({ ...base, CLIENT_IP_HEADER: "x-real-ip, fly-client-ip" })).toThrow(
+      /CLIENT_IP_HEADER/,
+    );
+  });
+
   it("forbids the payment bypass in production", () => {
     expect(() =>
       parseServerEnv({

@@ -19,6 +19,7 @@ export interface RateLimitRule {
 export const RATE_LIMITS = {
   signIn: { name: "auth:sign-in", limit: 10, windowSeconds: 60 },
   signUp: { name: "auth:sign-up", limit: 5, windowSeconds: 600 },
+  passwordReset: { name: "auth:password-reset", limit: 5, windowSeconds: 900 },
   authOther: { name: "auth:other", limit: 30, windowSeconds: 60 },
   draftSave: { name: "draft:save", limit: 180, windowSeconds: 60 },
   checkout: { name: "checkout", limit: 10, windowSeconds: 600 },
@@ -71,13 +72,39 @@ export async function hitRateLimit(
 }
 
 /**
- * Per-IP bucket. When the client IP is unknown (no trusted proxy header), all such requests share
- * one bucket, so its limit is scaled up to avoid locking everyone out — set TRUST_PROXY=true
- * behind a load balancer to get real per-IP limits.
+ * Per-IP bucket, or null when the client IP is unknown (see clientIp in ./request). Endpoints
+ * that act on an account (sign-in, sign-up, password reset) then rely on their per-account
+ * bucket alone: a shared "unknown IP" bucket would let one client lock everyone out.
  */
-export function ipBucket(rule: RateLimitRule, ip: string | null): [RateLimitRule, string] {
-  if (ip) return [rule, `ip:${ip}`];
-  return [{ ...rule, limit: rule.limit * 20 }, "ip:unknown"];
+export function ipBucket(rule: RateLimitRule, ip: string | null): [RateLimitRule, string] | null {
+  return ip ? [rule, `ip:${ip}`] : null;
+}
+
+/**
+ * For endpoints with no account to key on: per IP, or — when the IP is unknown — one bucket
+ * shared by all such requests, with its limit scaled up as a global backstop.
+ */
+export function ipOrSharedBucket(rule: RateLimitRule, ip: string | null): [RateLimitRule, string] {
+  return ipBucket(rule, ip) ?? [{ ...rule, limit: rule.limit * 20 }, "ip:unknown"];
+}
+
+/** Per-account bucket keyed by the normalized (trimmed, lower-case) email address. */
+export function accountBucket(rule: RateLimitRule, email: string): [RateLimitRule, string] {
+  return [rule, `email:${email.trim().toLowerCase()}`];
+}
+
+/**
+ * Buckets for an auth request: per IP (when known) and, when it acts on an account, per account
+ * — which is all that applies when the IP is unknown. Used by the auth route and server actions.
+ */
+export function authBuckets(
+  ipRule: RateLimitRule,
+  ip: string | null,
+  account?: { rule: RateLimitRule; email: string },
+): [RateLimitRule, string][] {
+  if (!account) return [ipOrSharedBucket(ipRule, ip)];
+  const perIp = ipBucket(ipRule, ip);
+  return [...(perIp ? [perIp] : []), accountBucket(account.rule, account.email)];
 }
 
 /** Throws RateLimitedError when the limit is exceeded. */

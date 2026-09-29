@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FORWARDED_FOR_HEADER } from "@/lib/client-ip";
 
 /**
  * Server-side environment validation.
@@ -34,7 +35,22 @@ export const serverEnvSchema = z
     /** Required in production; defaults to http://localhost:3001 otherwise (see transform). */
     APP_URL: z.string().url().optional(),
     BETTER_AUTH_SECRET: z.string().min(32, "must be at least 32 characters"),
-    TRUST_PROXY: booleanString,
+
+    /**
+     * Client IPs (rate limits, audit log, sessions) — see src/lib/client-ip.ts. Either a header
+     * the hosting platform sets and clients can't forge (e.g. x-real-ip on Vercel), used alone…
+     */
+    CLIENT_IP_HEADER: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .regex(/^[a-z0-9-]+$/, "must be a single header name, e.g. x-real-ip")
+      .refine((h) => h !== FORWARDED_FOR_HEADER, {
+        message: "clients can prepend to X-Forwarded-For; use TRUSTED_PROXY_HOPS for it instead",
+      })
+      .optional(),
+    /** …or the number of proxies in front of the app that append to X-Forwarded-For (0 = none). */
+    TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).max(10).default(1),
 
     DATA_ENCRYPTION_KEY: base64Key32,
     DATA_ENCRYPTION_KEY_ID: z

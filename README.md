@@ -125,7 +125,8 @@ Every variable is documented in [.env.example](.env.example). Summary:
 | `APP_URL`                                                                 | yes (prod) | Canonical base URL (auth, redirects, emails)                       |
 | `NEXT_PUBLIC_APP_NAME` / `NEXT_PUBLIC_APP_URL`                            | no         | Branding / public URL (build time)                                 |
 | `BETTER_AUTH_SECRET`                                                      | yes        | ≥32-char session signing secret                                    |
-| `TRUST_PROXY`                                                             | no         | Trust `X-Forwarded-For` for client IPs                             |
+| `CLIENT_IP_HEADER`                                                        | no         | Platform header holding the client IP (e.g. `x-real-ip`, Vercel)   |
+| `TRUSTED_PROXY_HOPS`                                                      | no         | Proxies appending to `X-Forwarded-For` (default 1, 0 = none)       |
 | `DATA_ENCRYPTION_KEY`                                                     | yes        | 32-byte base64 AES-256-GCM key                                     |
 | `DATA_ENCRYPTION_KEY_ID`                                                  | no         | Key id written into ciphertexts (default `k1`)                     |
 | `DATA_ENCRYPTION_PREVIOUS_KEYS`                                           | no         | `id:key,…` old keys for decryption after rotation                  |

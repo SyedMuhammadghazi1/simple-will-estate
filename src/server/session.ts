@@ -5,12 +5,12 @@ import type { UserRole } from "@/db/schema";
 import { normalizeRole, type Actor } from "./actor";
 import { getAuth } from "./auth";
 import { ForbiddenError, UnauthorizedError } from "./errors";
-import { requestMeta } from "./request";
+import { authHeaders, requestMeta } from "./request";
 
 export { isStaff, STAFF_ROLES, type Actor } from "./actor";
 
 export async function actorFromHeaders(h: Headers): Promise<Actor | null> {
-  const session = await getAuth().api.getSession({ headers: h });
+  const session = await getAuth().api.getSession({ headers: authHeaders(h) });
   if (!session) return null;
   const meta = requestMeta(h);
   const u = session.user as typeof session.user & { role?: unknown };

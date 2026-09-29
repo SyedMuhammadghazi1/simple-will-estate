@@ -22,7 +22,7 @@ src/
     documents/         document model, will + signing-instruction builders, PDF renderer
     states.ts          51-jurisdiction rules data (all unreviewed)
     order-status.ts    order state machine;  filing.ts  filing task rules
-    pricing.ts config.ts dates.ts crypto.ts file-type.ts
+    pricing.ts config.ts dates.ts crypto.ts file-type.ts client-ip.ts
   server/              I/O: auth, session guards, encryption keyring, rate limiter, audit, mailer, stripe
     services/          orders, wills, payments, documents, execution, filing, updates, admin, account
   jobs/                signing-reminders (idempotent)
@@ -135,7 +135,8 @@ for Unicode font embedding).
 
 See [SECURITY.md](../SECURITY.md). Highlights: owner-scoped queries returning 404 for foreign ids,
 staff PII views audited, encryption with row-bound AAD and key rotation, DB-level immutability for
-legal records, rate limits in Postgres, strict headers.
+legal records, rate limits in Postgres (per IP and per account; the client IP comes from
+`lib/client-ip.ts` only, see DEPLOYMENT.md), strict headers.
 
 ## Honest limitations
 
