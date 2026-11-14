@@ -16,7 +16,7 @@ export default defineConfig([
     },
   },
   {
-    files: ["scripts/**", "tests/**", "*.config.*"],
+    files: ["scripts/**", "tests/**", "*.config.*", "marketing/reel-kit/scripts/**"],
     rules: { "no-console": "off" },
   },
   globalIgnores([

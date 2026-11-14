@@ -16,7 +16,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: "unit",
-          include: ["src/**/*.test.ts"],
+          include: ["src/**/*.test.ts", "marketing/reel-kit/tests/**/*.test.mjs"],
         },
       },
       {

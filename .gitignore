@@ -26,3 +26,11 @@ npm-debug.log*
 *.log
 .DS_Store
 *.pem
+
+# reel kit: intermediate audio and per-build data (the final cut lives in reels/<slug>/export)
+marketing/reel-kit/out/
+marketing/reel-kit/reels/*/vo.wav
+marketing/reel-kit/reels/*/mix.wav
+marketing/reel-kit/reels/*/cues.json
+marketing/reel-kit/reels/*/timeline.resolved.json
+__pycache__/
