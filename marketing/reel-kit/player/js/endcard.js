@@ -17,15 +17,23 @@ const { W, H, tableY, mascot: M, SAFE } = LAYOUT;
 const NAVY_TOP = "#24456f";
 const NAVY_BOTTOM = "#142a45";
 
-export function buildEndcard(backLayer, frontLayer, spec, timeline) {
+export function buildEndcard(backLayer, frontLayer, spec, timeline, colors = {}) {
   if (!spec || !timeline.endcard) {
     return { update: () => null, sfx: () => [] };
   }
   const t0 = timeline.endcard.start;
+  // a theme can re-colour the card: { top, bottom, glow: "r,g,b", accent }
+  const C = {
+    top: NAVY_TOP,
+    bottom: NAVY_BOTTOM,
+    glow: "244,185,66",
+    accent: "#f4b942",
+    ...colors,
+  };
 
   const rise = h("div", {
-    style: `position:absolute;left:0;top:0;width:${W}px;height:${H}px;background:linear-gradient(${NAVY_TOP}, ${NAVY_BOTTOM});`,
-    html: `<div style="position:absolute;left:50%;top:380px;width:980px;height:980px;margin-left:-490px;border-radius:50%;background:radial-gradient(closest-side, rgba(244,185,66,0.20), rgba(244,185,66,0));" data-glow></div>`,
+    style: `position:absolute;left:0;top:0;width:${W}px;height:${H}px;background:linear-gradient(${C.top}, ${C.bottom});`,
+    html: `<div style="position:absolute;left:50%;top:380px;width:980px;height:980px;margin-left:-490px;border-radius:50%;background:radial-gradient(closest-side, rgba(${C.glow},0.20), rgba(${C.glow},0));" data-glow></div>`,
   });
   backLayer.appendChild(rise);
 
@@ -93,6 +101,7 @@ export function buildEndcard(backLayer, frontLayer, spec, timeline) {
   if (!spec.brand) brand.style.display = "none";
 
   const front = h("div", { id: "endcard" }, headline, pill, sub, brand, legal);
+  front.style.setProperty("--end-accent", C.accent);
   frontLayer.appendChild(front);
   const loopImg = h("img", { id: "loop-img", alt: "" });
   frontLayer.appendChild(loopImg);

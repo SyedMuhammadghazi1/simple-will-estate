@@ -119,6 +119,48 @@ const TABLE_SET_SVG = `
   </g>
 </svg>`;
 
+// Alternative table set for gaming and entertainment themes: two game cases and a gamepad. The
+// pad is a generic two-stick shape with plain dots for buttons (no console maker's markings).
+const GAMING_SET_SVG = `
+<svg class="layer" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
+  <g id="table-set" transform="translate(992 ${tableY}) scale(0.7) translate(-992 ${-tableY})">
+  <g id="cases">
+    <g transform="translate(748 ${tableY - 34})">
+      <rect x="6" y="6" width="236" height="34" rx="6" fill="#1d1420" opacity="0.25"/>
+      <rect x="0" y="0" width="236" height="34" rx="6" fill="#12877f" stroke="#1d1420" stroke-width="3.5"/>
+      <rect x="14" y="9" width="46" height="16" rx="3" fill="#fdf3ea" stroke="#1d1420" stroke-width="2.5"/>
+      <rect x="74" y="13" width="92" height="7" rx="3.5" fill="#fdf3ea" opacity="0.8"/>
+    </g>
+    <g transform="translate(770 ${tableY - 66})">
+      <rect x="0" y="0" width="200" height="32" rx="6" fill="#d6246e" stroke="#1d1420" stroke-width="3.5"/>
+      <rect x="14" y="8" width="42" height="16" rx="3" fill="#fdf3ea" stroke="#1d1420" stroke-width="2.5"/>
+      <rect x="70" y="12" width="78" height="7" rx="3.5" fill="#fdf3ea" opacity="0.8"/>
+    </g>
+  </g>
+  <g id="gamepad" transform="translate(880 ${tableY - 70}) rotate(-7)">
+    <path d="M-78 -100 H78 Q104 -100 107 -74 L117 -22 Q119 0 100 2 Q86 4 78 -10 L62 -38 H-62 L-78 -10 Q-86 4 -100 2 Q-119 0 -117 -22 L-107 -74 Q-104 -100 -78 -100 Z"
+      fill="#1d1420" opacity="0.22" transform="translate(7 7)"/>
+    <path d="M-78 -100 H78 Q104 -100 107 -74 L117 -22 Q119 0 100 2 Q86 4 78 -10 L62 -38 H-62 L-78 -10 Q-86 4 -100 2 Q-119 0 -117 -22 L-107 -74 Q-104 -100 -78 -100 Z"
+      fill="#fdf3ea" stroke="#1d1420" stroke-width="3.5" stroke-linejoin="round"/>
+    <g fill="#1d1420">
+      <rect x="-70" y="-72" width="30" height="10" rx="3"/>
+      <rect x="-60" y="-82" width="10" height="30" rx="3"/>
+    </g>
+    <circle cx="56" cy="-82" r="6.5" fill="#f6c445" stroke="#1d1420" stroke-width="2.5"/>
+    <circle cx="56" cy="-52" r="6.5" fill="#12877f" stroke="#1d1420" stroke-width="2.5"/>
+    <circle cx="41" cy="-67" r="6.5" fill="#d6246e" stroke="#1d1420" stroke-width="2.5"/>
+    <circle cx="71" cy="-67" r="6.5" fill="#8a5fd0" stroke="#1d1420" stroke-width="2.5"/>
+    <circle cx="-24" cy="-50" r="13" fill="#43206a" stroke="#1d1420" stroke-width="3"/>
+    <circle cx="24" cy="-50" r="13" fill="#43206a" stroke="#1d1420" stroke-width="3"/>
+    <circle cx="-24" cy="-52" r="6" fill="#8a5fd0"/>
+    <circle cx="24" cy="-52" r="6" fill="#8a5fd0"/>
+    <rect x="-12" y="-84" width="24" height="8" rx="4" fill="#1d1420" opacity="0.35"/>
+  </g>
+  </g>
+</svg>`;
+
+const TABLE_SETS = { desk: TABLE_SET_SVG, gaming: GAMING_SET_SVG };
+
 const TABLE_SVG = `
 <svg class="layer" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -152,7 +194,7 @@ export function buildStage(root, theme, { disclaimer = "" } = {}) {
   const back = layer(root, "l-back", backSvg(disclaimer ? esc(disclaimer.toUpperCase()) : ""));
   const dressing = layer(root, "l-dressing", PAD_DRESSING_SVG);
   const props = layer(root, "l-props");
-  const set = layer(root, "l-set", TABLE_SET_SVG);
+  const set = layer(root, "l-set", TABLE_SETS[theme.set ?? "desk"] ?? TABLE_SET_SVG);
   const table = layer(root, "l-table", TABLE_SVG);
   const endback = layer(root, "l-endback");
   const mascot = layer(root, "l-mascot");
@@ -174,6 +216,13 @@ export function buildStage(root, theme, { disclaimer = "" } = {}) {
     const hard = m >= 0.5 ? 1 : 0;
     for (const [name, pair] of Object.entries(theme.colors)) {
       root.style.setProperty(`--${name}`, mix(pair[0], pair[1], FLIP.has(name) ? hard : m));
+    }
+    // Mid-fade the wall passes through the unlit-word grey, so for those few frames the unlit
+    // words lean toward the ink colour and stay readable.
+    const mid = 1 - Math.abs(2 * m - 1);
+    if (mid > 0.001) {
+      const { ghost, ink } = theme.colors;
+      root.style.setProperty("--ghost", mix(ghost[hard], ink[hard], 0.7 * mid));
     }
     root.style.setProperty("--mood", m.toFixed(4));
     // Dressing is lit by the room: it sinks into the dark instead of being re-coloured.

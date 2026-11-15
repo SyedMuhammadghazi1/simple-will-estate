@@ -10,8 +10,13 @@ animates the scene, synthesises the sound design, and renders a 1080×1920 MP4 r
 
 - **How the format works and why** (the reverse-engineered design system):
   [docs/TEMPLATE-SPEC.md](docs/TEMPLATE-SPEC.md)
-- **The first reel made with it**: [`reels/plainwill-no-will/`](reels/plainwill-no-will)
-  (its caption, hashtags, comment-reply text and source list are in `POSTING-KIT.md` there)
+- **Reels made with it** (each folder has a `POSTING-KIT.md`: caption, hashtags, what to check
+  before posting, and a source for every claim):
+  - [`reels/plainwill-no-will/`](reels/plainwill-no-will): "No will? Your state already wrote
+    yours." (the `plainwill` theme)
+  - [`reels/gta6-launch-week/`](reels/gta6-launch-week): an unofficial GTA 6 launch-week
+    explainer (the `sunset` theme), which shows the kit on a subject that has nothing to do with
+    the first one
 
 ## Quick start
 
@@ -76,7 +81,8 @@ Create `reels/<slug>/reel.json`:
       "id": "hook",
       "caption": "You *already* have a will.", // *asterisks* mark accent words
       "prelit": 2, // words inked on the first frame, so the autoplay still reads as a phrase
-      // "captionWrap": "wrap"  fills line 1 instead of balancing the lines (two-sentence captions)
+      // "breakAfter": "will"   ends the first line after that word
+      // "captionWrap": "wrap"  fills line 1 instead of balancing the lines
       "prop": { "type": "doc-stamp", "enter": "none", "span": 3 /* stays for 3 beats */ },
       "mascot": [{ "at": 0, "face": "talk", "pose": "point" }],
     },
@@ -146,12 +152,17 @@ and every prop action moves with it.
 
 | Type           | Use it for                                                                        |
 | -------------- | --------------------------------------------------------------------------------- |
+| `calendar`     | a date on a desk-calendar page; earlier dates on slips get struck out             |
 | `doc-stamp`    | a document that gets authored, rubber-stamped and annotated                       |
+| `download`     | a status card with one button that a cursor clicks; it turns into a progress bar  |
+| `flip-clock`   | a digital clock that flips from one time to another on cue                        |
 | `formula-card` | belongings feeding an ordered list ("a rulebook decides"; an order, never shares) |
 | `gavel`        | someone else decides: gavel strikes on cue                                        |
+| `meter`        | a big number over a bar that fills; can re-measure it against a bigger whole      |
 | `pair`         | two people and a link that snaps, with the value that results                     |
+| `price-tags`   | two or three hanging price tags that drop in on cue                               |
 | `ratio-people` | "1 in 4" as avatars, with a source line                                           |
-| `checklist`    | three or four items ticked as they are spoken                                     |
+| `checklist`    | items ticked as they are spoken; an item can be a red cross (`no`) with a note    |
 | `sign-doc`     | a signature writing itself, then witnesses signing                                |
 | `timer`        | "this takes N minutes"                                                            |
 | `share-sheet`  | shows the exact share action a "send this to…" line asks for                      |
@@ -176,8 +187,17 @@ Add `"hop": 12` to a cue for a small jump. Faces with a `talk` weight lip-flap t
 ### Themes
 
 Colours are `[light, dark]` pairs in [`player/js/theme.js`](player/js/theme.js); the stage blends
-between them with the current mood. To re-skin for another brand, copy the `plainwill` theme and
-change the values. Layout numbers (safe zones, caption size, pad geometry) are in `LAYOUT`.
+between them with the current mood. Two themes ship: `plainwill` (cream, navy and gold, a desk
+with books and a photo) and `sunset` (peach, plum and magenta, a desk with game cases and a
+gamepad). To re-skin for another brand, copy one and change the values. A theme can also set the
+mascot's colours (`mascot`), the table set (`set`) and the follow card's colours (`endcard`).
+Layout numbers (safe zones, caption size, pad geometry) are in `LAYOUT`.
+
+**Other people's brands.** When a reel is about a product you do not own (a game, a film, a
+phone), use its name in plain text only: no logo, no lettering style, no screenshots, artwork or
+music from it. Say on screen that the reel is unofficial (the pad's binding strip and the end
+card are made for this), and keep the drawings generic: the `sunset` theme's gamepad, for
+example, carries no console maker's markings.
 
 ## What the validator checks
 

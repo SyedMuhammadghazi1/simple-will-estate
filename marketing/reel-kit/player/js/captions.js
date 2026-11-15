@@ -63,10 +63,15 @@ export function buildCaptions(layerEl, beats, { eyebrow = "" } = {}) {
     // A one- or two-letter word ("a", "to", "is") stays with the word after it, so it is never
     // stranded at the end of a line. The words are inline blocks, where a no-break space does
     // not hold, so such a run is wrapped in a nowrap group instead.
+    // "breakAfter": "gigs" (or a list of words) forces the line to end after that word, for a
+    // caption that reads best broken at a full stop the wrapping would not choose.
+    const plain = (s) => s.toLowerCase().replace(/[^a-z0-9$%]/g, "");
+    const breaks = new Set([beat.breakAfter ?? []].flat().map(plain));
     let group = null;
     const spans = beat.words.map((w, i) => {
       const last = i === beat.words.length - 1;
-      const short = !last && w.text.length <= 2 && !w.tail && !/[.,!?;:]$/.test(w.text);
+      const forced = !last && breaks.has(plain(w.text));
+      const short = !last && !forced && w.text.length <= 2 && !w.tail && !/[.,!?;:]$/.test(w.text);
       if (short && !group) {
         group = document.createElement("span");
         group.style.whiteSpace = "nowrap";
@@ -87,7 +92,10 @@ export function buildCaptions(layerEl, beats, { eyebrow = "" } = {}) {
       if (short) parent.appendChild(document.createTextNode(" "));
       else {
         group = null;
-        if (!last) block.appendChild(document.createTextNode(" "));
+        if (forced) {
+          breaks.delete(plain(w.text)); // only the first match breaks
+          block.appendChild(document.createElement("br"));
+        } else if (!last) block.appendChild(document.createTextNode(" "));
       }
       return span;
     });

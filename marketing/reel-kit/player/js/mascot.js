@@ -199,7 +199,16 @@ function blendFace(a, b, p) {
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-export function buildMascot(parent, { x, baseY, scale = 1 }) {
+export function buildMascot(parent, { x, baseY, scale = 1 }, palette = {}) {
+  // a theme can re-colour the mascot (body and ribbons); the face stays the same
+  const P = {
+    body: GOLD,
+    light: GOLD_LIGHT,
+    deep: GOLD_DEEP,
+    ribbon: NAVY,
+    ribbonDeep: NAVY_DEEP,
+    ...palette,
+  };
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("class", "layer");
   svg.setAttribute("viewBox", "0 0 1080 1920");
@@ -210,21 +219,21 @@ export function buildMascot(parent, { x, baseY, scale = 1 }) {
       <ellipse id="m-shadow" cx="0" cy="9" rx="104" ry="8" fill="#0b1626" opacity="0.5"/>
       <g id="m-body">
         <g id="m-ribbons" stroke="${INK}" stroke-width="5" stroke-linejoin="round">
-          <path id="m-rib-l" fill="${NAVY}"/>
-          <path id="m-rib-r" fill="${NAVY_DEEP}"/>
+          <path id="m-rib-l" fill="${P.ribbon}"/>
+          <path id="m-rib-r" fill="${P.ribbonDeep}"/>
         </g>
         <g id="m-arms" fill="none" stroke-linecap="round">
           <path id="m-arm-l-o" stroke="${INK}" stroke-width="21"/>
           <path id="m-arm-r-o" stroke="${INK}" stroke-width="21"/>
-          <path id="m-arm-l" stroke="${GOLD_DEEP}" stroke-width="12"/>
-          <path id="m-arm-r" stroke="${GOLD_DEEP}" stroke-width="12"/>
-          <circle id="m-hand-l" r="13" fill="${GOLD}" stroke="${INK}" stroke-width="4.5"/>
-          <circle id="m-hand-r" r="13" fill="${GOLD}" stroke="${INK}" stroke-width="4.5"/>
+          <path id="m-arm-l" stroke="${P.deep}" stroke-width="12"/>
+          <path id="m-arm-r" stroke="${P.deep}" stroke-width="12"/>
+          <circle id="m-hand-l" r="13" fill="${P.body}" stroke="${INK}" stroke-width="4.5"/>
+          <circle id="m-hand-r" r="13" fill="${P.body}" stroke="${INK}" stroke-width="4.5"/>
         </g>
-        <path d="${scallop()}" fill="${GOLD_DEEP}" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>
-        <circle cx="0" cy="${CY}" r="96" fill="${GOLD}" stroke="${INK}" stroke-opacity="0.2" stroke-width="3"/>
-        <circle cx="0" cy="${CY}" r="85" fill="none" stroke="${GOLD_DEEP}" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round"/>
-        <path d="M-66 ${CY - 44} A80 80 0 0 1 -14 ${CY - 78}" fill="none" stroke="${GOLD_LIGHT}" stroke-width="9" stroke-linecap="round"/>
+        <path d="${scallop()}" fill="${P.deep}" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>
+        <circle cx="0" cy="${CY}" r="96" fill="${P.body}" stroke="${INK}" stroke-opacity="0.2" stroke-width="3"/>
+        <circle cx="0" cy="${CY}" r="85" fill="none" stroke="${P.deep}" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round"/>
+        <path d="M-66 ${CY - 44} A80 80 0 0 1 -14 ${CY - 78}" fill="none" stroke="${P.light}" stroke-width="9" stroke-linecap="round"/>
         <circle cx="-62" cy="${CY + 22}" r="13" fill="#f08a5d" opacity="0.42"/>
         <circle cx="62" cy="${CY + 22}" r="13" fill="#f08a5d" opacity="0.42"/>
         <g id="m-face">

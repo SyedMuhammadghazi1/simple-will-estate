@@ -1,7 +1,9 @@
 // A short list whose items are ticked off on cue — one per spoken item. Keep it to three or
 // four rows: it has to be readable in the time it takes to say them.
 //
-// spec: { title, kicker, items: [{ text, at }], w, stamp: { text, at, color } }
+// spec: { title, kicker, items: [{ text, at, no, sub }], w, stamp: { text, at, color } }
+// An item with `no: true` gets a red cross instead of a green tick; `sub` is a short note set
+// at the right of the row ("not announced").
 
 import { clamp, ease, lerp, prog, settle } from "../timing.js";
 import { box, esc, h } from "./_util.js";
@@ -27,16 +29,19 @@ const prop = {
         style: `display:flex;align-items:center;gap:20px;height:88px;border-top:3px solid var(--cardAlt)`,
         html: `<div style="position:relative;width:52px;height:52px;flex:none">
                  <div style="position:absolute;inset:0;border:3.5px solid var(--line);border-radius:14px;background:var(--card)"></div>
-                 <div data-fill style="position:absolute;inset:0;border:3.5px solid var(--line);border-radius:14px;background:var(--green);opacity:0"></div>
-                 <svg viewBox="0 0 52 52" width="52" height="52" style="position:absolute;inset:0;overflow:visible"><path data-tick d="M13 27 L23 37 L40 16" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="46" stroke-dashoffset="46"/></svg>
+                 <div data-fill style="position:absolute;inset:0;border:3.5px solid var(--line);border-radius:14px;background:${it.no ? "var(--red)" : "var(--green)"};opacity:0"></div>
+                 <svg viewBox="0 0 52 52" width="52" height="52" style="position:absolute;inset:0;overflow:visible"><path data-tick d="${it.no ? "M15 15 L37 37 M37 15 L15 37" : "M13 27 L23 37 L40 16"}" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="${it.no ? 64 : 46}" stroke-dashoffset="${it.no ? 64 : 46}"/></svg>
                </div>
-               <div style="font:650 35px var(--font-ui);color:var(--ink);white-space:nowrap"><span class="mono" style="font-size:22px;color:var(--muted);margin-right:12px">${i + 1}</span>${esc(it.text)}</div>`,
+               <div style="font:650 35px var(--font-ui);color:var(--ink);white-space:nowrap"><span class="mono" style="font-size:22px;color:var(--muted);margin-right:12px">${i + 1}</span>${esc(it.text)}</div>
+               ${it.sub ? `<div data-sub class="mono" style="margin-left:auto;font-size:23px;letter-spacing:0.06em;color:${it.no ? "var(--red)" : "var(--muted)"};white-space:nowrap;opacity:0">${esc(it.sub)}</div>` : ""}`,
       });
       wrap.appendChild(row);
       return {
         row,
         fill: row.querySelector("[data-fill]"),
         tick: row.querySelector("[data-tick]"),
+        sub: row.querySelector("[data-sub]"),
+        len: it.no ? 64 : 46,
       };
     });
     const stamp = h(
@@ -61,14 +66,15 @@ const prop = {
       state.stamp.style.opacity = clamp(prog(t, at - land, at - land * 0.4)).toFixed(3);
       state.stamp.style.transform = `rotate(7deg) scale(${(lerp(2.4, 1, p) + wobble).toFixed(4)})`;
     }
-    state.rows.forEach(({ row, fill, tick }, i) => {
+    state.rows.forEach(({ row, fill, tick, sub, len }, i) => {
       const at = ctx.at(items[i].at ?? 0.4 + i * 0.5);
       const p = ease.outCubic(prog(t, at, at + 0.2));
       fill.style.opacity = p.toFixed(3);
       tick.setAttribute(
         "stroke-dashoffset",
-        (46 * (1 - ease.outCubic(prog(t, at + 0.04, at + 0.24)))).toFixed(2),
+        (len * (1 - ease.outCubic(prog(t, at + 0.04, at + 0.24)))).toFixed(2),
       );
+      if (sub) sub.style.opacity = ease.outCubic(prog(t, at + 0.1, at + 0.3)).toFixed(3);
       const pop = settle(t - at, 18);
       const prevAt = i > 0 ? ctx.at(items[i - 1].at ?? 0.4 + (i - 1) * 0.5) : -1;
       const waiting = t < at && t >= prevAt; // the box the voice has not reached yet
@@ -80,12 +86,11 @@ const prop = {
   },
 
   sfx(spec, ctx) {
-    const cues = (spec.items ?? []).map((it, i) => ({
-      t: ctx.at(it.at ?? 0.4 + i * 0.5),
-      name: "tick",
-      pitch: 0.9 + i * 0.14,
-      gain: 1.3,
-    }));
+    const cues = (spec.items ?? []).map((it, i) =>
+      it.no
+        ? { t: ctx.at(it.at ?? 0.4 + i * 0.5), name: "buzz", gain: 0.8 }
+        : { t: ctx.at(it.at ?? 0.4 + i * 0.5), name: "tick", pitch: 0.9 + i * 0.14, gain: 1.3 },
+    );
     if (spec.stamp) cues.push({ t: ctx.at(spec.stamp.at ?? "end-0.8"), name: "stamp", gain: 0.8 });
     return cues;
   },

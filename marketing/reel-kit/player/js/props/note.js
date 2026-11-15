@@ -3,14 +3,17 @@
 // ("* only clip streamers who allow it") — keeping the caveat on screen is part of the format.
 //
 // spec: { text, w }   Use "\n" for more lines. Usually combined with enter: "pop" and a
-// `delay` cue so it appears on the word it qualifies.
+// `delay` cue so it appears on the word it qualifies. The chip is as wide as its longest line
+// needs (the type is monospaced, so that is known); `w` can only make it wider.
 
 import { box, esc, h } from "./_util.js";
 
 const prop = {
   build(el, spec) {
     const lines = String(spec.text ?? "").split("\n");
-    const w = spec.w ?? 430;
+    // 27px DM Mono advances 16.2px per character; 36px of padding and 5px of border
+    const need = Math.ceil(Math.max(...lines.map((l) => l.length)) * 16.2 + 42);
+    const w = Math.max(spec.w ?? 0, need);
     box(el, w, 30 + lines.length * 36);
     el.appendChild(
       h("div", {

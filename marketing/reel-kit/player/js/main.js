@@ -140,7 +140,7 @@ async function boot() {
   });
 
   // ---- mascot ------------------------------------------------------------------------------
-  const mascot = buildMascot(layers.mascot, LAYOUT.mascot);
+  const mascot = buildMascot(layers.mascot, LAYOUT.mascot, theme.mascot);
   // One pose per beat, swapped on the cut with a small hop; extra cues inside a beat (reacting
   // to a word) change the face without hopping unless they ask to.
   const cues = [];
@@ -161,7 +161,7 @@ async function boot() {
       cues.push(cue);
     }
   }
-  const endcard = buildEndcard(layers.endback, layers.overlay, reel.endcard, tl);
+  const endcard = buildEndcard(layers.endback, layers.overlay, reel.endcard, tl, theme.endcard);
   if (tl.endcard) {
     const said = tl.endcard.words;
     if (said.length) {

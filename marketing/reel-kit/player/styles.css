@@ -215,7 +215,7 @@ body {
   font-variation-settings:
     "SOFT" 80,
     "WONK" 1;
-  color: #f4b942;
+  color: var(--end-accent, #f4b942);
 }
 #endcard .legal {
   position: absolute;

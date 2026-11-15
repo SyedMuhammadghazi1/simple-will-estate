@@ -63,6 +63,7 @@ const NOT_COPY = new Set([
   "delay",
   "about",
   "captionWrap",
+  "breakAfter",
 ]);
 
 /** Every cue inside a prop spec: values under `at`, `delay`, `*At`, and the entries of `hits`. */
