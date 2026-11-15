@@ -2,18 +2,19 @@
 // "the fine print" without competing with the caption. The reference reel does the same thing
 // ("* only clip streamers who allow it") — keeping the caveat on screen is part of the format.
 //
-// spec: { text, at, w }   Use "\n" for a second line. Usually combined with enter: "pop".
+// spec: { text, w }   Use "\n" for more lines. Usually combined with enter: "pop" and a
+// `delay` cue so it appears on the word it qualifies.
 
 import { box, esc, h } from "./_util.js";
 
 const prop = {
   build(el, spec) {
     const lines = String(spec.text ?? "").split("\n");
-    const w = spec.w ?? 380;
-    box(el, w, 30 + lines.length * 30);
+    const w = spec.w ?? 430;
+    box(el, w, 30 + lines.length * 36);
     el.appendChild(
       h("div", {
-        style: `position:absolute;inset:0;padding:14px 18px;background:var(--card);border:2.5px solid var(--line);border-radius:10px;font:400 21px/30px var(--font-mono);letter-spacing:0.02em;color:var(--ink);white-space:nowrap;box-shadow:5px 6px 0 var(--shadow)`,
+        style: `position:absolute;inset:0;padding:14px 18px 16px;background:var(--card);border:2.5px solid var(--line);border-radius:10px;font:500 27px/36px var(--font-mono);letter-spacing:0;color:var(--ink);white-space:pre;box-shadow:5px 6px 0 var(--shadow)`,
         html: lines.map((l) => esc(l)).join("<br>"),
       }),
     );

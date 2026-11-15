@@ -18,18 +18,22 @@ export function star(size = 30, fill = "var(--gold)") {
 }
 
 /** Head-and-shoulders avatar in a circle. */
+let personId = 0;
+
 export function person(
   size = 96,
   color = "var(--navy)",
   { bg = "var(--navySoft)", ring = true } = {},
 ) {
+  // every call gets its own clip id: two props drawing the same avatar must not share one
+  const id = `person-clip-${++personId}`;
   return svg(
     size,
     size,
     "0 0 100 100",
-    `<defs><clipPath id="pc-${size}-${color.replace(/[^a-z0-9]/gi, "")}"><circle cx="50" cy="50" r="46"/></clipPath></defs>
+    `<defs><clipPath id="${id}"><circle cx="50" cy="50" r="46"/></clipPath></defs>
      <circle cx="50" cy="50" r="46" fill="${bg}"/>
-     <g clip-path="url(#pc-${size}-${color.replace(/[^a-z0-9]/gi, "")})" stroke="${INK}" stroke-width="3.2">
+     <g clip-path="url(#${id})" stroke="${INK}" stroke-width="3.2">
        <circle cx="50" cy="40" r="17" fill="${color}"/>
        <path d="M17 100 v-12 a33 30 0 0 1 66 0 v12 Z" fill="${color}"/>
      </g>

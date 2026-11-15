@@ -15,6 +15,7 @@ const CY = -168; // body centre above the table line
 const R_OUT = 116;
 const R_IN = 104;
 const LOBES = 16;
+const HOP_DUR = 1 / 3;
 
 function scallop() {
   const step = (Math.PI * 2) / LOBES;
@@ -110,6 +111,19 @@ export const FACES = {
     mw: 15,
     mo: 0.08,
     mc: -0.3,
+    talk: 0.7,
+  },
+  // heavy-lidded and flat: the reference's pose for its one dark beat (serious, not scolding)
+  deadpan: {
+    look: [0.45, 0.05],
+    blink: 0.4,
+    happy: 0,
+    eye: 0.96,
+    browY: 3,
+    browTilt: 0.12,
+    mw: 14,
+    mo: 0.05,
+    mc: -0.08,
     talk: 0.7,
   },
   think: {
@@ -304,11 +318,22 @@ export function buildMascot(parent, { x, baseY, scale = 1 }) {
     const a = POSES[prev.pose] ?? POSES.rest;
     const b = POSES[cur.pose] ?? POSES.rest;
     const pp = ease.outBack(prog(t, cur.t, cur.t + dur * 1.5), 2.2);
+    // the hop belongs to whichever cue last asked for one, not to the current face
+    let hop = 0;
+    let hopAge = Infinity;
+    for (let k = i; k >= 0 && t - cues[k].t < HOP_DUR; k--) {
+      if (cues[k].hop) {
+        hop = cues[k].hop;
+        hopAge = t - cues[k].t;
+        break;
+      }
+    }
     return {
       face,
       arms: [lerp(a[0], b[0], pp), lerp(a[1], b[1], pp)],
       since: t - cur.t,
-      hop: cur.hop ?? 0,
+      hop,
+      hopAge,
     };
   }
 
@@ -319,18 +344,24 @@ export function buildMascot(parent, { x, baseY, scale = 1 }) {
    * @param place  optional { x, baseY, scale, opacity } override (the end card moves the mascot)
    */
   function update(t, cues, voice = 0, place = {}) {
-    const { face, arms, since, hop } = resolve(t, cues);
+    const { face, arms, since, hop, hopAge } = resolve(t, cues);
 
     // idle life: slow bob, breathing, periodic blink
-    const bob = Math.sin((t * Math.PI * 2) / 2.6) * 4;
+    const bob = Math.sin((t * Math.PI * 2) / 2.2) * 7;
     const breathe = Math.sin((t * Math.PI * 2) / 2.6 + 1.1) * 0.012;
-    const blinkPhase = (t + 1.3) % 3.4;
-    const autoBlink = blinkPhase < 0.16 ? Math.sin((blinkPhase / 0.16) * Math.PI) : 0;
+    // a three-frame blink on a fixed 97-frame timer, as measured
+    const blinkPhase = (t + 1.3) % (97 / 30);
+    const autoBlink = blinkPhase < 0.1 ? Math.sin((blinkPhase / 0.1) * Math.PI) : 0;
 
-    // a little squash-and-stretch pop every time the expression changes
-    const pop = since >= 0 && since < 0.7 ? Math.exp(-7 * since) * Math.sin(since * 26) * 0.07 : 0;
     // five frames up, five down, as measured
-    const hopY = hop && since >= 0 && since < 1 / 3 ? -Math.sin(since * 3 * Math.PI) * hop : 0;
+    const hopY = hop && hopAge < HOP_DUR ? -Math.sin((hopAge / HOP_DUR) * Math.PI) * hop : 0;
+    // squash on LANDING (a few px, decaying); a smaller settle when only the face changes
+    const landed = hop ? hopAge - HOP_DUR : -1;
+    const squash =
+      landed >= 0 && landed < 0.4 ? -Math.exp(-11 * landed) * Math.cos(landed * 24) * 0.05 : 0;
+    const settleFace =
+      !hop && since >= 0 && since < 0.5 ? Math.exp(-9 * since) * Math.sin(since * 26) * 0.035 : 0;
+    const pop = squash + settleFace;
     const sy = 1 + breathe + pop;
     const sx = 1 - (breathe + pop) * 0.7;
     const lift = bob + hopY;

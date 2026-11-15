@@ -6,13 +6,16 @@
 //  - the caption cut ("swap frame") is the master clock of a beat;
 //  - the outgoing prop leaves during the four frames BEFORE the swap: straight left at a
 //    constant speed, blurring more each frame, still opaque, and is gone on the swap frame;
-//  - the incoming prop starts ON the swap frame, already most of a screen away, and settles like
-//    a critically damped spring: fast, no overshoot, no bounce, about half a second to rest,
-//    with a few degrees of extra tilt and its motion blur decaying on the same curve;
-//  - old and new props are never on screen together, and the pad is never empty for more than
-//    the swap frame itself.
+//  - the incoming prop arrives from the frame edge and settles like a critically damped spring:
+//    fast, no overshoot, no bounce, about half a second to rest, with a few degrees of extra
+//    tilt and its motion blur decaying on the same curve;
+//  - the pad is never empty for more than the swap frame itself.
+//
+// One deliberate difference: the player starts a travelling prop two frames BEFORE the swap
+// (main.js), so its first pixels are already on screen on the cut. For those two frames the new
+// prop is entering at the right edge while the old one is clearing the left.
 
-import { clamp, ease, lerp, prog, settle } from "./timing.js";
+import { blurPop, clamp, ease, lerp, prog, settle } from "./timing.js";
 
 export const FPS = 30;
 export const ENTER_DUR = 0.5;
@@ -23,6 +26,7 @@ const TRAVEL = 760; // fallback distance an entering prop starts from (see spec.
 const EXIT_SPEED = 180 * FPS; // px per second: 180 px per frame at 1080 wide
 const EXIT_BLUR = 4.5 * FPS; // blur gained per second: 4.5 px per frame
 const OMEGA = 15; // spring stiffness; ~90% settled in 8 frames
+const EPS = 1e-6;
 
 const ENTERS = {
   // the default: slide in from a side, tilted, straightening as it lands
@@ -33,7 +37,7 @@ const ENTERS = {
   // rise from behind the table
   rise: (p) => ({ dy: p.left * 520, blur: p.left * 10 }),
   // "blur-pop" for secondary elements: grows in place from ~half size, sharpening, no overshoot
-  pop: (p) => ({ scale: lerp(0.5, 1, p.pop), opacity: p.pop, blur: (1 - p.pop) * 14 }),
+  pop: (p) => ({ scale: p.pop.scale, opacity: p.pop.opacity, blur: p.pop.blur }),
   // a physical hit: arrives big and fast from the camera side
   stamp: (p) => ({ scale: lerp(2.2, 1, p.hard), opacity: clamp(p.t * 6), rot: (1 - p.hard) * 9 }),
   // full-width elements fade in place over five frames
@@ -62,9 +66,10 @@ const EXITS = {
  */
 export function propPose(spec, t, tIn, tOut) {
   const enterDur = spec.enterDur ?? ENTER_DUR;
-  const local = t - tIn;
-  // a hair of tolerance so float error never shows a prop for an extra frame after the swap
-  const visible = local >= 0 && t < tOut + EXIT_DUR - 1e-4;
+  // a hair of tolerance at both ends, so float error never shows a prop a frame late on its
+  // arrival or for an extra frame after the swap
+  const visible = t - tIn >= -EPS && t < tOut + EXIT_DUR - 1e-4;
+  const local = Math.max(0, t - tIn);
   if (!visible) return { visible: false };
 
   const tn = prog(local, 0, enterDur);
@@ -73,14 +78,14 @@ export function propPose(spec, t, tIn, tOut) {
     t: tn,
     left: 1 - s, // share of the journey still to go
     travel: spec.travel ?? TRAVEL,
-    pop: ease.outCubic(prog(local, 0, 10 / FPS)),
+    pop: blurPop(local),
     hard: ease.outExpo(prog(local, 0, enterDur * 0.45)),
     fade: prog(local, 0, 5 / FPS),
   });
 
   let exit = {};
-  if (t >= tOut) {
-    const dt = t - tOut;
+  if (t >= tOut - EPS) {
+    const dt = Math.max(0, t - tOut);
     // the first exit frame has already moved one step, as in the reference
     exit = (EXITS[spec.exit ?? "left"] ?? EXITS.left)({
       dist: (dt + 1 / FPS) * EXIT_SPEED,

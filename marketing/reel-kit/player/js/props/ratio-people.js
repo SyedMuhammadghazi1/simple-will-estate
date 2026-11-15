@@ -10,7 +10,7 @@ import { box, esc, h } from "./_util.js";
 const prop = {
   build(el, spec) {
     const total = spec.total ?? 4;
-    box(el, 660, 400);
+    box(el, 660, 384);
     const card = h("div", {
       class: "card",
       style: "position:absolute;inset:0;padding:26px 30px;",
@@ -19,7 +19,7 @@ const prop = {
                <div class="serif" style="font-size:46px;font-style:italic;font-weight:600;color:var(--accent)">${esc(spec.label ?? "")}</div>
              </div>
              <div data-row style="display:flex;gap:${total > 5 ? 10 : 20}px;margin-top:26px"></div>
-             <div class="mono" style="position:absolute;right:28px;bottom:18px;font-size:17px;letter-spacing:0.08em;color:var(--muted)">${esc(spec.source ?? "")}</div>`,
+             <div style="position:absolute;left:32px;bottom:18px;font:600 26px var(--font-ui);color:var(--ink);opacity:0.82;white-space:nowrap">${esc(spec.source ?? "")}</div>`,
     });
     const row = card.querySelector("[data-row]");
     const size = Math.min(132, Math.floor((600 - (total - 1) * (total > 5 ? 10 : 20)) / total));

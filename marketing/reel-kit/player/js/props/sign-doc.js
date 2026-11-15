@@ -21,12 +21,12 @@ const prop = {
     const sheet = h("div", {
       style:
         "position:absolute;left:0;top:0;width:392px;height:440px;background:var(--card);border:3.5px solid var(--line);border-radius:16px;box-shadow:10px 11px 0 var(--shadow);padding:26px 30px;transform:rotate(-2.5deg)",
-      html: `<div class="mono" style="font-size:18px;color:var(--muted)">${esc(spec.subtitle ?? "")}</div>
+      html: `<div class="mono" style="font-size:21px;color:var(--muted)">${esc(spec.subtitle ?? "")}</div>
         <div class="serif" style="font-size:50px;line-height:1.05;font-weight:640;color:var(--ink);margin-top:6px">${esc(spec.title ?? "")}</div>
         ${[96, 88, 93, 60].map((p) => `<div style="height:10px;width:${p}%;margin-top:15px;border-radius:5px;background:var(--line);opacity:0.15"></div>`).join("")}
         <div style="position:absolute;left:30px;right:30px;bottom:34px">
           <svg viewBox="0 0 240 64" width="250" height="66" style="overflow:visible;display:block"><path data-sig d="${SIG_MAIN}" fill="none" stroke="var(--navy)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <div style="border-top:3.5px solid var(--line);margin-top:2px;padding-top:7px" class="mono"><span style="font-size:17px;color:var(--muted)">${esc(spec.signer ?? "")}</span></div>
+          <div style="border-top:3.5px solid var(--line);margin-top:2px;padding-top:7px" class="mono"><span style="font-size:21px;color:var(--muted)">${esc(spec.signer ?? "")}</span></div>
         </div>`,
     });
     const sig = sheet.querySelector("[data-sig]");
@@ -37,7 +37,7 @@ const prop = {
         style: `width:204px;height:150px;margin-bottom:22px;padding:14px 16px;transform:rotate(${i % 2 ? -3 : 3}deg);opacity:0;box-shadow:7px 8px 0 var(--shadow)`,
         html: `<div style="display:flex;align-items:center;gap:10px">
                  <div style="width:46px;height:46px">${person(46, i % 2 ? "var(--amber)" : "var(--green)", { bg: "var(--cardAlt)" })}</div>
-                 <div class="mono" style="font-size:17px;color:var(--ink)">${esc(w.label ?? `witness ${i + 1}`)}</div>
+                 <div class="mono" style="font-size:19px;letter-spacing:0.04em;color:var(--ink);white-space:nowrap">${esc(w.label ?? `witness ${i + 1}`)}</div>
                </div>
                <svg viewBox="0 0 124 40" width="160" height="50" style="overflow:visible;display:block;margin-top:6px"><path data-w d="${SIG_W[i % 2]}" fill="none" stroke="var(--navy)" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                <div style="border-top:3px solid var(--line);margin-top:0"></div>`,

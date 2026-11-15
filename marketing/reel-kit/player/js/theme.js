@@ -29,10 +29,9 @@ export const THEMES = {
       padShadow: ["#d9cdb8", "#070f1b"],
       // text
       ink: ["#1c1917", "#f6efe0"],
-      ghost: ["#bdb6ab", "#4a5a74"],
+      ghost: ["#a69e93", "#4a5a74"],
       accent: ["#b45309", "#f4b942"],
-      accentGhost: ["#e3bf9c", "#6b5a38"],
-      eyebrow: ["#6b7a5e", "#8ea0bd"],
+      eyebrow: ["#55634a", "#8ea0bd"],
       // prop palette (props read these so they follow the mood too)
       line: ["#1c1917", "#f6efe0"],
       card: ["#ffffff", "#1b2f4b"],
@@ -69,7 +68,7 @@ export const LAYOUT = {
   captionSize: 68,
   captionLine: 86,
   // the pad runs 28px below the table line so its bottom corners hide behind the table
-  pad: { x: 90, y: 712, w: 900, h: 654, r: 26, binding: 50 },
+  pad: { x: 90, y: 712, w: 900, h: 654, r: 26, binding: 60 },
   tableY: 1338,
   mascot: { x: 212, baseY: 1340 },
 };

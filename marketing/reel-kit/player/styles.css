@@ -199,8 +199,8 @@ body {
   text-align: center;
   font-family: var(--font-caption);
   font-weight: 560;
-  font-size: 74px;
-  line-height: 90px;
+  font-size: 70px;
+  line-height: 84px;
   letter-spacing: -0.012em;
   font-variation-settings:
     "SOFT" 60,
@@ -218,14 +218,14 @@ body {
 }
 #endcard .legal {
   position: absolute;
-  left: 110px;
-  width: 860px;
+  left: 90px;
+  width: 900px;
   text-align: center;
   font-family: var(--font-ui);
   font-weight: 500;
-  font-size: 25px;
-  line-height: 33px;
-  color: rgba(246, 239, 224, 0.8);
+  font-size: 27px;
+  line-height: 35px;
+  color: rgba(246, 239, 224, 0.88);
   text-wrap: balance;
 }
 #loop-img {

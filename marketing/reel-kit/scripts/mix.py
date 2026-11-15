@@ -10,7 +10,7 @@ license and the mix is reproducible. Add an effect by writing a function and reg
 SFX; trigger it from reel.json ("sfx": [{ "at": "w:judge", "name": "gavel" }]) or from a prop's
 sfx() hook.
 
-  python marketing/reel-kit/scripts/mix.py --reel plainwill-guardian
+  python marketing/reel-kit/scripts/mix.py --reel plainwill-no-will
 """
 
 from __future__ import annotations
@@ -227,14 +227,18 @@ def sub(seed=17, dur=1.1, **_):
     body = sweep_sine(74, 40, dur) * np.minimum(1, t / 0.012) * np.exp(-t / 0.42)
     rumble = one_pole_lp(noise(len(t), seed), 160) * np.exp(-t / 0.3) * 1.6
     hit = one_pole_lp(noise(len(t), seed + 1), 900) * env_exp(dur, 0.02) * 0.8
-    return (body + rumble + hit) * 0.9
+    # 150-400 Hz thump: the part of the hit that survives a phone speaker
+    thump = (sweep_sine(360, 150, dur) + 0.5 * sweep_sine(720, 300, dur)) * env_exp(dur, 0.06, attack=0.001) * 0.7
+    return (body + rumble + hit + thump) * 0.9
 
 
 def cut(seed=20, **_):
     """The soft low swell under every caption cut: felt on headphones, invisible on a phone speaker."""
     dur = 0.6
     t = np.linspace(0, 1, int(dur * SR))
-    body = one_pole_lp(noise(len(t), seed), 70) * 6.0 + np.sin(2 * np.pi * 46 * t * dur) * 0.6
+    # fixed seed and a two-pole low-pass: the same sample on every cut, nothing above ~80 Hz
+    rumble = one_pole_lp(one_pole_lp(noise(len(t), 20), 70), 70) * 14.0
+    body = rumble + np.sin(2 * np.pi * 46 * t * dur) * 0.6
     return body * t**1.6 * np.minimum(1, (1 - t) / 0.04) * 0.5
 
 
@@ -263,9 +267,9 @@ def sparkle(seed=19, **_):
 
 
 SFX = {
-    "whoosh-in": (whoosh_in, 0.5),
-    "whoosh-out": (whoosh_out, 0.42),
-    "pop": (pop, 0.6),
+    "whoosh-in": (whoosh_in, 0.3),
+    "whoosh-out": (whoosh_out, 0.26),
+    "pop": (pop, 0.4),
     "tick": (tick, 0.55),
     "key": (key, 0.5),
     "click": (click, 0.55),
@@ -273,16 +277,16 @@ SFX = {
     "chime": (chime, 0.5),
     "sparkle": (sparkle, 0.45),
     "counter": (counter, 0.5),
-    "thud": (thud, 0.75),
-    "stamp": (stamp, 0.8),
-    "gavel": (gavel, 0.75),
+    "thud": (thud, 0.5),
+    "stamp": (stamp, 0.5),
+    "gavel": (gavel, 0.5),
     "paper": (paper, 0.55),
     "scribble": (scribble, 0.55),
     "coin": (coin, 0.5),
     "buzz": (buzz, 0.5),
     "swell": (swell, 0.55),
     "sub": (sub, 0.85),
-    "cut": (cut, 0.5),
+    "cut": (cut, 0.28),
     "drone": (drone, 0.45),
 }
 
@@ -310,12 +314,12 @@ def epiano(note: int, dur: float, vel: float = 1.0) -> np.ndarray:
     t = t_axis(dur)
     f = midi(note)
     tine = np.sin(2 * np.pi * f * 14 * t) * np.exp(-t / 0.05) * 0.35  # short bell-like bite
-    tone = np.sin(2 * np.pi * f * t + tine) + 0.22 * np.sin(2 * np.pi * 2 * f * t) * np.exp(-t / 0.6)
+    tone = np.sin(2 * np.pi * f * t + tine) + 0.5 * np.sin(2 * np.pi * 2 * f * t) * np.exp(-t / 0.7)
     trem = 1 + 0.07 * np.sin(2 * np.pi * 4.3 * t)
     return tone * np.minimum(1, t / 0.006) * np.exp(-t / 1.35) * trem * vel
 
 
-def music_bed(n: int, until: float, seed: int = 7) -> np.ndarray:
+def music_bed(n: int, until: float, seed: int = 7, fade: float | None = None) -> np.ndarray:
     beat = 60 / BPM
     bar = beat * 4
     out = np.zeros(n)
@@ -338,9 +342,9 @@ def music_bed(n: int, until: float, seed: int = 7) -> np.ndarray:
         add(np.sin(2 * np.pi * midi(bass) * tb) * np.minimum(1, tb / 0.012) * np.exp(-tb / 1.1) * 0.55, t0)
         for kick_at in (0.0, beat * 2):
             add(sweep_sine(92, 44, 0.2) * env_exp(0.2, 0.06) * 0.5, t0 + kick_at)
-    out = one_pole_lp(out, 1700)
-    # one-bar fade so the bed is gone exactly where the ask begins
-    fade_len = int(min(bar, until) * SR)
+    out = one_pole_lp(out, 3000)
+    # one-bar fade so the bed is gone exactly where the ask begins (or a short one into the loop)
+    fade_len = int(min(bar if fade is None else fade, until) * SR)
     end = int(until * SR)
     env = np.ones(n)
     env[max(0, end - fade_len) : end] = np.linspace(1, 0, min(fade_len, end)) ** 1.5
@@ -378,7 +382,7 @@ def main() -> int:
             "-y", "-i", str(reel_dir / "vo.wav"), "-ar", str(SR), "-ac", "1",
             "-af",
             "highpass=f=75,acompressor=threshold=-22dB:ratio=3:attack=4:release=90:makeup=3,"
-            "equalizer=f=3200:t=q:w=1.1:g=2,equalizer=f=220:t=q:w=1:g=-1.5,alimiter=limit=0.9",
+            "equalizer=f=3200:t=q:w=1.1:g=2,equalizer=f=220:t=q:w=1:g=-1.5,alimiter=limit=0.9:latency=1",
             str(vo48),
         )
         vo, _ = sf.read(vo48, dtype="float64")
@@ -388,12 +392,21 @@ def main() -> int:
         left = voice * 0.707
         right = voice * 0.707
 
+        # "music": false (or null) turns the bed off; true or a missing key means the defaults
         music_cfg = reel.get("music", {})
-        if not args.no_music and music_cfg is not False and music_cfg.get("enabled", True):
+        if music_cfg is True:
+            music_cfg = {}
+        if not args.no_music and isinstance(music_cfg, dict) and music_cfg.get("enabled", True):
             beats = timeline["beats"]
             stop_id = music_cfg.get("until")
-            stop = next((b["start"] for b in beats if b["id"] == stop_id), beats[-1]["start"])
-            bed = music_bed(n, stop)
+            if stop_id == "end":
+                # under a spoken end card too, fading out through the closing dissolve
+                bed = music_bed(n, duration, fade=1.0)
+            else:
+                if stop_id is not None and stop_id not in {b["id"] for b in beats}:
+                    raise SystemExit(f'music.until "{stop_id}" is not a beat id (or "end")')
+                stop = next((b["start"] for b in beats if b["id"] == stop_id), beats[-1]["start"])
+                bed = music_bed(n, stop)
             # dip the bed under dark beats so the low hit owns the bottom end
             duck = np.ones(n)
             for b in beats:
@@ -417,8 +430,11 @@ def main() -> int:
             kwargs = {k: cue[k] for k in ("dur", "pitch") if k in cue}
             sound = fn(seed=101 + i * 7, **kwargs) * base * cue.get("gain", 1.0) * args.sfx_gain
             at = int(round(cue["t"] * SR))
-            if at >= n or at < 0:
+            if at >= n:
                 continue
+            if at < 0:  # starts before the reel: keep the part that is inside it
+                sound = sound[-at:]
+                at = 0
             sound = sound[: n - at]
             pan = float(np.clip(cue.get("pan", 0.0), -1, 1))
             left[at : at + len(sound)] += sound * (0.5 - pan * 0.28)
@@ -427,9 +443,14 @@ def main() -> int:
             print(f"warning: no such effect(s): {', '.join(sorted(unknown))}")
 
         stereo = np.stack([left, right], axis=1)
+        # tame the few low hits that tower over everything else, then leave ~6 dB of headroom:
+        # with that, the gain to reach the loudness target is a plain (linear) level change
+        stereo = np.tanh(stereo * 1.6) / 1.6
         peak = float(np.max(np.abs(stereo))) or 1.0
-        if peak > 0.97:
-            stereo *= 0.97 / peak
+        stereo *= 0.5 / peak
+        # no click at the loop point
+        fade = int(0.03 * SR)
+        stereo[-fade:] *= np.linspace(1, 0, fade)[:, None]
         premix = tmp / "premix.wav"
         sf.write(premix, stereo, SR, subtype="PCM_24")
 
@@ -437,13 +458,18 @@ def main() -> int:
         target = f"loudnorm=I={args.lufs}:TP=-1.0:LRA=7"
         report = ffmpeg("-i", str(premix), "-af", f"{target}:print_format=json", "-f", "null", "-")
         m = json.loads(re.search(r"\{[^{}]*\"input_i\"[^{}]*\}", report, re.S).group(0))
-        ffmpeg(
+        if "inf" in str(m["input_i"]):
+            raise SystemExit("the mix is silent: is vo.wav empty? Re-run the voice step.")
+        second = ffmpeg(
             "-y", "-i", str(premix),
             "-af",
             f"{target}:measured_I={m['input_i']}:measured_TP={m['input_tp']}:measured_LRA={m['input_lra']}"
-            f":measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true",
+            f":measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true:print_format=json",
             "-ar", str(SR), "-c:a", "pcm_s16le", str(reel_dir / "mix.wav"),
         )
+        mode = re.search(r'"normalization_type"\s*:\s*"(\w+)"', second)
+        if mode and mode.group(1) != "linear":
+            print("warning: loudness normalisation fell back to dynamic mode (peaks too close to the target)")
     check = ffmpeg("-i", str(reel_dir / "mix.wav"), "-af", "loudnorm=print_format=summary", "-f", "null", "-")
     lines = [ln.strip() for ln in check.splitlines() if ln.startswith(("Input Integrated", "Input True Peak", "Input LRA"))]
     print(f"mix.wav: {duration:.2f}s, {len(cues)} effect cues | " + " | ".join(lines))

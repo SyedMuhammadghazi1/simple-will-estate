@@ -7,6 +7,9 @@ import { clamp, mix } from "./timing.js";
 
 const { W, H, pad: PAD, tableY } = LAYOUT;
 
+// tokens used for text and outlines (see setMood)
+const FLIP = new Set(["ink", "ghost", "accent", "eyebrow", "line", "muted", "amber"]);
+
 function rules() {
   const lines = [];
   const first = PAD.y + PAD.binding + 58;
@@ -21,8 +24,9 @@ function rules() {
 /** The pad's binding strip. With fine print it doubles as the always-on disclosure line. */
 function binding(fineprint) {
   if (fineprint) {
-    // starts clear of the paperclip; sized so ~52 characters span the strip
-    return `<text id="pad-fineprint" x="${PAD.x + 138}" y="${PAD.y + 33}" font-family="DM Mono, monospace" font-weight="500" font-size="20" letter-spacing="2" fill="#f6efe0" fill-opacity="0.94" textLength="${PAD.w - 138 - 34}" lengthAdjust="spacing">${fineprint}</text>`;
+    // 28px, the size the reference sets its own footnotes in: fine print nobody can read on a
+    // phone does not count as a disclosure. Starts clear of the paperclip.
+    return `<text id="pad-fineprint" x="${PAD.x + 132}" y="${PAD.y + 41}" font-family="DM Mono, monospace" font-weight="500" font-size="28" fill="#f6efe0" textLength="${PAD.w - 132 - 36}" lengthAdjust="spacing">${fineprint}</text>`;
   }
   const out = [];
   for (let x = PAD.x + 40; x < PAD.x + PAD.w - 30; x += 44) {
@@ -65,7 +69,8 @@ const backSvg = (fineprint) => `
   </g>
 </svg>`;
 
-// Pad dressing (under the props): a paperclip and a "sign here" flag.
+// Pad dressing (under the props): a paperclip. Keep this layer sparse: props are staged over
+// it, and anything here that pokes out from behind a prop reads as part of that prop.
 const PAD_DRESSING_SVG = `
 <svg class="layer" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
   <g id="clip" transform="translate(${PAD.x + 62} ${PAD.y - 30}) rotate(7)">
@@ -73,13 +78,6 @@ const PAD_DRESSING_SVG = `
       fill="none" stroke="#1c1917" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M0 20 V92 a17 17 0 0 0 34 0 V14 a12 12 0 0 0 -24 0 V84 a5.5 5.5 0 0 0 11 0 V26"
       fill="none" stroke="#c9d1da" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
-  <g id="flag" transform="translate(${PAD.x + PAD.w - 8} ${PAD.y + 150})">
-    <g id="flag-inner">
-      <path d="M-34 -24 H52 a8 8 0 0 1 8 8 V16 a8 8 0 0 1 -8 8 H-34 L-58 0 Z" fill="#1c1917" transform="translate(5 6)"/>
-      <path d="M-34 -24 H52 a8 8 0 0 1 8 8 V16 a8 8 0 0 1 -8 8 H-34 L-58 0 Z" fill="#f4b942" stroke="#1c1917" stroke-width="3.5" stroke-linejoin="round"/>
-      <text x="8" y="6" text-anchor="middle" font-family="DM Mono, monospace" font-weight="500" font-size="17" letter-spacing="1.5" fill="#1c1917">SIGN</text>
-    </g>
   </g>
 </svg>`;
 
@@ -165,15 +163,17 @@ export function buildStage(root, theme, { disclaimer = "" } = {}) {
   root.style.setProperty("--font-ui", theme.fonts.ui);
   root.style.setProperty("--font-mono", theme.fonts.mono);
 
-  const flag = dressing.querySelector("#flag-inner");
   let lastMood = -1;
 
   function setMood(d) {
     const m = clamp(d);
     if (Math.abs(m - lastMood) < 0.0005) return;
     lastMood = m;
+    // Surfaces fade; text and outlines flip at the midpoint. If they faded too, ink would pass
+    // through the same grey as the wall and the caption would vanish for a frame mid-fade.
+    const hard = m >= 0.5 ? 1 : 0;
     for (const [name, pair] of Object.entries(theme.colors)) {
-      root.style.setProperty(`--${name}`, mix(pair[0], pair[1], m));
+      root.style.setProperty(`--${name}`, mix(pair[0], pair[1], FLIP.has(name) ? hard : m));
     }
     root.style.setProperty("--mood", m.toFixed(4));
     // Dressing is lit by the room: it sinks into the dark instead of being re-coloured.
@@ -182,12 +182,8 @@ export function buildStage(root, theme, { disclaimer = "" } = {}) {
     set.style.filter = dim;
   }
 
-  /** `flagWiggle` is 0..1 — used to draw the eye to the pad when a beat lands. */
-  function update(t, { mood = 0, flagWiggle = 0 } = {}) {
+  function update(t, { mood = 0 } = {}) {
     setMood(mood);
-    const idle = Math.sin(t * 1.7) * 1.2;
-    const wig = Math.sin(t * 26) * 9 * flagWiggle;
-    flag.setAttribute("transform", `rotate(${(idle + wig).toFixed(2)} 60 0)`);
   }
 
   setMood(0);

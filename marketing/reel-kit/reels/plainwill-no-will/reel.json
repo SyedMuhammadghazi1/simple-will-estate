@@ -1,0 +1,521 @@
+{
+  "id": "plainwill-no-will",
+  "theme": "plainwill",
+  "fps": 30,
+  "eyebrow": "Plainwill · not a law firm",
+  "disclaimer": "Not legal advice · Laws vary by state",
+  "voice": {
+    "engine": "kokoro",
+    "voice": "af_heart",
+    "speed": 0.96,
+    "lead": 0.1,
+    "gap": 0.24
+  },
+  "music": {
+    "until": "end"
+  },
+  "lint": {
+    "require": [
+      {
+        "field": "disclaimer",
+        "includes": ["not legal advice", "laws vary by state"]
+      },
+      {
+        "field": "eyebrow",
+        "includes": ["not a law firm"]
+      },
+      {
+        "field": "endcard.disclaimer",
+        "includes": ["not a law firm", "substitute for the advice of an attorney"]
+      }
+    ],
+    "banned": [
+      "guarantee",
+      "legally valid",
+      "/\\bvalid\\b/",
+      "court-proof",
+      "ironclad",
+      "attorney-approved",
+      "lawyer-approved",
+      "approved",
+      "certified",
+      "official",
+      "in effect",
+      "reviewed",
+      "backed",
+      "drafted by",
+      "minutes",
+      "avoid probate",
+      "skip court",
+      "takes everything",
+      "takes your",
+      "foster",
+      "all 50 states",
+      "nationwide",
+      "risk-free",
+      "money-back",
+      "hidden fees",
+      "cheapest",
+      "/\\bfree\\b/",
+      "/\\$[1-9]/",
+      "100%",
+      "start your will",
+      "available now",
+      "file your will",
+      "files it",
+      "need a lawyer",
+      "replaces a lawyer",
+      "e-sign",
+      "notar",
+      "no witnesses",
+      "trusted by",
+      "/\\brated\\b/",
+      "bank-level",
+      "too late",
+      "lock in"
+    ]
+  },
+  "variants": {
+    "list": {
+      "about": "Comment-keyword end card: the viewer comments LIST and is sent the checklist.",
+      "endcard": {
+        "keyword": "LIST",
+        "sub": "Comment it. I'll send the one-page checklist."
+      }
+    },
+    "ask-no-will": {
+      "about": "The ask hands straight back into the hook.",
+      "beats": {
+        "ask": {
+          "caption": "Send this to someone with *no will.*",
+          "prop": {
+            "pickAt": "w:someone"
+          },
+          "mascot": [
+            {
+              "at": 0,
+              "face": "smile",
+              "pose": "point"
+            },
+            {
+              "at": "w:will",
+              "face": "happy",
+              "pose": "wave"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "beats": [
+    {
+      "id": "hook",
+      "caption": "No will? Your state *already* wrote *yours.*",
+      "props": [
+        {
+          "type": "doc-stamp",
+          "span": 2,
+          "x": 690,
+          "y": 1022,
+          "rot": 3,
+          "scale": 0.9,
+          "enter": "none",
+          "subtitle": "Last will of",
+          "title": "You.",
+          "bylineLabel": "Written by:",
+          "byline": "your state",
+          "typeAt": "w:state",
+          "stamp": "Default",
+          "stampAt": "w:yours",
+          "chip": "opened: never",
+          "chipAt": "w:never"
+        },
+        {
+          "type": "note",
+          "span": 2,
+          "x": 272,
+          "y": 872,
+          "rot": -3,
+          "w": 316,
+          "enter": "pop",
+          "delay": "w:wrote",
+          "text": "* your state's\n  default rules\n  (intestacy law)"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "talk",
+          "pose": "shrug"
+        },
+        {
+          "at": "w:your",
+          "face": "talk",
+          "pose": "point"
+        },
+        {
+          "at": "w:yours",
+          "face": "shock",
+          "pose": "gasp"
+        }
+      ],
+      "prelit": 2
+    },
+    {
+      "id": "twist",
+      "caption": "You've probably *never read* it.",
+      "mascot": [
+        {
+          "at": 0,
+          "face": "worried",
+          "pose": "shrug"
+        }
+      ]
+    },
+    {
+      "id": "order",
+      "caption": "It *ranks* who gets your stuff. Yes, *that sibling* too.",
+      "props": [
+        {
+          "type": "formula-card",
+          "x": 664,
+          "y": 1004,
+          "rot": -2,
+          "title": "Typical order",
+          "items": ["car", "savings", "pet"],
+          "rows": [
+            {
+              "label": "Spouse & kids"
+            },
+            {
+              "label": "Parents"
+            },
+            {
+              "label": "Siblings"
+            },
+            {
+              "label": "Other relatives"
+            }
+          ],
+          "rowsAt": "w:ranks",
+          "highlight": {
+            "row": 2,
+            "at": "w:sibling"
+          },
+          "tag": "not your call",
+          "tagAt": "w:yes"
+        },
+        {
+          "type": "note",
+          "x": 690,
+          "y": 1197,
+          "rot": -1,
+          "w": 300,
+          "enter": "pop",
+          "delay": 0.4,
+          "text": "* order + shares\n  vary by state"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "look",
+          "pose": "rest"
+        },
+        {
+          "at": "w:sibling",
+          "face": "think",
+          "pose": "chin"
+        }
+      ]
+    },
+    {
+      "id": "partner",
+      "caption": "Not married? Your partner usually gets *nothing.*",
+      "props": [
+        {
+          "type": "pair",
+          "x": 652,
+          "y": 976,
+          "scale": 1.02,
+          "left": {
+            "label": "you"
+          },
+          "right": {
+            "label": "your partner",
+            "color": "var(--amber)"
+          },
+          "breakAt": "w:usually",
+          "valueLabel": "no will,\nmost states",
+          "value": "$0",
+          "valueAt": "w:nothing",
+          "tag": "not married",
+          "tagAt": 0.2
+        },
+        {
+          "type": "note",
+          "x": 546,
+          "y": 1176,
+          "rot": 1,
+          "w": 380,
+          "enter": "pop",
+          "delay": 0.3,
+          "text": "* joint accounts +\n  named beneficiaries\n  pass separately"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "worried",
+          "pose": "rest"
+        },
+        {
+          "at": "w:nothing",
+          "face": "shock",
+          "pose": "chin"
+        }
+      ],
+      "gap": 0.5
+    },
+    {
+      "id": "kids",
+      "caption": "Kids? If *no parent* is left, a *judge* decides.",
+      "props": [
+        {
+          "type": "gavel",
+          "span": 2,
+          "x": 656,
+          "y": 965,
+          "scale": 0.94,
+          "title": "Guardianship hearing",
+          "lines": ["Raised by:", "a judge decides"],
+          "hits": ["w:judge"],
+          "answers": [
+            {
+              "text": "usually a relative",
+              "at": "w:relative"
+            }
+          ],
+          "tag": "maybe not your pick",
+          "tagAt": "w:maybe",
+          "tagColor": "var(--gold)"
+        },
+        {
+          "type": "note",
+          "span": 2,
+          "x": 592,
+          "y": 1197,
+          "rot": -1,
+          "w": 430,
+          "enter": "pop",
+          "delay": "w:no",
+          "text": "* a surviving parent\n  normally keeps custody"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "worried",
+          "pose": "rest"
+        },
+        {
+          "at": "w:judge",
+          "face": "worried",
+          "pose": "chin"
+        }
+      ]
+    },
+    {
+      "id": "relative",
+      "caption": "Usually a *relative.* Maybe not *your pick.*",
+      "mascot": [
+        {
+          "at": 0,
+          "face": "worried",
+          "pose": "rest"
+        }
+      ]
+    },
+    {
+      "id": "turn",
+      "caption": "You can *replace* it. A will is where *you* decide.",
+      "prop": {
+        "type": "doc-stamp",
+        "x": 690,
+        "y": 1022,
+        "rot": -2,
+        "scale": 0.9,
+        "subtitle": "Last will of",
+        "title": "You.",
+        "bylineLabel": "Written by:",
+        "byline": "you",
+        "typeAt": "w:where",
+        "stamp": "Your call",
+        "stampAt": "w:decide+0.2",
+        "stampColor": "var(--green)",
+        "stampRot": 9,
+        "bylineFrom": "your state",
+        "eraseAt": "w:replace"
+      },
+      "mascot": [
+        {
+          "at": 0,
+          "face": "smile",
+          "pose": "pointUp"
+        },
+        {
+          "at": "w:a",
+          "face": "think",
+          "pose": "chin"
+        },
+        {
+          "at": "w:decide",
+          "face": "happy",
+          "pose": "cheer",
+          "hop": 30
+        }
+      ]
+    },
+    {
+      "id": "how",
+      "caption": "Who gets *what.* Who you'd *name* for kids. Who's in *charge.*",
+      "props": [
+        {
+          "type": "checklist",
+          "x": 674,
+          "y": 968,
+          "rot": -2,
+          "w": 640,
+          "title": "You decide",
+          "kicker": "the core of a will",
+          "items": [
+            {
+              "text": "Who gets what",
+              "at": "w:what"
+            },
+            {
+              "text": "Who you'd name for kids",
+              "at": "w:kids"
+            },
+            {
+              "text": "Who's in charge",
+              "at": "w:charge"
+            }
+          ],
+          "scale": 0.94
+        },
+        {
+          "type": "note",
+          "x": 596,
+          "y": 1190,
+          "rot": 1,
+          "w": 436,
+          "enter": "pop",
+          "delay": 0.3,
+          "text": "* you name your choice;\n  a court may still OK it"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "talk",
+          "pose": "point"
+        },
+        {
+          "at": "w:charge",
+          "face": "proud",
+          "pose": "rest"
+        }
+      ]
+    },
+    {
+      "id": "dark",
+      "mood": "dark",
+      "gap": 0.5,
+      "caption": "Unsigned? The state's version is *still yours.*",
+      "mascot": [
+        {
+          "at": 0,
+          "face": "deadpan",
+          "pose": "rest",
+          "hop": 0
+        }
+      ],
+      "props": [
+        {
+          "type": "doc-stamp",
+          "x": 690,
+          "y": 1022,
+          "rot": -3,
+          "scale": 0.9,
+          "enter": "pop",
+          "exit": "fade",
+          "subtitle": "Last will of",
+          "title": "You.",
+          "bylineLabel": "Written by:",
+          "byline": "your state",
+          "typeAt": -1,
+          "stamp": "Still yours",
+          "stampAt": "w:still",
+          "chip": "your will: unsigned",
+          "chipAt": "w:unsigned+0.2",
+          "chipX": 41
+        },
+        {
+          "type": "note",
+          "x": 276,
+          "y": 884,
+          "rot": -3,
+          "w": 322,
+          "enter": "pop",
+          "delay": "w:the",
+          "text": "* most states:\n  signed by you\n  + 2 witnesses"
+        }
+      ]
+    },
+    {
+      "id": "ask",
+      "caption": "Send this to the person you'd *actually pick.*",
+      "prop": {
+        "type": "share-sheet",
+        "x": 676,
+        "y": 992,
+        "scale": 1.02,
+        "title": "Send to",
+        "people": [
+          {
+            "label": "Sister"
+          },
+          {
+            "label": "Your person"
+          },
+          {
+            "label": "Best friend"
+          }
+        ],
+        "pick": 1,
+        "pickAt": "w:person"
+      },
+      "mascot": [
+        {
+          "at": 0,
+          "face": "smile",
+          "pose": "point"
+        },
+        {
+          "at": "w:pick",
+          "face": "happy",
+          "pose": "wave"
+        }
+      ]
+    }
+  ],
+  "endcard": {
+    "headline": "Follow for the rules\nnobody reads,\n*in plain English*",
+    "say": "Follow for the rules nobody reads, in plain English.",
+    "sub": "Want the one-page checklist? See the caption.",
+    "brand": "plainwill",
+    "disclaimer": "Plainwill is not a law firm and is not a substitute for the advice of an attorney.",
+    "hold": 4.4
+  }
+}

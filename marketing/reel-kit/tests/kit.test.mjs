@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import { parseCaption, plainCaption } from "../player/js/captions.js";
 import { propPose } from "../player/js/motion.js";
-import { buildTimeline, resolveAt } from "../player/js/timeline.js";
+import { buildTimeline, cueMatches, resolveAt } from "../player/js/timeline.js";
 import {
   blurPop,
   clamp,
@@ -19,7 +19,8 @@ import {
   spring,
 } from "../player/js/timing.js";
 import { toSrt } from "../scripts/build.mjs";
-import { validateReel } from "../scripts/validate.mjs";
+import { bannedIn, fencedBlocks, validateReel } from "../scripts/validate.mjs";
+import { applyVariant, spokenText, variantNames } from "../scripts/variant.mjs";
 
 const KIT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -29,6 +30,7 @@ const reel = (beats, extra = {}) => ({
   endcard: { headline: "Follow", keyword: "WORD" },
   ...extra,
 });
+const word = (t0) => ({ t0, t1: t0 + 0.2 });
 const beat = (id, caption, extra = {}) => ({
   id,
   caption,
@@ -195,9 +197,110 @@ describe("timeline", () => {
     expect(() => resolveAt("w:nope", a)).toThrow(/does not match/);
   });
 
+  it("picks a later occurrence of a repeated word, and reports ambiguous cues", () => {
+    const tl = buildTimeline(reel([beat("a", "You can replace it where *you* decide.")]));
+    const [a] = tl.beats;
+    expect(resolveAt("w:you", a)).toBeCloseTo(a.words[0].t0);
+    expect(resolveAt("w:you#2", a)).toBeCloseTo(a.words[5].t0);
+    expect(resolveAt("w:you#2+0.1", a)).toBeCloseTo(a.words[5].t0 + 0.1);
+    expect(() => resolveAt("w:you#3", a)).toThrow(/does not match/);
+    expect(cueMatches("w:you", [a])).toBe(2);
+    expect(cueMatches("w:you#2", [a])).toBe(1);
+    expect(cueMatches("w:replace", [a])).toBe(1);
+    expect(cueMatches(0.4, [a])).toBe(1);
+    expect(() => resolveAt("beat:1", a, [a])).toThrow(/points past/);
+  });
+
+  it("resolves words that look like offsets or indexes as words", () => {
+    const tl = buildTimeline(reel([beat("a", "Only 2 in 3 said *covid-19* was over.")]));
+    const [a] = tl.beats;
+    expect(resolveAt("w:covid-19", a)).toBeCloseTo(a.words[5].t0);
+    expect(resolveAt("w:covid-19+0.5", a)).toBeCloseTo(a.words[5].t0 + 0.5);
+    expect(resolveAt("w:2", a)).toBeCloseTo(a.words[1].t0); // the word "2", not index 2
+    expect(resolveAt("i:2", a)).toBeCloseTo(a.words[2].t0);
+    expect(resolveAt("w:6", a)).toBeCloseTo(a.words[6].t0); // no word "6": falls back to index
+    expect(cueMatches("w:covid-19", [a])).toBe(1);
+  });
+
+  it("snaps cuts to frames and rejects timings whose wording no longer matches", () => {
+    const one = reel([beat("a", "One two *three.*")]);
+    const timing = (text) => ({
+      beats: [
+        {
+          text,
+          start: 0,
+          end: 1.9667, // a 4-decimal rounding of 59/30
+          words: [
+            { t0: 0.1, t1: 0.3 },
+            { t0: 0.4, t1: 0.6 },
+            { t0: 0.9, t1: 1.4 },
+          ],
+        },
+      ],
+    });
+    const tl = buildTimeline(one, timing("One two three."));
+    expect(tl.beats[0].end).toBe(59 / 30);
+    expect(tl.endcard.start).toBe(59 / 30);
+    // same word count, different words: still stale
+    expect(() => buildTimeline(one, timing("One two four."))).toThrow(/stale/);
+  });
+
   it("writes one subtitle per beat", () => {
     const srt = toSrt(buildTimeline(r));
     expect(srt).toMatch(/^1\n00:00:00,000 --> 00:00:0\d,\d{3}\nOne two three\.\n\n2\n/);
+  });
+
+  it("every cut of every beat lands exactly on a frame", () => {
+    const tl = buildTimeline(r, {
+      beats: [
+        { text: "One two three.", start: 0, end: 1.2333, words: [0.1, 0.4, 0.8].map(word) },
+        {
+          text: "Four five six seven.",
+          start: 1.2333,
+          end: 3.0667,
+          words: [1.3, 1.7, 2.1, 2.5].map(word),
+        },
+      ],
+    });
+    for (const t of [...tl.beats.flatMap((b) => [b.start, b.end]), tl.endcard.end, tl.loop.start]) {
+      expect(Math.abs(t * tl.fps - Math.round(t * tl.fps))).toBeLessThan(1e-9);
+    }
+  });
+
+  it("times a spoken end card like a beat and never ends the card before the line", () => {
+    const spoken = reel([beat("a", "One two *three.*")], {
+      endcard: { headline: "Follow for *more*", say: "Follow for more.", hold: 1 },
+    });
+    const est = buildTimeline(spoken);
+    expect(est.endcard.words).toHaveLength(3);
+    expect(est.endcard.words[0].t0).toBeGreaterThan(est.endcard.start);
+    expect(est.endcard.end).toBeGreaterThanOrEqual(est.endcard.words[2].t1 + 0.85);
+    expect(est.duration).toBe(est.endcard.end);
+
+    const timing = (text) => ({
+      beats: [{ text: "One two three.", start: 0, end: 2, words: [0.1, 0.5, 0.9].map(word) }],
+      endcard: { text, words: [2.3, 2.6, 3.0].map(word) },
+    });
+    const tl = buildTimeline(spoken, timing("Follow for more."));
+    expect(tl.endcard.words.map((w) => w.t0)).toEqual([2.3, 2.6, 3.0]);
+    expect(tl.endcard.end).toBeCloseTo(3.2 + 0.9, 1);
+    // the line was reworded, or the voice was made before the line existed
+    expect(() => buildTimeline(spoken, timing("Follow for less."))).toThrow(
+      /stale for the end card/,
+    );
+    expect(() => buildTimeline(spoken, { beats: timing("").beats })).toThrow(
+      /stale for the end card/,
+    );
+    // an unspoken end card has no words and keeps its hold
+    expect(buildTimeline(r).endcard.words).toEqual([]);
+  });
+
+  it("subtitles carry the end card's spoken line and its on-screen disclosure", () => {
+    const card = { headline: "Follow", say: "Follow for more.", disclaimer: "Not a law firm." };
+    const srt = toSrt(buildTimeline(reel(r.beats, { endcard: card })), card);
+    expect(srt).toMatch(
+      /\n3\n[\d:,]+ --> [\d:,]+\nFollow for more\.\n\[On screen\] Not a law firm\.\n/,
+    );
   });
 });
 
@@ -286,17 +389,162 @@ describe("validator", () => {
     expect(validateReel(r3).warnings.join("\n")).not.toMatch(/has no prop/);
   });
 
+  it("checks cues in nested prop fields and warns about ambiguous word cues", () => {
+    const r5 = good();
+    r5.beats[1].caption = "You can do it where *you* decide.";
+    r5.beats[1].prop = { type: "doc-stamp", typeAt: "w:you", stampAt: "w:decide" };
+    r5.beats[2].prop = {
+      type: "formula-card",
+      rows: [{ label: "A" }],
+      highlight: { row: 0, at: "w:missing" },
+    };
+    const res = validateReel(r5);
+    expect(res.warnings.join("\n")).toMatch(/cue "w:you" matches 2 words/);
+    expect(res.errors.join("\n")).toMatch(/cue "w:missing"/);
+  });
+
+  it("rejects bad structure: props object, unknown theme, unknown music.until, stray asterisk", () => {
+    const a = good();
+    a.beats[0].props = { type: "note", text: "x" };
+    expect(validateReel(a).errors.join("\n")).toMatch(/"props" must be an array/);
+    const b = good();
+    b.theme = "nope";
+    expect(validateReel(b).errors.join("\n")).toMatch(/unknown theme/);
+    const c = good();
+    c.music = { until: "nope" };
+    expect(validateReel(c).errors.join("\n")).toMatch(/music.until/);
+    const d = good();
+    d.beats[0].caption = "A *word*— then *more* text here.";
+    expect(validateReel(d).errors.join("\n")).toMatch(/accent markers/);
+  });
+
+  it("knows the mixer's effect names and flags captions the voice cannot be timed to", () => {
+    const r7 = good();
+    r7.beats[2].sfx = [{ at: 0.2, name: "kazoo" }];
+    r7.beats[3].sfx = [{ at: 0.2, name: "ding" }];
+    r7.beats[4].caption = "Kids & pets come *first* here.";
+    const res = validateReel(r7);
+    expect(res.errors.join("\n")).toMatch(/unknown sound "kazoo"/);
+    expect(res.errors.join("\n")).not.toMatch(/unknown sound "ding"/);
+    expect(res.warnings.join("\n")).toMatch(/no letters or digits/);
+  });
+
+  it("the phrase guard reads everything a viewer can see, literally", () => {
+    const r6 = good();
+    r6.lint = { banned: ["$0 (free)", "legal advice"] };
+    r6.disclaimer = "This is legal advice";
+    expect(validateReel(r6).errors.join("\n")).toMatch(/banned phrase "legal advice"/);
+    r6.disclaimer = "General information";
+    r6.beats[3].prop = { type: "note", text: "costs\n$0 (free) today", enter: "none" };
+    expect(validateReel(r6).errors.join("\n")).toMatch(/banned phrase "\$0 \(free\)"/);
+    r6.beats[3].prop = { type: "note", text: "x", enter: "none" };
+    expect(validateReel(r6).errors).toEqual([]);
+  });
+
   it("enforces a reel's own banned phrases", () => {
     const r4 = good();
     r4.lint = { banned: ["guarantee", "legal advice"] };
     r4.beats[2].caption = "We *guarantee* it holds up.";
     expect(validateReel(r4).errors.join("\n")).toMatch(/banned phrase/);
   });
+
+  it("enforces the disclosures a reel says it must carry", () => {
+    const r7 = good();
+    r7.lint = {
+      require: [
+        { field: "disclaimer", includes: ["not legal advice"] },
+        { field: "endcard.disclaimer", includes: ["not a law firm", "substitute"] },
+      ],
+    };
+    expect(validateReel(r7).errors.join("\n")).toMatch(/"disclaimer" is missing/);
+    r7.disclaimer = "Not Legal Advice · Laws vary";
+    r7.endcard.disclaimer = "We are not a law firm.";
+    const errs = validateReel(r7).errors;
+    expect(errs).toEqual(['lint.require: "endcard.disclaimer" must include "substitute"']);
+    r7.endcard.disclaimer = "Not a law firm and not a substitute for an attorney.";
+    expect(validateReel(r7).errors).toEqual([]);
+  });
+
+  it("warns when a footnote is up too briefly or the end card sits in silence", () => {
+    const r8 = good();
+    r8.beats[4].props = [
+      { type: "note", text: "x", enter: "none" },
+      { type: "note", text: "* the caveat", enter: "pop", delay: "end-0.6" },
+    ];
+    delete r8.beats[4].prop;
+    r8.endcard.hold = 4;
+    const warns = validateReel(r8).warnings.join("\n");
+    expect(warns).toMatch(/note "\* the caveat" is on screen 0\.6s/);
+    expect(warns).toMatch(/holds over 3s in silence/);
+    r8.endcard.say = "Follow for more of these.";
+    expect(validateReel(r8).warnings.join("\n")).toMatch(
+      /endcard\.say has 5 words and endcard\.headline 1/,
+    );
+  });
+
+  it("holds pasted copy (fenced blocks) to the same phrase guard", () => {
+    const md =
+      "Intro: it is free to read.\n\n```\nComment LIST\nIt's free today\n```\n\n```text\nSecond block\n```\n";
+    expect(fencedBlocks(md)).toEqual(["Comment LIST", "It's free today", "Second block"]);
+    const found = bannedIn(fencedBlocks(md), ["/\\bfree\\b/", "/(unclosed/"], [], "kit: ");
+    expect(found).toEqual([
+      'banned phrase "/\\bfree\\b/" found in kit: "It\'s free today"',
+      'lint.banned: "/(unclosed/" is not a valid pattern',
+    ]);
+  });
+});
+
+describe("variants", () => {
+  const base = reel(
+    [
+      beat("a", "One two *three.*"),
+      beat("b", "Four five *six.*", { mascot: [{ at: 0, face: "talk" }] }),
+    ],
+    {
+      endcard: { headline: "Follow", sub: "Original" },
+      variants: {
+        card: { about: "keyword card", endcard: { keyword: "WORD", sub: null } },
+        ask: { beats: { b: { caption: "Seven *eight.*", prop: { text: "y" }, mascot: [] } } },
+        short: { beats: { a: null } },
+        broken: { beats: { nope: { caption: "x" } } },
+      },
+    },
+  );
+
+  it("merges objects, replaces arrays and values, and removes keys set to null", () => {
+    expect(variantNames(base)).toEqual(["card", "ask", "short", "broken"]);
+    const card = applyVariant(base, "card");
+    expect(card.id).toBe("t--card");
+    expect(card.endcard).toEqual({ headline: "Follow", keyword: "WORD" });
+    expect(card.variants).toBeUndefined();
+    expect(card.beats).toEqual(base.beats);
+    // the original is left untouched
+    expect(base.endcard.sub).toBe("Original");
+  });
+
+  it("patches beats by id and can drop one", () => {
+    const ask = applyVariant(base, "ask");
+    expect(ask.beats[1]).toMatchObject({
+      id: "b",
+      caption: "Seven *eight.*",
+      prop: { type: "note", text: "y", enter: "none" },
+      mascot: [],
+    });
+    expect(applyVariant(base, "short").beats.map((b) => b.id)).toEqual(["b"]);
+    expect(() => applyVariant(base, "broken")).toThrow(/patches beat "nope"/);
+    expect(() => applyVariant(base, "missing")).toThrow(/no variant "missing" \(have: card, ask/);
+  });
+
+  it("knows when a variant can reuse the original narration", () => {
+    expect(spokenText(applyVariant(base, "card"))).toBe(spokenText(base));
+    expect(spokenText(applyVariant(base, "ask"))).not.toBe(spokenText(base));
+  });
 });
 
 describe("shipped reels", () => {
   const dir = path.join(KIT, "reels");
-  const slugs = readdirSync(dir).filter((d) => !d.startsWith("_"));
+  // "<slug>--<variant>" folders are generated by build.mjs --variant, not shipped
+  const slugs = readdirSync(dir).filter((d) => !d.startsWith("_") && !d.includes("--"));
 
   it.each(slugs)("%s passes validation with its committed voice timing", (slug) => {
     const read = (f) => JSON.parse(readFileSync(path.join(dir, slug, f), "utf8"));

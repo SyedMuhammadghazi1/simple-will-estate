@@ -4,13 +4,19 @@
 // spec: {
 //   title, subtitle,
 //   bylineLabel, byline, typeAt,       a "written by:" line whose value types itself in
+//   bylineFrom, eraseAt,               an earlier value that is on the line first and is
+//                                      backspaced on cue, before `byline` is typed
 //   stamp, stampAt, stampColor,        rubber stamp that slams down
-//   chip, chipAt,                      small pill that pops in under the stamp (e.g. "opened: never")
+//   chip, chipAt, chipX, chipY,        small pill that pops in under the stamp (e.g. "opened:
+//                                      never"); position in % of the sheet (default 50, 86)
 //   w, h
 // }
 
 import { clamp, ease, lerp, prog, settle } from "../timing.js";
 import { box, esc, h, setText } from "./_util.js";
+
+const TYPE_STEP = 0.045;
+const ERASE_STEP = 0.03;
 
 const prop = {
   build(el, spec) {
@@ -22,11 +28,11 @@ const prop = {
       html: `
         <div style="height:16px;background:var(--navy);border-bottom:3.5px solid var(--line)"></div>
         <div style="padding:26px 34px 0">
-          <div class="mono" style="font-size:19px;color:var(--muted)">${esc(spec.subtitle ?? "")}</div>
+          <div class="mono" style="font-size:22px;color:var(--muted)">${esc(spec.subtitle ?? "")}</div>
           <div class="serif" style="font-size:58px;line-height:1.04;font-weight:640;margin-top:8px;color:var(--ink)">${esc(spec.title ?? "")}</div>
           <div style="margin-top:22px;padding:14px 0 13px;border-top:3px solid var(--cardAlt);border-bottom:3px solid var(--cardAlt);white-space:nowrap">
-            <span class="mono" style="font-size:19px;color:var(--muted)">${esc(spec.bylineLabel ?? "")}</span>
-            <span data-byline style="font:650 30px var(--font-ui);color:var(--accent);margin-left:10px"></span><span data-caret style="display:inline-block;width:3.5px;height:29px;background:var(--ink);margin-left:3px;vertical-align:-5px"></span>
+            <span class="mono" style="font-size:24px;letter-spacing:0.02em;color:var(--muted)">${esc(spec.bylineLabel ?? "")}</span>
+            <span data-byline style="font:650 35px var(--font-ui);color:var(--accent);margin-left:8px"></span><span data-caret style="display:inline-block;width:3.5px;height:33px;background:var(--ink);margin-left:3px;vertical-align:-5px"></span>
           </div>
           <div data-lines style="margin-top:24px"></div>
         </div>`,
@@ -43,7 +49,7 @@ const prop = {
     const stamp = h(
       "div",
       {
-        style: `position:absolute;left:50%;top:60%;padding:12px 26px 10px;border:6px solid ${spec.stampColor ?? "var(--red)"};border-radius:14px;color:${spec.stampColor ?? "var(--red)"};font:500 46px var(--font-mono);letter-spacing:0.1em;white-space:nowrap;text-transform:uppercase;background:color-mix(in srgb, var(--card) 86%, transparent);opacity:0;`,
+        style: `position:absolute;left:50%;top:60%;padding:12px 26px 10px;border:6px solid ${spec.stampColor ?? "var(--red)"};border-radius:14px;color:${spec.stampColor ?? "var(--red)"};font:500 ${(spec.stamp ?? "").length > 8 ? 37 : 46}px var(--font-mono);letter-spacing:0.1em;white-space:nowrap;text-transform:uppercase;background:color-mix(in srgb, var(--card) 86%, transparent);opacity:0;`,
       },
       spec.stamp ?? "",
     );
@@ -51,7 +57,7 @@ const prop = {
       "div",
       {
         class: "tag",
-        style: "position:absolute;left:50%;top:86%;background:var(--gold);color:#1c1917;opacity:0",
+        style: `position:absolute;left:${spec.chipX ?? 50}%;top:${spec.chipY ?? 86}%;background:var(--gold);color:#1c1917;opacity:0`,
       },
       spec.chip ?? "",
     );
@@ -69,10 +75,15 @@ const prop = {
     const spec = ctx.spec;
     const text = spec.byline ?? "";
     const typeAt = ctx.at(spec.typeAt ?? 0.3);
-    const step = 0.045;
-    const n = t < typeAt ? 0 : clamp(Math.floor((t - typeAt) / step) + 1, 0, text.length);
-    setText(state.byline, text.slice(0, n));
-    const typing = n > 0 && n < text.length;
+    const n = t < typeAt ? 0 : clamp(Math.floor((t - typeAt) / TYPE_STEP) + 1, 0, text.length);
+    // an earlier author can be on the line first and get backspaced on cue
+    const from = spec.bylineFrom ?? "";
+    const eraseAt = from ? ctx.at(spec.eraseAt ?? 0.3) : 0;
+    const gone =
+      t < eraseAt ? 0 : clamp(Math.floor((t - eraseAt) / ERASE_STEP) + 1, 0, from.length);
+    const erasing = from && t >= eraseAt && gone < from.length;
+    setText(state.byline, n > 0 ? text.slice(0, n) : from.slice(0, from.length - gone));
+    const typing = (n > 0 && n < text.length) || erasing;
     state.caret.style.opacity = typing || Math.floor(t * 2.6) % 2 === 0 ? "1" : "0";
 
     // the stamp arrives big and fast, lands, and the sheet takes the hit
@@ -87,7 +98,9 @@ const prop = {
       state.stamp.style.transform = `translate(-50%, -50%) rotate(${spec.stampRot ?? -11}deg) scale(${s.toFixed(4)})`;
       shake = t > st ? Math.exp(-16 * (t - st)) * Math.sin((t - st) * 70) * 9 : 0;
     }
-    state.sheet.style.transform = `translate(${(shake * 0.5).toFixed(2)}px, ${shake.toFixed(2)}px)`;
+    // a slow rock keeps the sheet alive between the things that happen to it
+    const rock = Math.sin(t * 1.9 + (ctx.seed ?? 0)) * 0.55;
+    state.sheet.style.transform = `translate(${(shake * 0.5).toFixed(2)}px, ${shake.toFixed(2)}px) rotate(${rock.toFixed(3)}deg)`;
 
     if (spec.chip) {
       const ct = ctx.at(spec.chipAt ?? 2);
@@ -102,7 +115,12 @@ const prop = {
     const text = spec.byline ?? "";
     const typeAt = ctx.at(spec.typeAt ?? 0.3);
     for (let i = 0; i < text.length; i += 2)
-      cues.push({ t: typeAt + i * 0.045, name: "key", gain: 0.7 });
+      cues.push({ t: typeAt + i * TYPE_STEP, name: "key", gain: 0.7 });
+    if (spec.bylineFrom) {
+      const eraseAt = ctx.at(spec.eraseAt ?? 0.3);
+      for (let i = 0; i < spec.bylineFrom.length; i += 3)
+        cues.push({ t: eraseAt + i * ERASE_STEP, name: "key", gain: 0.45, pitch: 0.8 });
+    }
     if (spec.stamp) cues.push({ t: ctx.at(spec.stampAt ?? 1), name: "stamp" });
     if (spec.chip) cues.push({ t: ctx.at(spec.chipAt ?? 2), name: "pop" });
     return cues;

@@ -1,7 +1,9 @@
 // A gavel that strikes on cue, in front of a small "hearing" card. Used for "someone else
 // decides" beats.
 //
-// spec: { title, lines: ["Guardian:", "decided by the court"], hits: ["w:judge", ...], tag, tagAt }
+// spec: { title, lines: ["Raised by:", "a judge decides"], hits: ["w:judge", ...],
+//         answers: [{ text, at }]  later replacements for the answer line,
+//         tag, tagAt, tagColor }
 
 import { clamp, ease, lerp, prog, settle } from "../timing.js";
 import { person } from "./_art.js";
@@ -14,7 +16,7 @@ const prop = {
       class: "card",
       style:
         "position:absolute;left:0;top:26px;width:400px;height:300px;padding:24px 28px;transform:rotate(-3deg)",
-      html: `<div class="mono" style="font-size:20px;color:var(--muted)">${esc(spec.title ?? "")}</div>
+      html: `<div class="mono" style="font-size:22px;color:var(--muted);white-space:nowrap">${esc(spec.title ?? "")}</div>
         <div style="display:flex;align-items:center;gap:20px;margin-top:22px">
           <div style="width:104px;height:104px">${person(104, "var(--gold)", { bg: "var(--sky)" })}</div>
           <div>
@@ -50,7 +52,7 @@ const prop = {
       "div",
       {
         class: "tag",
-        style: "position:absolute;left:150px;top:300px;background:var(--red);color:#fff;opacity:0",
+        style: `position:absolute;left:120px;top:300px;background:${spec.tagColor ?? "var(--red)"};color:${spec.tagColor ? "#1c1917" : "#fff"};opacity:0`,
       },
       spec.tag ?? "",
     );
@@ -87,24 +89,33 @@ const prop = {
       }
     }
     // a slow idle sway keeps the prop alive between strikes
-    angle += Math.sin(t * 2.6) * 1.6;
+    angle += Math.sin(t * 2.6) * 3.4;
     state.arm.setAttribute("transform", `translate(262 206) rotate(${angle.toFixed(2)})`);
     state.burst.setAttribute("opacity", flash.toFixed(3));
     state.card.style.transform = `rotate(-3deg) translateY(${jolt.toFixed(2)}px)`;
 
     const first = hits[0];
     const answered = t >= first;
-    const text = answered ? (spec.lines?.[1] ?? "") : "?";
+    let text = answered ? (spec.lines?.[1] ?? "") : "?";
+    let changed = first;
+    for (const a of spec.answers ?? []) {
+      const at = ctx.at(a.at);
+      if (t >= at) {
+        text = a.text;
+        changed = at;
+      }
+    }
     if (state.who._t !== text) {
       state.who.textContent = text;
       state.who._t = text;
     }
-    const pop = answered ? 1 + Math.exp(-10 * (t - first)) * 0.25 : 1;
+    const pop = answered ? 1 + Math.exp(-10 * (t - changed)) * 0.25 : 1;
     state.who.style.transform = `scale(${pop.toFixed(4)})`;
     state.who.style.transformOrigin = "0 50%";
 
     if (spec.tag) {
-      const at = ctx.at(spec.tagAt ?? hits[hits.length - 1] + 0.15);
+      // `hits` are already local times; only an explicit cue needs resolving
+      const at = spec.tagAt != null ? ctx.at(spec.tagAt) : hits[hits.length - 1] + 0.15;
       const p = settle(t - at, 18);
       state.tag.style.opacity = clamp(prog(t, at, at + 0.07)).toFixed(3);
       state.tag.style.transform = `rotate(${lerp(-12, -4, p).toFixed(2)}deg) scale(${lerp(0.5, 1, p).toFixed(4)})`;

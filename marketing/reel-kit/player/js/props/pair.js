@@ -14,7 +14,7 @@ const prop = {
       h("div", {
         style: `position:absolute;left:${x}px;top:0;width:190px;text-align:center`,
         html: `<div data-av="${side}" style="width:170px;height:170px;margin:0 auto;filter:drop-shadow(7px 8px 0 var(--shadow))">${person(170, cfg?.color ?? "var(--navy)", { bg: cfg?.bg ?? "var(--navySoft)" })}</div>
-               <div class="mono" style="font-size:22px;color:var(--ink);margin-top:14px">${esc(cfg?.label ?? "")}</div>`,
+               <div class="mono" style="font-size:22px;color:var(--ink);margin:14px -30px 0;white-space:nowrap">${esc(cfg?.label ?? "")}</div>`,
       });
     const left = mk("l", spec.left, 10);
     const right = mk("r", spec.right, 420);
@@ -32,8 +32,9 @@ const prop = {
     const value = h("div", {
       class: "card",
       style:
-        "position:absolute;left:330px;top:246px;width:290px;height:128px;padding:16px 24px;transform-origin:50% 0;opacity:0",
-      html: `<div class="mono" style="font-size:19px;color:var(--muted)">${esc(spec.valueLabel ?? "")}</div>
+        "position:absolute;left:420px;top:232px;width:220px;min-height:128px;padding:16px 24px;transform-origin:50% 0;opacity:0",
+      // "\n" in valueLabel breaks the line, so the number can carry its own scope
+      html: `<div class="mono" style="font-size:21px;line-height:25px;letter-spacing:0.08em;color:var(--muted);white-space:nowrap">${esc(spec.valueLabel ?? "").replace(/\n/g, "<br>")}</div>
              <div class="serif" style="font-size:66px;line-height:1.05;font-weight:640;color:var(--red)">${esc(spec.value ?? "")}</div>`,
     });
     const tag = h(
@@ -41,7 +42,7 @@ const prop = {
       {
         class: "tag",
         style:
-          "position:absolute;left:60px;top:268px;background:var(--gold);color:#1c1917;opacity:0",
+          "position:absolute;left:8px;top:262px;background:var(--gold);color:#1c1917;opacity:0;font-size:21px;padding:9px 14px 8px",
       },
       spec.tag ?? "",
     );
@@ -80,7 +81,7 @@ const prop = {
     state.b.setAttribute("stroke-dashoffset", (-Math.min(t, brk) * 30).toFixed(1));
     state.rightAv.style.filter = `drop-shadow(7px 8px 0 var(--shadow)) saturate(${(1 - grey * 0.75).toFixed(3)})`;
 
-    const vAt = ctx.at(spec.valueAt ?? brk + 0.12);
+    const vAt = spec.valueAt != null ? ctx.at(spec.valueAt) : brk + 0.12;
     const vp = settle(t - vAt, 18);
     state.value.style.opacity = clamp(prog(t, vAt, vAt + 0.08)).toFixed(3);
     state.value.style.transform = `rotate(${lerp(8, 3, vp).toFixed(2)}deg) scale(${lerp(0.6, 1, vp).toFixed(4)})`;
@@ -95,7 +96,7 @@ const prop = {
   sfx(spec, ctx) {
     const brk = ctx.at(spec.breakAt ?? 0.9);
     const cues = [{ t: brk, name: "buzz", gain: 0.8 }];
-    cues.push({ t: ctx.at(spec.valueAt ?? brk + 0.12), name: "pop" });
+    cues.push({ t: spec.valueAt != null ? ctx.at(spec.valueAt) : brk + 0.12, name: "pop" });
     return cues;
   },
 };

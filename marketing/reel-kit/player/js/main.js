@@ -5,7 +5,7 @@
 import { buildCaptions } from "./captions.js";
 import { buildEndcard } from "./endcard.js";
 import { buildMascot, voiceLevel } from "./mascot.js";
-import { applyPose, EXIT_DUR, propPose } from "./motion.js";
+import { applyPose, EXIT_DUR, FPS, propPose } from "./motion.js";
 import { PROPS } from "./props/index.js";
 import { h } from "./props/_util.js";
 import { buildStage } from "./stage.js";
@@ -14,11 +14,12 @@ import { buildTimeline, resolveAt } from "./timeline.js";
 import { clamp, prog } from "./timing.js";
 
 const params = new URLSearchParams(location.search);
-const reelDir = (params.get("reel") ?? "../reels/plainwill-guardian").replace(/\/$/, "");
+const reelDir = (params.get("reel") ?? "").replace(/\/$/, "");
 const renderMode = params.get("mode") === "render";
 const MOOD_IN = 4 / 30;
 const MOOD_OUT = 3 / 30;
 const HOP = 36; // mascot hop on every caption cut (px)
+const EPS = 1e-6;
 
 async function getJson(url, optional = false) {
   const res = await fetch(url, { cache: "no-store" });
@@ -30,11 +31,14 @@ async function getJson(url, optional = false) {
 }
 
 async function boot() {
+  if (!reelDir) throw new Error("no reel selected: open the player with ?reel=../reels/<slug>");
   const reel = await getJson(`${reelDir}/reel.json`);
   const timing = params.get("estimate") ? null : await getJson(`${reelDir}/timeline.json`, true);
   const theme = THEMES[reel.theme ?? "plainwill"];
   if (!theme) throw new Error(`unknown theme "${reel.theme}"`);
   const tl = buildTimeline(reel, timing);
+  // The motion rules in motion.js are measured in frames of a 30 fps reel.
+  if (tl.fps !== FPS) throw new Error(`reel.fps must be ${FPS} (got ${tl.fps})`);
   const warnings = [];
 
   const root = document.getElementById("root");
@@ -72,10 +76,16 @@ async function boot() {
       // A travelling prop starts two frames before the cut, while the old one is still clearing
       // the left edge, so that its first pixels are on screen right after the swap frame.
       const travels = ["right", "left", "drop", "rise"].includes(spec.enter ?? "right");
-      const preroll = travels && spec.delay == null && i > 0 ? 2 / tl.fps : 0;
+      // (a hero prop that pops in on the cut gets the same head start, so the pad is not empty)
+      const early = travels || spec.enter === "pop";
+      const preroll = early && spec.delay == null && i > 0 ? 2 / tl.fps : 0;
       const tIn = resolveAt(spec.delay ?? 0, beat, spanned) - preroll;
       // leave during the four frames before the next caption cut, so old and new never overlap
-      const tOut = last.end - EXIT_DUR + (spec.linger ?? 0);
+      // ...except a prop on the final beat: it stays put and the end card rises over it, so the
+      // pad is never empty while the last caption is still up
+      const intoEndcard = tl.endcard && last.index === tl.beats.length - 1;
+      if (intoEndcard) spec.exit = "none";
+      const tOut = intoEndcard ? tl.endcard.start + 0.7 : last.end - EXIT_DUR + (spec.linger ?? 0);
       const ctx = {
         spec,
         beat,
@@ -90,19 +100,32 @@ async function boot() {
       const state = mod.build(body, spec, ctx);
       // start with the leading edge on the frame edge, so the prop is already arriving on the cut
       if (spec.travel == null) {
-        const half = (body.offsetWidth * (spec.scale ?? 1)) / 2;
+        const scale = spec.scale ?? 1;
+        const half = (body.offsetWidth * scale) / 2;
+        // a prop whose left part pops in later reports where its first visible pixels are
+        const inset = (mod.leadInset?.(spec) ?? 0) * scale;
         spec.travel =
-          spec.enter === "left" ? spec.x + half + 8 : Math.max(200, LAYOUT.W - (spec.x - half) + 8);
+          spec.enter === "left"
+            ? spec.x + half + 8
+            : Math.max(200, LAYOUT.W - (spec.x - half + inset) + 8);
       }
       instances.push({ mod, spec, ctx, wrap, state, tIn, tOut });
 
-      if (spec.enter !== "none" && spec.enterSfx !== false) {
-        sfx.push({ t: tIn, name: spec.enterSfx ?? "whoosh-in" });
+      // Default sounds follow the motion: a travelling prop whooshes, a blur-pop pops quietly,
+      // anything that appears in place is silent.
+      const enterSound = travels ? "whoosh-in" : spec.enter === "pop" ? "pop" : null;
+      if (spec.enterSfx !== false && (spec.enterSfx ?? enterSound)) {
+        sfx.push({ t: tIn, name: spec.enterSfx ?? enterSound, gain: travels ? 1 : 0.6 });
       }
-      if (spec.exit !== "none" && spec.exitSfx !== false && tOut < tl.duration - 0.05) {
+      const slidesOut = ["left", "right", "up", "drop"].includes(spec.exit ?? "left");
+      if (spec.exitSfx !== false && (spec.exitSfx ?? slidesOut) && tOut < tl.duration - 0.05) {
         sfx.push({ t: tOut, name: spec.exitSfx ?? "whoosh-out" });
       }
-      for (const cue of mod.sfx?.(spec, ctx) ?? []) sfx.push({ ...cue, t: tIn + cue.t });
+      // a prop is only heard while it is on screen
+      for (const cue of mod.sfx?.(spec, ctx) ?? []) {
+        if (cue.t < 0 || tIn + cue.t > tOut + EXIT_DUR) continue;
+        sfx.push({ ...cue, t: tIn + cue.t });
+      }
     });
     for (const cue of beat.sfx ?? []) {
       sfx.push({ ...cue, t: resolveAt(cue.at ?? 0, beat), at: undefined });
@@ -121,7 +144,7 @@ async function boot() {
   // One pose per beat, swapped on the cut with a small hop; extra cues inside a beat (reacting
   // to a word) change the face without hopping unless they ask to.
   const cues = [];
-  let last = { face: "talk", pose: "rest" };
+  let prevCue = { face: "talk", pose: "rest" };
   for (const beat of tl.beats) {
     const own = (beat.mascot ?? []).map((cue) => ({ ...cue, t: resolveAt(cue.at ?? 0, beat) }));
     const opener = own.find((cue) => cue.t <= beat.start + 1e-6);
@@ -129,23 +152,37 @@ async function boot() {
       opener.hop ??= HOP;
       opener.dur ??= 0.1;
     } else {
-      own.unshift({ t: beat.start, face: last.face, pose: last.pose, hop: HOP, dur: 0.1 });
+      own.unshift({ t: beat.start, face: prevCue.face, pose: prevCue.pose, hop: HOP, dur: 0.1 });
     }
     for (const cue of own) {
-      cue.face ??= last.face;
-      cue.pose ??= last.pose;
-      last = cue;
+      cue.face ??= prevCue.face;
+      cue.pose ??= prevCue.pose;
+      prevCue = cue;
       cues.push(cue);
     }
   }
   const endcard = buildEndcard(layers.endback, layers.overlay, reel.endcard, tl);
   if (tl.endcard) {
-    cues.push({ t: tl.endcard.start + 0.04, face: "happy", pose: "cheer", dur: 0.25 });
-    cues.push({ t: tl.endcard.start + 1.05, face: "smile", pose: "wave", dur: 0.3 });
+    const said = tl.endcard.words;
+    if (said.length) {
+      // a spoken card: the mascot says the line, then settles into the wave
+      cues.push({ t: tl.endcard.start + 0.04, face: "talk", pose: "cheer", dur: 0.25 });
+      cues.push({ t: tl.endcard.start + 1.05, face: "talk", pose: "wave", dur: 0.3 });
+      cues.push({
+        t: said[said.length - 1].t1 + 0.05,
+        face: "happy",
+        pose: "wave",
+        dur: 0.2,
+        hop: 18,
+      });
+    } else {
+      cues.push({ t: tl.endcard.start + 0.04, face: "happy", pose: "cheer", dur: 0.25 });
+      cues.push({ t: tl.endcard.start + 1.05, face: "smile", pose: "wave", dur: 0.3 });
+    }
     sfx.push(...endcard.sfx());
   }
   cues.sort((a, b) => a.t - b.t);
-  const allWords = tl.beats.flatMap((b) => b.words);
+  const allWords = [...tl.beats.flatMap((b) => b.words), ...(tl.endcard?.words ?? [])];
 
   // ---- per-frame ----------------------------------------------------------------------------
   // Mood follows the reference: the frame darkens over ~4 frames starting ON the cut into a dark
@@ -168,15 +205,14 @@ async function boot() {
   function seek(time) {
     const t = clamp(time, 0, tl.duration);
     let active = -1;
-    for (let i = 0; i < tl.beats.length; i++) if (tl.beats[i].start <= t) active = i;
-    const inEnd = tl.endcard && t >= tl.endcard.start;
+    // cuts sit exactly on frames; the epsilon keeps float error from delaying one by a frame
+    for (let i = 0; i < tl.beats.length; i++) if (tl.beats[i].start <= t + EPS) active = i;
+    const inEnd = tl.endcard && t >= tl.endcard.start - EPS;
 
     const place = endcard.update(t);
     let mood = moodAt(t, active);
     if (place) mood *= place.captionFade;
-    const beat = tl.beats[active];
-    const flag = beat?.flag ? Math.exp(-5 * (t - beat.start)) : 0;
-    stage.update(t, { mood, flagWiggle: flag });
+    stage.update(t, { mood });
 
     captions.update(t, inEnd && place.captionFade <= 0 ? -1 : active);
     if (place) {
@@ -202,21 +238,33 @@ async function boot() {
     duration: tl.duration,
     frames: tl.frames,
     timeline: tl,
-    sfx: sfx.sort((a, b) => a.t - b.t),
+    sfx: dedupe(sfx).sort((a, b) => a.t - b.t),
     warnings,
     seek,
     setLoopImage: endcard.setLoopImage ?? (() => {}),
-    // default cover: the last frame of the hook beat, when its caption is fully inked
+    // default cover: the last frame of the hook beat before any prop starts to leave, when its
+    // caption is fully inked
     coverTime:
       reel.cover?.at != null
         ? resolveAt(reel.cover.at, tl.beats[0], tl.beats)
-        : tl.beats[0].end - 2 / tl.fps,
+        : tl.beats[0].end - EXIT_DUR - 1 / tl.fps,
     exitDur: EXIT_DUR,
   };
 
   if (renderMode) document.body.classList.add("render");
   else preview(reel, tl, seek);
   document.body.dataset.ready = "1";
+}
+
+/** Two props leaving on the same cut should make one whoosh, not a louder one. */
+function dedupe(cues) {
+  const seen = new Set();
+  return cues.filter((cue) => {
+    const key = `${cue.name}@${cue.t.toFixed(3)}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 // ---- preview: scale to the window, play with audio, scrub, show safe zones ---------------------

@@ -1,14 +1,18 @@
 // End card + loop. The table rises to fill the frame (so the stage never "cuts"), the mascot
-// hops to centre stage, and the ask appears as the thing the viewer is being asked to do: a
-// comment being typed and liked. The final frames cross-dissolve into frame 0 so the reel loops
-// without a visible seam.
+// hops to centre stage and the follow line builds under it. With `endcard.say` the line is
+// spoken and its words appear as the voice reaches them; with `endcard.keyword` the ask is also
+// shown as the thing the viewer is being asked to do: a comment being typed and liked. The final
+// frames cross-dissolve into frame 0 so the reel loops without a visible seam.
+//
+// The stack (headline, comment pill, sub line, brand, legal line) is laid out from its measured
+// heights and always ends inside the safe zone; a taller stack pushes the mascot up.
 
 import { parseCaption } from "./captions.js";
 import { LAYOUT } from "./theme.js";
 import { clamp, ease, lerp, prog, settle } from "./timing.js";
 import { esc, h } from "./props/_util.js";
 
-const { W, H, tableY, mascot: M } = LAYOUT;
+const { W, H, tableY, mascot: M, SAFE } = LAYOUT;
 
 const NAVY_TOP = "#24456f";
 const NAVY_BOTTOM = "#142a45";
@@ -21,30 +25,42 @@ export function buildEndcard(backLayer, frontLayer, spec, timeline) {
 
   const rise = h("div", {
     style: `position:absolute;left:0;top:0;width:${W}px;height:${H}px;background:linear-gradient(${NAVY_TOP}, ${NAVY_BOTTOM});`,
-    html: `<div style="position:absolute;left:50%;top:500px;width:980px;height:980px;margin-left:-490px;border-radius:50%;background:radial-gradient(closest-side, rgba(244,185,66,0.20), rgba(244,185,66,0));" data-glow></div>`,
+    html: `<div style="position:absolute;left:50%;top:380px;width:980px;height:980px;margin-left:-490px;border-radius:50%;background:radial-gradient(closest-side, rgba(244,185,66,0.20), rgba(244,185,66,0));" data-glow></div>`,
   });
   backLayer.appendChild(rise);
 
-  const words = parseCaption(spec.headline ?? "");
-  const headline = h("div", { class: "headline", style: "top:846px" });
-  const wordEls = words.map((w, i) => {
-    const el = h(
-      w.accent ? "em" : "span",
-      { style: "display:inline-block;opacity:0" },
-      w.text + w.tail,
-    );
-    headline.appendChild(el);
-    if (i < words.length - 1) headline.appendChild(document.createTextNode(" "));
-    return el;
-  });
+  // "\n" in the headline forces a line break, so a three-line headline breaks where it reads best
+  const headline = h("div", { class: "headline" });
+  const words = [];
+  const wordEls = [];
+  String(spec.headline ?? "")
+    .split("\n")
+    .forEach((line) => {
+      const row = h("div", {});
+      const parsed = parseCaption(line);
+      parsed.forEach((w, i) => {
+        const el = h(
+          w.accent ? "em" : "span",
+          { style: "display:inline-block;opacity:0" },
+          w.text + w.tail,
+        );
+        row.appendChild(el);
+        if (i < parsed.length - 1) row.appendChild(document.createTextNode(" "));
+        words.push(w);
+        wordEls.push(el);
+      });
+      headline.appendChild(row);
+    });
+  // spoken end card: each headline word appears on the frame the voice reaches it
+  const spoken = timeline.endcard.words ?? [];
+  const synced = spoken.length === words.length && words.length > 0;
 
-  const keyword = spec.keyword ?? "";
   // Without a keyword the comment pill is left out and the rest closes up: a follow-only end
-  // card, for testing the ask against the comment-keyword version.
-  const up = keyword ? 0 : 126;
+  // card (the default; the keyword version is the one to test against it).
+  const keyword = spec.keyword ?? "";
   const pill = h("div", {
     style:
-      "position:absolute;left:50%;top:1046px;width:468px;height:104px;margin-left:-234px;background:#fffdf7;border:3.5px solid #1c1917;border-radius:22px;box-shadow:8px 9px 0 #0b1626;",
+      "position:absolute;left:50%;width:468px;height:104px;margin-left:-234px;background:#fffdf7;border:3.5px solid #1c1917;border-radius:22px;box-shadow:8px 9px 0 #0b1626;",
     html: `
       <div style="position:absolute;left:22px;top:22px;width:60px;height:60px;border-radius:50%;background:#f4b942;border:3.5px solid #1c1917"></div>
       <div style="position:absolute;left:102px;top:14px;font:500 19px var(--font-mono);letter-spacing:0.06em;color:#7b746b">you · now</div>
@@ -61,27 +77,45 @@ export function buildEndcard(backLayer, frontLayer, spec, timeline) {
   const sub = h(
     "div",
     {
-      style: `position:absolute;left:0;top:${1172 - up}px;width:1080px;text-align:center;font:500 27px var(--font-ui);color:#b9c6d9;opacity:0`,
+      style: `position:absolute;left:90px;width:900px;text-align:center;font:600 31px/40px var(--font-ui);color:#e6edf6;opacity:0`,
     },
     spec.sub ?? "",
   );
   const brand = h("div", {
-    style: `position:absolute;left:50%;top:${1226 - up}px;transform:translateX(-50%);padding:9px 24px 10px;border:3px solid #f6efe0;border-radius:999px;font:500 27px var(--font-mono);letter-spacing:0.06em;color:#f6efe0;white-space:nowrap;opacity:0`,
+    style: `position:absolute;left:50%;transform:translateX(-50%);padding:9px 24px 10px;border:3px solid #f6efe0;border-radius:999px;font:500 27px var(--font-mono);letter-spacing:0.06em;color:#f6efe0;white-space:nowrap;opacity:0`,
     html: esc(spec.brand ?? ""),
   });
 
   // required disclosure, inside the video (a caption-only disclosure is easy to miss)
-  const legal = h(
-    "div",
-    { class: "legal", style: `top:${1318 - up}px;opacity:0` },
-    spec.disclaimer ?? "",
-  );
+  const legal = h("div", { class: "legal", style: "opacity:0" }, spec.disclaimer ?? "");
   if (!keyword) pill.style.display = "none";
+  if (!spec.sub) sub.style.display = "none";
+  if (!spec.brand) brand.style.display = "none";
 
   const front = h("div", { id: "endcard" }, headline, pill, sub, brand, legal);
   frontLayer.appendChild(front);
   const loopImg = h("img", { id: "loop-img", alt: "" });
   frontLayer.appendChild(loopImg);
+
+  // Stack the parts from their measured heights. The stack starts under the mascot at y = 728
+  // unless that would push the legal line past the safe zone; then everything moves up.
+  let y = headline.offsetHeight;
+  const place = (el, gap, height = el.offsetHeight) => {
+    if (el.style.display === "none") return null;
+    const at = y + gap;
+    y = at + height;
+    return at;
+  };
+  const offsets = [
+    [pill, place(pill, 22, 104)],
+    [sub, place(sub, 20)],
+    [brand, place(brand, 16)],
+    [legal, place(legal, 24)],
+  ];
+  const stackTop = Math.round(Math.min(728, SAFE.bottom - 10 - y));
+  headline.style.top = `${stackTop}px`;
+  for (const [el, at] of offsets) if (at != null) el.style.top = `${stackTop + at}px`;
+  const mascotY = stackTop - 16;
 
   const T = {
     rise: 0.0,
@@ -99,7 +133,9 @@ export function buildEndcard(backLayer, frontLayer, spec, timeline) {
 
   /** Returns the mascot placement override while the end card is up, else null. */
   function update(t) {
-    const te = t - t0;
+    // the same float tolerance the player uses for cuts
+    const raw = t - t0;
+    const te = raw > -1e-6 ? Math.max(0, raw) : raw;
     if (te < 0) {
       rise.style.display = "none";
       front.style.display = "none";
@@ -115,7 +151,8 @@ export function buildEndcard(backLayer, frontLayer, spec, timeline) {
     rise.style.clipPath = `inset(${topY.toFixed(1)}px 0 0 0)`;
 
     words.forEach((_, i) => {
-      const p = ease.outCubic(prog(te, T.head + i * 0.055, T.head + i * 0.055 + 0.26));
+      const at = synced ? Math.max(0, spoken[i].t0 - 0.05 - t0) : T.head + i * 0.055;
+      const p = ease.outCubic(prog(te, at, at + (synced ? 0.2 : 0.26)));
       wordEls[i].style.opacity = p.toFixed(3);
       wordEls[i].style.transform = `translateY(${((1 - p) * 22).toFixed(2)}px)`;
     });
@@ -142,7 +179,8 @@ export function buildEndcard(backLayer, frontLayer, spec, timeline) {
     const bp = settle(te - T.brand, 18);
     brand.style.opacity = clamp(prog(te, T.brand, T.brand + 0.12)).toFixed(3);
     brand.style.transform = `translateX(-50%) scale(${lerp(0.8, 1, bp).toFixed(4)})`;
-    legal.style.opacity = ease.outCubic(prog(te, 0.5, 0.8)).toFixed(3);
+    // the legal line comes up with the card, so it has the whole hold to be read
+    legal.style.opacity = ease.outCubic(prog(te, 0.12, 0.38)).toFixed(3);
 
     if (timeline.loop) {
       const lp = prog(t, timeline.loop.start, timeline.loop.start + timeline.loop.dur);
@@ -155,8 +193,8 @@ export function buildEndcard(backLayer, frontLayer, spec, timeline) {
     const arc = Math.sin(hp * Math.PI) * 150;
     return {
       x: lerp(M.x, 540, e),
-      baseY: lerp(M.baseY, 786, e) - arc,
-      scale: lerp(1, 1.42, e),
+      baseY: lerp(M.baseY, mascotY, e) - arc,
+      scale: lerp(1, 1.3, e),
       shadow: 1 - clamp(hp * 3),
       captionFade: 1 - clamp(prog(te, 0, 0.16)),
     };

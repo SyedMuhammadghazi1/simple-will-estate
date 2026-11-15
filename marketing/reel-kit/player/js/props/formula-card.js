@@ -1,8 +1,10 @@
-// "Who gets what" as decided by a formula: a few belongings on the left feed a ranked list on
-// the right whose bars fill one after another. The bars are deliberately unlabelled with
-// numbers — the point is that a rulebook decides, not what any particular rulebook says.
+// "Who gets what" as decided by a rulebook: a few belongings on the left feed a ranked list on
+// the right. Rows show an ORDER (1st, 2nd, ...) and a question mark, never bars or fractions:
+// anything that reads as a share would be wrong somewhere, because shares depend on the state
+// and on who survives. One row can be spotlighted on cue.
 //
-// spec: { title, tag, items: ["home","car","savings"], rows: [{ label, fill }], rowsAt, note }
+// spec: { title, items: ["home","car","savings"], rows: [{ label }], rowsAt,
+//         highlight: { row, at }, tag, tagAt }
 
 import { clamp, ease, lerp, prog, settle } from "../timing.js";
 import { box, esc, h } from "./_util.js";
@@ -16,6 +18,9 @@ const ICONS = {
 };
 
 const prop = {
+  // the belongings on the left pop in after arrival, so the card is the leading edge
+  leadInset: () => 222,
+
   build(el, spec) {
     const w = spec.w ?? 640;
     const hgt = spec.h ?? 400;
@@ -39,25 +44,34 @@ const prop = {
     const card = h("div", {
       class: "card",
       style: `position:absolute;left:222px;top:0;width:${w - 222}px;height:${hgt}px;padding:22px 26px;`,
-      html: `<div class="mono" style="font-size:20px;color:var(--muted)">${esc(spec.title ?? "")}</div>
+      html: `<div class="mono" style="font-size:22px;color:var(--muted);white-space:nowrap">${esc(spec.title ?? "")}</div>
              <div data-rows style="margin-top:14px"></div>`,
     });
     const rowWrap = card.querySelector("[data-rows]");
-    const rowEls = rows.map((r) => {
+    const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
+    const rowEls = rows.map((r, i) => {
       const row = h("div", {
-        style: "display:flex;align-items:center;gap:14px;height:58px;",
-        html: `<div style="width:118px;font:650 26px var(--font-ui);color:var(--ink)">${esc(r.label)}</div>
-               <div style="flex:1;height:22px;border:3px solid var(--line);border-radius:11px;background:var(--cardAlt);overflow:hidden"><div data-bar style="height:100%;width:0;background:${r.color ?? "var(--navy)"}"></div></div>
-               <div data-q style="width:26px;font:700 28px var(--font-ui);color:var(--muted)">?</div>`,
+        style:
+          "position:relative;display:flex;align-items:center;gap:14px;height:62px;padding:0 10px;margin:0 -10px;border-radius:14px;",
+        html: `<div data-glow style="position:absolute;inset:3px 0;border-radius:14px;background:var(--gold);border:3px solid var(--line);opacity:0"></div>
+               <div class="mono" style="position:relative;width:62px;font-size:23px;letter-spacing:0.04em;color:var(--accent)">${ORDINALS[i] ?? i + 1}</div>
+               <div style="position:relative;font:650 30px var(--font-ui);color:var(--ink);white-space:nowrap">${esc(r.label)}</div>
+               <div data-lead style="position:relative;flex:1;height:0;border-top:4px dotted var(--line);opacity:0.28;transform-origin:0 50%"></div>
+               <div data-q style="position:relative;width:22px;font:700 30px var(--font-ui);color:var(--muted)">?</div>`,
       });
       rowWrap.appendChild(row);
-      return { row, bar: row.querySelector("[data-bar]"), q: row.querySelector("[data-q]") };
+      return {
+        row,
+        glow: row.querySelector("[data-glow]"),
+        lead: row.querySelector("[data-lead]"),
+        q: row.querySelector("[data-q]"),
+      };
     });
     const tag = h(
       "div",
       {
         class: "tag",
-        style: `position:absolute;right:-26px;top:-30px;background:var(--red);color:#fff;opacity:0`,
+        style: `position:absolute;right:-24px;top:-34px;background:var(--red);color:#fff;opacity:0`,
       },
       spec.tag ?? "",
     );
@@ -75,14 +89,18 @@ const prop = {
     const rowsAt = ctx.at(spec.rowsAt ?? 0.5);
     state.arrow.style.opacity = clamp(prog(t, rowsAt - 0.18, rowsAt)).toFixed(3);
     state.arrow.style.transform = `translateX(${(Math.sin(t * 7) * 3).toFixed(2)}px)`;
-    const rows = spec.rows ?? [];
-    state.rowEls.forEach(({ row, bar, q }, i) => {
+    const hi = spec.highlight;
+    const hiAt = hi ? ctx.at(hi.at ?? "end-0.8") : Infinity;
+    state.rowEls.forEach(({ row, glow, lead, q }, i) => {
       const at = rowsAt + i * 0.17;
-      const p = ease.outCubic(prog(t, at, at + 0.42));
       row.style.opacity = clamp(prog(t, at - 0.08, at + 0.06)).toFixed(3);
-      row.style.transform = `translateX(${((1 - ease.outCubic(prog(t, at - 0.08, at + 0.2))) * 26).toFixed(2)}px)`;
-      bar.style.width = `${(p * (rows[i].fill ?? 50)).toFixed(2)}%`;
-      q.style.opacity = (0.5 + 0.5 * Math.sin(t * 6 + i)).toFixed(3);
+      const slide = (1 - ease.outCubic(prog(t, at - 0.08, at + 0.2))) * 26;
+      // the spotlighted row nudges forward when its word is spoken
+      const on = hi && i === hi.row ? settle(t - hiAt, 18) : 0;
+      row.style.transform = `translateX(${(slide + on * 8).toFixed(2)}px) scale(${(1 + on * 0.04).toFixed(4)})`;
+      glow.style.opacity = on.toFixed(3);
+      lead.style.transform = `scaleX(${ease.outCubic(prog(t, at, at + 0.4)).toFixed(4)})`;
+      q.style.opacity = (0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t * 6 + i))).toFixed(3);
     });
     if (spec.tag) {
       const at = ctx.at(spec.tagAt ?? "end-0.9");
@@ -99,6 +117,7 @@ const prop = {
       name: "tick",
       pitch: 0.8 + i * 0.12,
     }));
+    if (spec.highlight) cues.push({ t: ctx.at(spec.highlight.at ?? "end-0.8"), name: "pop" });
     if (spec.tag) cues.push({ t: ctx.at(spec.tagAt ?? "end-0.9"), name: "pop" });
     return cues;
   },

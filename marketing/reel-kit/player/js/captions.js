@@ -1,6 +1,7 @@
 // Karaoke captions: each beat's sentence is laid out in full in a "ghost" tone, then every word
 // turns to ink on the frame the voice reaches it. Accent words (wrapped in *asterisks* in
-// reel.json) are italic, tinted before they are spoken, and get an underline that draws in.
+// reel.json) are italic from the start but grey; on their frame they take the accent colour and
+// their underline appears at full width.
 //
 // The sentence being visible before it is spoken is deliberate: it lets sound-off viewers read
 // ahead while the reveal keeps sound-on viewers in sync with the voice.
@@ -68,7 +69,12 @@ export function buildCaptions(layerEl, beats, { eyebrow = "" } = {}) {
         block.appendChild(tail);
         span._tail = tail;
       }
-      if (i < beat.words.length - 1) block.appendChild(document.createTextNode(" "));
+      if (i < beat.words.length - 1) {
+        // a one- or two-letter word ("a", "to") stays with the word after it, so it is never
+        // stranded at the end of a line
+        const short = w.text.length <= 2 && !w.tail && !/[.,!?;:]$/.test(w.text);
+        block.appendChild(document.createTextNode(short ? "\u00a0" : " "));
+      }
       return span;
     });
     layerEl.appendChild(block);
@@ -126,7 +132,14 @@ export function buildCaptions(layerEl, beats, { eyebrow = "" } = {}) {
       }
       const beat = beats[i];
       spans.forEach((span, k) => {
-        const at = beat.words[k].t0 - LEAD;
+        // The first word of a beat lights one frame after the cut (the whole sentence is grey for
+        // exactly one frame). Frame 0 is "swap + 1": the hook's first word is already lit on
+        // the cover/loop frame. `prelit: n` inks the first n words from the beat's first frame,
+        // which lets the hook read as a phrase ("No will?") on the autoplay still.
+        let at = beat.words[k].t0 - LEAD;
+        const prelit = beat.prelit ?? (i === 0 ? 1 : 0);
+        if (k < prelit) at = beat.start - 1;
+        else if (k === 0) at = Math.min(at, beat.start + 1 / 30 + 1e-6);
         const on = t >= at;
         const dy = on ? DROP * (1 - prog(t, at, at + RISE)) : 0;
         const key = on ? Math.round(dy * 10) : -1;

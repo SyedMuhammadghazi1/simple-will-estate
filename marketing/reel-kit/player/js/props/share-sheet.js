@@ -92,10 +92,11 @@ const prop = {
 
   sfx(spec, ctx) {
     const at = ctx.at(spec.pickAt ?? 0.6);
+    // This prop sits under the reel's spoken ask, so it stays quiet: a click on the pick and a
+    // soft chime once the line has been said.
     return [
       { t: at, name: "click" },
-      { t: at + 0.34, name: "whoosh-in", gain: 0.7 },
-      { t: at + 0.64, name: "chime", gain: 0.9 },
+      { t: Math.max(at + 0.9, ctx.at("end") - 0.25), name: "chime", gain: 0.45 },
     ];
   },
 };

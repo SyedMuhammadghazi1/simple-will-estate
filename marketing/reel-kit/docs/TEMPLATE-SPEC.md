@@ -164,32 +164,82 @@ last word   picture holds 0.3–0.6 s, then the cycle repeats
 | Cut sound | the same soft 0.65 s low swell on every caption cut                                     | `cut`                                      |
 | Effects   | sparse and literal: tied to a prop action or the key word of the beat                   | per-prop `sfx()` hooks                     |
 | Dark beat | the one loud effect: a low boom and a held rumble                                       | `sub` + `drone`                            |
-| End card  | silent                                                                                  | UI clicks only                             |
+| End card  | silent                                                                                  | spoken follow line over the bed (optional) |
 | Master    | −14.2 LUFS integrated, −0.7 dBTP, dual mono                                             | −14 LUFS, −1 dBTP                          |
 
 ## 7. The dark beat, end card and loop
 
-- **Dark beat**: the whole frame flips to the dark palette in three frames on the swap; the board
-  outline and set dressing sink to faint silhouettes, the mascot stays lit, the caption inverts,
-  and the prop is a row of chips plus one huge numeral with its unit in accent italic. It is the
-  shortest sentence in the reel and is followed by the longest pause (0.62 s).
-- **End card**: the stage gives way to a full-frame gradient; the mascot moves to centre at
-  about 1.4× scale; a two-line follow headline (second half in accent italic), the comment pill
-  with the keyword typing itself and the heart turning red, one sub-line, and the handle in an
-  outlined pill. No voice, no music.
-- **Loop**: the last ~0.4 s cross-dissolves into frame 0, and frame 0 is "swap + 1": the hook
-  caption with its first word already lit, the hook prop at rest, the mascot starting its hop.
-  There is no intro, logo sting or fade from black — the reel begins mid-thought.
+- **Dark beat**: a near-opaque dark layer fades in linearly over four frames starting on the swap
+  and fades out over the three frames _before_ the next swap, so the following beat opens fully
+  lit. Board outline and set dressing sink to faint ghosts; the mascot and the beat's props stay
+  at full brightness above the layer; the caption inverts. Props here pop or scale in and fade
+  out (five frames) instead of sliding. In the reference it is the shortest sentence in the reel
+  (five words), its prop is a row of date chips popping on two frames apart plus one huge numeral
+  with its unit in accent italic, and it is followed by the longest pause (0.62 s).
+- **End card** (reference): a hard cut from the stage to a full-frame sky gradient. Build order
+  after the cut: +0.03 s the mascot pops in at centre (about 1.45× stage size, scale 0→1 in ten
+  frames with a small landing); +0.23 s the headline, one word every two frames (fade, 30 px
+  rise); +0.50 s the comment card; +0.63 s the handle pill; +0.77 s the keyword types itself at
+  two frames per character with a blinking caret; +0.83 s the sub-line fades in; +1.10 s the
+  heart turns red. Everything is settled for barely 0.6 s. No voice, no music, no effects.
+- **Loop**: at +1.90 s a nine-frame linear cross-dissolve to a _frozen_ frame 0. Frame 0 is
+  "swap + 1": the hook caption with its first word already lit, the hook prop at rest, the mascot
+  about to hop. There is no intro, logo sting or fade from black — the reel begins mid-thought,
+  with the voice on frame 1.
+- **Mascot bookkeeping**: exactly one hop per swap (lift-off one frame after it), a three-frame
+  blink on a fixed 97-frame timer, the pose catalogue reused across beats (cheer for reveals,
+  point for demonstrations, wink-and-point for the playful beats, heavy-lidded deadpan for the
+  problem and the dark beat).
+
+The kit's own end card keeps the build order but not the hard cut: the table rises to fill the
+frame and the mascot hops to centre, which keeps the "one continuous shot" promise to the end. It
+is spoken rather than silent and holds longer, because it carries a legal line that has to be
+readable (see section 8).
 
 ## 8. Where the kit deliberately departs
 
-- **Disclosure is built into the stage.** The pad's binding strip carries an always-on fine-print
-  line, and the end card has a legal line. A regulated product needs its caveats inside the
-  video, not only in the caption.
-- **The ask is a send first.** Instagram has named sends per reach as the strongest signal for
-  reaching non-followers, and has at times treated "comment a word" prompts as engagement bait.
-  The kit's last spoken line can be a share prompt (`share-sheet` prop) with the comment keyword
-  shown on the silent end card and in the post caption.
+Sections 1–7 describe the reference. The kit follows them except here:
+
+- **Disclosure is built into the stage.** The eyebrow and the pad's binding strip are on screen
+  for the whole reel, so they carry what must always be readable (who is speaking, and that it is
+  not advice); the end card shows the full sentence for its whole hold, and the subtitle file
+  repeats it. A regulated product needs its caveats inside the video, not only in the caption.
+  Props are staged below the strip so it is never covered. `lint.require` in reel.json makes the
+  validator fail a reel whose disclosures have been removed.
+- **Footnotes are first-class.** The reference shows one caveat chip; the kit has a `note` prop
+  and expects one wherever a claim needs a hedge or a source, set at the reference's footnote
+  size (27 px), kept inside the safe zone and on screen for at least 2 s (the validator and the
+  render's safe-zone check enforce both).
+- **The ask is a send first, and the keyword is optional.** Instagram has named sends per reach
+  as the strongest signal for reaching non-followers, and has given "comment a specific word" as
+  an example of engagement bait (while saying genuine deliver-something flows are not treated
+  that way). The kit's last spoken line is a share prompt (`share-sheet` prop). Its default end
+  card asks only for a follow; `endcard.keyword` adds the reference's typed-comment pill, and is
+  meant to be tested as a variant (`build.mjs --variant`) rather than assumed.
+- **The end card is spoken.** The reference's card is 2.3 s of silence. The kit's carries a legal
+  line that needs reading time, and several seconds of silence at the end costs completion, so
+  `endcard.say` gives the card a voiced line: the headline's words appear as they are spoken, the
+  mascot says them, and the music bed runs to the loop (`music.until: "end"`).
+- **The hook can open on a phrase.** The reference lights one word on frame 0. `prelit` inks the
+  first few words from the first frame, so the autoplay still reads "No will?" rather than "No".
+  Unlit words are also a little darker than a 35% tint (about 2.4:1 on the wall), for the same
+  reason: frame 0 has to be legible as a still.
+- **More idle motion.** A drawn stage is stiller than the reference's 3D one, so props keep a
+  slow loop between their cued events (a document rocks, a gavel sways, the mascot bobs), and
+  cues are spread so something lands roughly every second.
+- **Pre-roll.** A travelling prop starts two frames before the swap, so its first pixels are on
+  screen on the cut. For those two frames the new prop is entering at the right edge while the
+  old one is clearing the left (the reference keeps them strictly apart and accepts a nearly
+  empty stage on the swap frame).
+- **Dark beat.** The pad and its outline are re-coloured from the dark palette rather than dimmed
+  to a ghost, and the beat's prop is drawn in the dark palette too. Text and outlines flip at the
+  midpoint of the fade instead of fading, so the caption never passes through the wall colour.
+- **End card.** The table rises to fill the frame and the mascot hops to centre (no hard cut);
+  the legal line comes in with the card and stays for all of it; the stack is laid out from its
+  measured heights so it always ends inside the safe zone.
+- **Mascot.** A beat may add a second expression on a word (a reaction), where the reference
+  holds one pose per beat; arm changes and the end card's heart are allowed a small overshoot.
+  "No overshoot" applies to props.
 - **Original everything**: its own stage (a ruled pad on a table), mascot (a gold rosette),
   typefaces, palette, props, sound effects and music.
 
@@ -207,14 +257,26 @@ Written by `scripts/vo.py`; write it yourself to use a recorded voice.
       "start": 0.0,
       "end": 1.43,
       "vo": [0.1, 1.23],
+      "text": "No will?",
       "words": [
         { "t0": 0.1, "t1": 0.21 },
         { "t0": 0.21, "t1": 0.61 }
       ]
     }
-  ]
+  ],
+  "endcard": {
+    "text": "Follow for more.",
+    "vo": [26.4, 27.6],
+    "words": [
+      { "t0": 26.4, "t1": 26.8 },
+      { "t0": 26.8, "t1": 27.0 },
+      { "t0": 27.0, "t1": 27.6 }
+    ]
+  }
 }
 ```
 
 One `words` entry per whitespace-separated caption word, in order; `t0` is when the word starts
-being spoken. Beat `start`/`end` are the swap frames.
+being spoken. Beat `start`/`end` are the swap frames. `text` is the wording the timings belong
+to: the player refuses a timing file whose text no longer matches the caption. `endcard` is
+present only when the reel has `endcard.say`.

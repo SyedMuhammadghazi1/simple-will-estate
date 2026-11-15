@@ -34,3 +34,5 @@ marketing/reel-kit/reels/*/mix.wav
 marketing/reel-kit/reels/*/cues.json
 marketing/reel-kit/reels/*/timeline.resolved.json
 __pycache__/
+# generated test versions of a reel (build.mjs --variant)
+marketing/reel-kit/reels/*--*/
