@@ -144,7 +144,11 @@ async function main() {
     await mkdir(exp, { recursive: true });
     await copyFile(path.join(KIT, "out", `${slug}.mp4`), path.join(exp, `${slug}.mp4`));
     if (variant) {
-      await copyFile(srt, path.join(exp, `captions--${variant}.srt`));
+      // a variant gets its own subtitle file only when its words differ from the original's
+      const baseSrt = path.join(exp, "captions.srt");
+      const same =
+        existsSync(baseSrt) && (await readFile(baseSrt, "utf8")) === (await readFile(srt, "utf8"));
+      if (!same) await copyFile(srt, path.join(exp, `captions--${variant}.srt`));
     } else {
       await copyFile(path.join(KIT, "out", `${slug}-cover.png`), path.join(exp, "cover.png"));
       await copyFile(srt, path.join(exp, "captions.srt"));
