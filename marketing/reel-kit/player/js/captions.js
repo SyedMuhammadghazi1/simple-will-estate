@@ -57,23 +57,37 @@ export function buildCaptions(layerEl, beats, { eyebrow = "" } = {}) {
     block.style.width = `${LAYOUT.captionMaxW}px`;
     block.style.fontSize = `${beat.captionSize ?? LAYOUT.captionSize}px`;
     block.style.lineHeight = `${beat.captionLine ?? LAYOUT.captionLine}px`;
+    // Lines are balanced by default (no stranded last word). A caption made of two sentences
+    // can read better broken at the full stop: "captionWrap": "wrap" fills the first line.
+    if (beat.captionWrap) block.style.textWrap = beat.captionWrap;
+    // A one- or two-letter word ("a", "to", "is") stays with the word after it, so it is never
+    // stranded at the end of a line. The words are inline blocks, where a no-break space does
+    // not hold, so such a run is wrapped in a nowrap group instead.
+    let group = null;
     const spans = beat.words.map((w, i) => {
+      const last = i === beat.words.length - 1;
+      const short = !last && w.text.length <= 2 && !w.tail && !/[.,!?;:]$/.test(w.text);
+      if (short && !group) {
+        group = document.createElement("span");
+        group.style.whiteSpace = "nowrap";
+        block.appendChild(group);
+      }
+      const parent = group ?? block;
       const span = document.createElement("span");
       span.className = w.accent ? "w acc" : "w";
       span.textContent = w.text;
-      block.appendChild(span);
+      parent.appendChild(span);
       if (w.tail) {
         const tail = document.createElement("span");
         tail.className = "w tail";
         tail.textContent = w.tail;
-        block.appendChild(tail);
+        parent.appendChild(tail);
         span._tail = tail;
       }
-      if (i < beat.words.length - 1) {
-        // a one- or two-letter word ("a", "to") stays with the word after it, so it is never
-        // stranded at the end of a line
-        const short = w.text.length <= 2 && !w.tail && !/[.,!?;:]$/.test(w.text);
-        block.appendChild(document.createTextNode(short ? "\u00a0" : " "));
+      if (short) parent.appendChild(document.createTextNode(" "));
+      else {
+        group = null;
+        if (!last) block.appendChild(document.createTextNode(" "));
       }
       return span;
     });

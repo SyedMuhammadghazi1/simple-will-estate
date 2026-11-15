@@ -43,7 +43,7 @@ const prop = {
     });
     const card = h("div", {
       class: "card",
-      style: `position:absolute;left:222px;top:0;width:${w - 222}px;height:${hgt}px;padding:22px 26px;`,
+      style: `position:absolute;left:222px;top:0;width:${w - 222}px;height:${hgt}px;padding:32px 26px 22px;`,
       html: `<div class="mono" style="font-size:22px;color:var(--muted);white-space:nowrap">${esc(spec.title ?? "")}</div>
              <div data-rows style="margin-top:14px"></div>`,
     });
@@ -71,7 +71,7 @@ const prop = {
       "div",
       {
         class: "tag",
-        style: `position:absolute;right:-24px;top:-34px;background:var(--red);color:#fff;opacity:0`,
+        style: `position:absolute;right:-24px;top:-28px;background:var(--red);color:#fff;opacity:0`,
       },
       spec.tag ?? "",
     );

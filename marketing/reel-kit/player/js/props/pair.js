@@ -1,7 +1,10 @@
 // Two people and what passes between them. The link snaps on cue and a value lands under the
 // second person. Used for "your partner gets nothing" style beats.
 //
-// spec: { left: { label, color }, right: { label, color }, breakAt, valueLabel, value, tag, tagAt }
+// spec: { left: { label, color }, right: { label, color }, breakAt, valueLabel, value, valueAt,
+//         valueLabelAt   the card and its label may arrive before the value lands in it, so a
+//                        scope line ("no will, most states") has time to be read,
+//         tag, tagAt }
 
 import { clamp, ease, lerp, prog, settle } from "../timing.js";
 import { person } from "./_art.js";
@@ -35,7 +38,7 @@ const prop = {
         "position:absolute;left:420px;top:232px;width:220px;min-height:128px;padding:16px 24px;transform-origin:50% 0;opacity:0",
       // "\n" in valueLabel breaks the line, so the number can carry its own scope
       html: `<div class="mono" style="font-size:21px;line-height:25px;letter-spacing:0.08em;color:var(--muted);white-space:nowrap">${esc(spec.valueLabel ?? "").replace(/\n/g, "<br>")}</div>
-             <div class="serif" style="font-size:66px;line-height:1.05;font-weight:640;color:var(--red)">${esc(spec.value ?? "")}</div>`,
+             <div data-num class="serif" style="display:inline-block;transform-origin:0 70%;font-size:66px;line-height:1.05;font-weight:640;color:var(--red)">${esc(spec.value ?? "")}</div>`,
     });
     const tag = h(
       "div",
@@ -55,6 +58,7 @@ const prop = {
       heart: link.querySelector("[data-heart]"),
       rightAv: right.querySelector("[data-av]"),
       value,
+      num: value.querySelector("[data-num]"),
       tag,
     };
   },
@@ -82,9 +86,13 @@ const prop = {
     state.rightAv.style.filter = `drop-shadow(7px 8px 0 var(--shadow)) saturate(${(1 - grey * 0.75).toFixed(3)})`;
 
     const vAt = spec.valueAt != null ? ctx.at(spec.valueAt) : brk + 0.12;
-    const vp = settle(t - vAt, 18);
-    state.value.style.opacity = clamp(prog(t, vAt, vAt + 0.08)).toFixed(3);
-    state.value.style.transform = `rotate(${lerp(8, 3, vp).toFixed(2)}deg) scale(${lerp(0.6, 1, vp).toFixed(4)})`;
+    const cAt = spec.valueLabelAt != null ? Math.min(vAt, ctx.at(spec.valueLabelAt)) : vAt;
+    const cp = settle(t - cAt, 18);
+    state.value.style.opacity = clamp(prog(t, cAt, cAt + 0.08)).toFixed(3);
+    state.value.style.transform = `rotate(${lerp(8, 3, cp).toFixed(2)}deg) scale(${lerp(0.6, 1, cp).toFixed(4)})`;
+    const np = settle(t - vAt, 22);
+    state.num.style.opacity = clamp(prog(t, vAt, vAt + 0.06)).toFixed(3);
+    state.num.style.transform = `scale(${lerp(cAt < vAt ? 1.8 : 1, 1, np).toFixed(4)})`;
     if (spec.tag) {
       const at = ctx.at(spec.tagAt ?? 0.25);
       const p = settle(t - at, 18);
@@ -96,7 +104,11 @@ const prop = {
   sfx(spec, ctx) {
     const brk = ctx.at(spec.breakAt ?? 0.9);
     const cues = [{ t: brk, name: "buzz", gain: 0.8 }];
-    cues.push({ t: spec.valueAt != null ? ctx.at(spec.valueAt) : brk + 0.12, name: "pop" });
+    const vAt = spec.valueAt != null ? ctx.at(spec.valueAt) : brk + 0.12;
+    cues.push({ t: vAt, name: "pop" });
+    if (spec.valueLabelAt != null && ctx.at(spec.valueLabelAt) < vAt) {
+      cues.push({ t: ctx.at(spec.valueLabelAt), name: "tick", gain: 0.8 });
+    }
     return cues;
   },
 };

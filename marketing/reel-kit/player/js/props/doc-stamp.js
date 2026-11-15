@@ -5,7 +5,9 @@
 //   title, subtitle,
 //   bylineLabel, byline, typeAt,       a "written by:" line whose value types itself in
 //   bylineFrom, eraseAt,               an earlier value that is on the line first and is
-//                                      backspaced on cue, before `byline` is typed
+//                                      backspaced on cue as far as the letters it shares with
+//                                      `byline` ("your state" -> "you"); the rest is typed at
+//                                      typeAt, and the finished value gives a small pop
 //   stamp, stampAt, stampColor,        rubber stamp that slams down
 //   chip, chipAt, chipX, chipY,        small pill that pops in under the stamp (e.g. "opened:
 //                                      never"); position in % of the sheet (default 50, 86)
@@ -17,6 +19,13 @@ import { box, esc, h, setText } from "./_util.js";
 
 const TYPE_STEP = 0.045;
 const ERASE_STEP = 0.03;
+
+/** How many leading characters two strings have in common. */
+function sharedPrefix(a, b) {
+  let n = 0;
+  while (n < a.length && n < b.length && a[n] === b[n]) n++;
+  return n;
+}
 
 const prop = {
   build(el, spec) {
@@ -32,7 +41,7 @@ const prop = {
           <div class="serif" style="font-size:58px;line-height:1.04;font-weight:640;margin-top:8px;color:var(--ink)">${esc(spec.title ?? "")}</div>
           <div style="margin-top:22px;padding:14px 0 13px;border-top:3px solid var(--cardAlt);border-bottom:3px solid var(--cardAlt);white-space:nowrap">
             <span class="mono" style="font-size:24px;letter-spacing:0.02em;color:var(--muted)">${esc(spec.bylineLabel ?? "")}</span>
-            <span data-byline style="font:650 35px var(--font-ui);color:var(--accent);margin-left:8px"></span><span data-caret style="display:inline-block;width:3.5px;height:33px;background:var(--ink);margin-left:3px;vertical-align:-5px"></span>
+            <span data-byline style="display:inline-block;transform-origin:0 60%;font:650 35px var(--font-ui);color:var(--accent);margin-left:8px"></span><span data-caret style="display:inline-block;width:3.5px;height:33px;background:var(--ink);margin-left:3px;vertical-align:-5px"></span>
           </div>
           <div data-lines style="margin-top:24px"></div>
         </div>`,
@@ -75,16 +84,24 @@ const prop = {
     const spec = ctx.spec;
     const text = spec.byline ?? "";
     const typeAt = ctx.at(spec.typeAt ?? 0.3);
-    const n = t < typeAt ? 0 : clamp(Math.floor((t - typeAt) / TYPE_STEP) + 1, 0, text.length);
-    // an earlier author can be on the line first and get backspaced on cue
+    // an earlier author can be on the line first and get backspaced on cue, down to the
+    // letters the two values share
     const from = spec.bylineFrom ?? "";
+    const keep = sharedPrefix(from, text);
     const eraseAt = from ? ctx.at(spec.eraseAt ?? 0.3) : 0;
     const gone =
-      t < eraseAt ? 0 : clamp(Math.floor((t - eraseAt) / ERASE_STEP) + 1, 0, from.length);
-    const erasing = from && t >= eraseAt && gone < from.length;
-    setText(state.byline, n > 0 ? text.slice(0, n) : from.slice(0, from.length - gone));
-    const typing = (n > 0 && n < text.length) || erasing;
+      t < eraseAt ? 0 : clamp(Math.floor((t - eraseAt) / ERASE_STEP) + 1, 0, from.length - keep);
+    const erasing = from && t >= eraseAt && gone < from.length - keep;
+    const n =
+      t < typeAt ? 0 : clamp(Math.floor((t - typeAt) / TYPE_STEP) + 1, 0, text.length - keep);
+    const typed = t >= typeAt && !erasing;
+    setText(state.byline, typed ? text.slice(0, keep + n) : from.slice(0, from.length - gone));
+    const typing = (typed && keep + n < text.length) || erasing;
     state.caret.style.opacity = typing || Math.floor(t * 2.6) % 2 === 0 ? "1" : "0";
+    // the replaced value lands with a small pop, so the swap registers even if no key was typed
+    const doneAt = typeAt + (text.length - keep) * TYPE_STEP;
+    const pulse = from && t >= doneAt ? 1 + Math.exp(-9 * (t - doneAt)) * 0.32 : 1;
+    state.byline.style.transform = `scale(${pulse.toFixed(4)})`;
 
     // the stamp arrives big and fast, lands, and the sheet takes the hit
     let shake = 0;
@@ -113,13 +130,16 @@ const prop = {
   sfx(spec, ctx) {
     const cues = [];
     const text = spec.byline ?? "";
+    const from = spec.bylineFrom ?? "";
+    const keep = sharedPrefix(from, text);
     const typeAt = ctx.at(spec.typeAt ?? 0.3);
-    for (let i = 0; i < text.length; i += 2)
+    for (let i = 0; i < text.length - keep; i += 2)
       cues.push({ t: typeAt + i * TYPE_STEP, name: "key", gain: 0.7 });
-    if (spec.bylineFrom) {
+    if (from) {
       const eraseAt = ctx.at(spec.eraseAt ?? 0.3);
-      for (let i = 0; i < spec.bylineFrom.length; i += 3)
-        cues.push({ t: eraseAt + i * ERASE_STEP, name: "key", gain: 0.45, pitch: 0.8 });
+      for (let i = 0; i < from.length - keep; i += 3)
+        cues.push({ t: eraseAt + i * ERASE_STEP, name: "key", gain: 0.45 });
+      cues.push({ t: typeAt + (text.length - keep) * TYPE_STEP, name: "pop", gain: 0.6 });
     }
     if (spec.stamp) cues.push({ t: ctx.at(spec.stampAt ?? 1), name: "stamp" });
     if (spec.chip) cues.push({ t: ctx.at(spec.chipAt ?? 2), name: "pop" });

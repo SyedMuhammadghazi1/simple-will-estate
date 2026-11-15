@@ -224,6 +224,9 @@ Sections 1–7 describe the reference. The kit follows them except here:
   first few words from the first frame, so the autoplay still reads "No will?" rather than "No".
   Unlit words are also a little darker than a 35% tint (about 2.4:1 on the wall), for the same
   reason: frame 0 has to be legible as a still.
+- **Caption lines are balanced.** The reference fills each caption line before wrapping. The
+  kit balances the lines so a last word is never stranded, and keeps a one- or two-letter word
+  with the word after it. `captionWrap: "wrap"` on a beat restores the fill-first break.
 - **More idle motion.** A drawn stage is stiller than the reference's 3D one, so props keep a
   slow loop between their cued events (a document rocks, a gavel sways, the mascot bobs), and
   cues are spread so something lands roughly every second.

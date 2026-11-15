@@ -128,7 +128,7 @@
           "stamp": "Default",
           "stampAt": "w:yours",
           "chip": "opened: never",
-          "chipAt": "w:never"
+          "chipAt": "w:probably+0.15"
         },
         {
           "type": "note",
@@ -169,6 +169,11 @@
           "at": 0,
           "face": "worried",
           "pose": "shrug"
+        },
+        {
+          "at": "w:read",
+          "face": "look",
+          "pose": "chin"
         }
       ]
     },
@@ -179,7 +184,7 @@
         {
           "type": "formula-card",
           "x": 664,
-          "y": 1004,
+          "y": 1016,
           "rot": -2,
           "title": "Typical order",
           "items": ["car", "savings", "pet"],
@@ -227,7 +232,8 @@
           "face": "think",
           "pose": "chin"
         }
-      ]
+      ],
+      "captionWrap": "wrap"
     },
     {
       "id": "partner",
@@ -250,7 +256,8 @@
           "value": "$0",
           "valueAt": "w:nothing",
           "tag": "not married",
-          "tagAt": 0.2
+          "tagAt": 0.2,
+          "valueLabelAt": "w:usually+0.15"
         },
         {
           "type": "note",
@@ -275,7 +282,7 @@
           "pose": "chin"
         }
       ],
-      "gap": 0.5
+      "gap": 0.7
     },
     {
       "id": "kids",
@@ -333,8 +340,14 @@
           "at": 0,
           "face": "worried",
           "pose": "rest"
+        },
+        {
+          "at": "w:pick",
+          "face": "worried",
+          "pose": "shrug"
         }
-      ]
+      ],
+      "gap": 0.45
     },
     {
       "id": "turn",
@@ -349,13 +362,13 @@
         "title": "You.",
         "bylineLabel": "Written by:",
         "byline": "you",
-        "typeAt": "w:where",
+        "typeAt": "w:you#2",
         "stamp": "Your call",
-        "stampAt": "w:decide+0.2",
+        "stampAt": "w:decide",
         "stampColor": "var(--green)",
         "stampRot": 9,
         "bylineFrom": "your state",
-        "eraseAt": "w:replace"
+        "eraseAt": "w:replace+0.3"
       },
       "mascot": [
         {
@@ -374,7 +387,8 @@
           "pose": "cheer",
           "hop": 30
         }
-      ]
+      ],
+      "gap": 0.4
     },
     {
       "id": "how",
@@ -468,7 +482,7 @@
           "rot": -3,
           "w": 322,
           "enter": "pop",
-          "delay": "w:the",
+          "delay": 0.45,
           "text": "* most states:\n  signed by you\n  + 2 witnesses"
         }
       ]
@@ -516,6 +530,7 @@
     "sub": "Want the one-page checklist? See the caption.",
     "brand": "plainwill",
     "disclaimer": "Plainwill is not a law firm and is not a substitute for the advice of an attorney.",
-    "hold": 4.4
+    "hold": 5.4,
+    "lead": 0.4
   }
 }

@@ -76,6 +76,7 @@ Create `reels/<slug>/reel.json`:
       "id": "hook",
       "caption": "You *already* have a will.", // *asterisks* mark accent words
       "prelit": 2, // words inked on the first frame, so the autoplay still reads as a phrase
+      // "captionWrap": "wrap"  fills line 1 instead of balancing the lines (two-sentence captions)
       "prop": { "type": "doc-stamp", "enter": "none", "span": 3 /* stays for 3 beats */ },
       "mascot": [{ "at": 0, "face": "talk", "pose": "point" }],
     },

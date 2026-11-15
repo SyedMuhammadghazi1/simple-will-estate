@@ -159,6 +159,7 @@ async function main() {
           `reels/${slug}/checklist.html`,
           "--out",
           `reels/${slug}/export/checklist.pdf`,
+          "--png",
         ]);
       }
     }

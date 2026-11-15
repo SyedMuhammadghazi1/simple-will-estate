@@ -120,14 +120,16 @@ export function buildEndcard(backLayer, frontLayer, spec, timeline) {
   const T = {
     rise: 0.0,
     riseDur: 0.5,
-    hop: 0.06,
-    hopDur: 0.56,
+    hop: 0.02,
+    hopDur: 0.46,
     head: 0.36,
     pill: 0.74,
     type: 0.98,
     like: 1.62,
-    sub: 1.12,
-    brand: 1.26,
+    // the sub line and brand come up with the card, so that after the first half second only
+    // the headline is still arriving and the legal line can be read
+    sub: 0.3,
+    brand: 0.42,
   };
   const typeStep = 0.085;
 

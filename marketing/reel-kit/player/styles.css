@@ -75,8 +75,9 @@ body {
   position: absolute;
   font-family: var(--font-mono);
   font-weight: 500;
-  font-size: 23px;
-  letter-spacing: 0.2em;
+  /* the eyebrow can carry a disclosure ("not a law firm"): same cap height as the pad strip */
+  font-size: 28px;
+  letter-spacing: 0.17em;
   text-transform: uppercase;
   color: var(--eyebrow);
   white-space: nowrap;
@@ -92,7 +93,7 @@ body {
   font-optical-sizing: auto;
   letter-spacing: -0.012em;
   color: var(--ghost);
-  text-wrap: pretty;
+  text-wrap: balance;
 }
 .cap .w {
   display: inline-block;
