@@ -4,11 +4,11 @@ An Echelons AI reel in the "boy maths" format: what GTA 6 costs per hour, what t
 nights would cost as date nights, and what that money would have done in Take-Two stock,
 depending on when it was bought.
 
-| File                            | What it is                                            |
-| ------------------------------- | ----------------------------------------------------- |
+| File                            | What it is                                                  |
+| ------------------------------- | ----------------------------------------------------------- |
 | `export/echelons-gta-maths.mp4` | the reel: 1080 × 1920, 30 fps, H.264 High, AAC 48 kHz, 63 s |
-| `export/cover.png`              | cover: a real frame of the reel (the hook figure)     |
-| `export/captions.srt`           | subtitles, plus the end card's on-screen disclaimer   |
+| `export/cover.png`              | cover: a real frame of the reel (the hook figure)           |
+| `export/captions.srt`           | subtitles, plus the end card's on-screen disclaimer         |
 
 ## Before you post
 
