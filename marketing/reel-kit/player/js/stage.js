@@ -161,6 +161,25 @@ const GAMING_SET_SVG = `
 
 const TABLE_SETS = { desk: TABLE_SET_SVG, gaming: GAMING_SET_SVG };
 
+// "Bare" stage: just the wall, no pad, table or set. Props float on the background and the
+// fine print sits at the foot of the safe zone. Used by minimal themes (e.g. noir).
+const bareSvg = (fineprint) => `
+<svg class="layer" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g-wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color:var(--wallTop)"/>
+      <stop offset="1" style="stop-color:var(--wallBottom)"/>
+    </linearGradient>
+    <radialGradient id="g-glow" cx="0.5" cy="0.45" r="0.7">
+      <stop offset="0" style="stop-color:var(--wallGlow)" stop-opacity="0.9"/>
+      <stop offset="1" style="stop-color:var(--wallGlow)" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="0" y="0" width="${W}" height="${H}" fill="url(#g-wall)"/>
+  <rect x="0" y="0" width="${W}" height="${H}" fill="url(#g-glow)"/>
+  ${fineprint ? `<text id="pad-fineprint" x="${W / 2}" y="1236" text-anchor="middle" font-family="DM Mono, monospace" font-weight="500" font-size="24" letter-spacing="2" style="fill:var(--muted)">${fineprint}</text>` : ""}
+</svg>`;
+
 const TABLE_SVG = `
 <svg class="layer" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -191,11 +210,13 @@ function layer(parent, id, html = "") {
  */
 export function buildStage(root, theme, { disclaimer = "" } = {}) {
   const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
-  const back = layer(root, "l-back", backSvg(disclaimer ? esc(disclaimer.toUpperCase()) : ""));
-  const dressing = layer(root, "l-dressing", PAD_DRESSING_SVG);
+  const bare = theme.stage === "bare";
+  const fine = disclaimer ? esc(disclaimer.toUpperCase()) : "";
+  const back = layer(root, "l-back", bare ? bareSvg(fine) : backSvg(fine));
+  const dressing = layer(root, "l-dressing", bare ? "" : PAD_DRESSING_SVG);
   const props = layer(root, "l-props");
-  const set = layer(root, "l-set", TABLE_SETS[theme.set ?? "desk"] ?? TABLE_SET_SVG);
-  const table = layer(root, "l-table", TABLE_SVG);
+  const set = layer(root, "l-set", bare ? "" : (TABLE_SETS[theme.set ?? "desk"] ?? TABLE_SET_SVG));
+  const table = layer(root, "l-table", bare ? "" : TABLE_SVG);
   const endback = layer(root, "l-endback");
   const mascot = layer(root, "l-mascot");
   const caption = layer(root, "l-caption");

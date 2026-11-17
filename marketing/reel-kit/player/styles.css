@@ -95,6 +95,14 @@ body {
   color: var(--ghost);
   text-wrap: balance;
 }
+.eyebrow-mark {
+  display: inline-block;
+  vertical-align: -0.28em;
+  margin-right: 14px;
+}
+.eyebrow-mark svg {
+  display: block;
+}
 .cap .w {
   display: inline-block;
   color: var(--ghost);

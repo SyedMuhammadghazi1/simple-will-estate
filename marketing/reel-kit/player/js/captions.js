@@ -41,10 +41,27 @@ export function plainCaption(markup) {
     .join(" ");
 }
 
-export function buildCaptions(layerEl, beats, { eyebrow = "" } = {}) {
+export function buildCaptions(layerEl, beats, { eyebrow = "", style = {}, mark = "" } = {}) {
+  // a theme can restyle the caption block: { align, size, line, y, left, width }
+  const S = {
+    align: "left",
+    size: LAYOUT.captionSize,
+    line: LAYOUT.captionLine,
+    y: LAYOUT.captionY,
+    left: LAYOUT.SIDE,
+    width: LAYOUT.captionMaxW,
+    ...style,
+  };
   const brow = document.createElement("div");
   brow.className = "eyebrow";
-  brow.textContent = eyebrow;
+  // an optional brand mark (inline SVG from the theme) sits before the eyebrow text
+  if (mark) {
+    const m = document.createElement("span");
+    m.className = "eyebrow-mark";
+    m.innerHTML = mark;
+    brow.appendChild(m);
+  }
+  brow.appendChild(document.createTextNode(eyebrow));
   brow.style.left = `${LAYOUT.SIDE}px`;
   brow.style.top = `${LAYOUT.eyebrowY}px`;
   layerEl.appendChild(brow);
@@ -52,11 +69,12 @@ export function buildCaptions(layerEl, beats, { eyebrow = "" } = {}) {
   const blocks = beats.map((beat) => {
     const block = document.createElement("div");
     block.className = "cap";
-    block.style.left = `${LAYOUT.SIDE}px`;
-    block.style.top = `${LAYOUT.captionY}px`;
-    block.style.width = `${LAYOUT.captionMaxW}px`;
-    block.style.fontSize = `${beat.captionSize ?? LAYOUT.captionSize}px`;
-    block.style.lineHeight = `${beat.captionLine ?? LAYOUT.captionLine}px`;
+    block.style.left = `${S.left}px`;
+    block.style.top = `${S.y}px`;
+    block.style.width = `${S.width}px`;
+    block.style.textAlign = S.align;
+    block.style.fontSize = `${beat.captionSize ?? S.size}px`;
+    block.style.lineHeight = `${beat.captionLine ?? S.line}px`;
     // Lines are balanced by default (no stranded last word). A caption made of two sentences
     // can read better broken at the full stop: "captionWrap": "wrap" fills the first line.
     if (beat.captionWrap) block.style.textWrap = beat.captionWrap;

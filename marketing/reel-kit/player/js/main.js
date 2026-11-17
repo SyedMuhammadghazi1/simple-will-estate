@@ -57,12 +57,18 @@ async function boot() {
   );
   await document.fonts.ready;
 
-  const captions = buildCaptions(layers.caption, tl.beats, { eyebrow: reel.eyebrow ?? "" });
+  const captions = buildCaptions(layers.caption, tl.beats, {
+    eyebrow: reel.eyebrow ?? "",
+    style: theme.caption,
+    mark: theme.mark,
+  });
   warnings.push(...captions.fit(reel.maxCaptionLines ?? 3));
 
   // ---- props -------------------------------------------------------------------------------
-  const padCx = LAYOUT.pad.x + LAYOUT.pad.w / 2;
-  const padCy = (LAYOUT.pad.y + LAYOUT.pad.binding + LAYOUT.tableY) / 2;
+  // default prop anchor: the pad's centre, or the middle of the safe zone on a bare stage
+  const bare = theme.stage === "bare";
+  const padCx = bare ? LAYOUT.W / 2 : LAYOUT.pad.x + LAYOUT.pad.w / 2;
+  const padCy = bare ? 900 : (LAYOUT.pad.y + LAYOUT.pad.binding + LAYOUT.tableY) / 2;
   const instances = [];
   const sfx = [];
   tl.beats.forEach((beat, i) => {
@@ -133,7 +139,7 @@ async function boot() {
     // every caption cut gets the same soft low swell; a turn to dark gets the one big hit
     if (i > 0) sfx.push({ t: beat.start, name: "cut" });
     const wasDark = i > 0 && tl.beats[i - 1].mood === "dark";
-    if (beat.mood === "dark" && !wasDark) {
+    if (beat.mood === "dark" && !wasDark && beat.moodSfx !== false) {
       sfx.push({ t: beat.start, name: "sub" });
       sfx.push({ t: beat.start, name: "drone", dur: beat.end - beat.start });
     }
@@ -141,6 +147,8 @@ async function boot() {
 
   // ---- mascot ------------------------------------------------------------------------------
   const mascot = buildMascot(layers.mascot, LAYOUT.mascot, theme.mascot);
+  // a theme without a mascot (theme.mascot === false) keeps the timing code but hides it
+  if (theme.mascot === false) layers.mascot.style.display = "none";
   // One pose per beat, swapped on the cut with a small hop; extra cues inside a beat (reacting
   // to a word) change the face without hopping unless they ask to.
   const cues = [];

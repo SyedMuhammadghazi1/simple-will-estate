@@ -55,6 +55,53 @@ export const THEMES = {
     },
   },
 
+  // Minimal dark: no pad, table or mascot; centred captions; props float on near-black. Mood
+  // "dark" flips to a pale paper page instead (used for the beat where the maths lands).
+  noir: {
+    fonts: {
+      caption: '"Fraunces", Georgia, serif',
+      ui: '"Inter", system-ui, sans-serif',
+      mono: '"DM Mono", ui-monospace, monospace',
+    },
+    stage: "bare",
+    mascot: false,
+    caption: { align: "center", size: 58, line: 74, y: 362, left: 90, width: 900 },
+    // Echelons AI mark: three rising steps, the last one lit
+    mark: `<svg viewBox="0 0 40 34" width="40" height="34"><rect x="0" y="22" width="11" height="12" rx="2" fill="currentColor" opacity="0.55"/><rect x="14" y="12" width="11" height="22" rx="2" fill="currentColor" opacity="0.8"/><rect x="28" y="0" width="12" height="34" rx="2" fill="#7c5cff"/></svg>`,
+    endcard: { top: "#121117", bottom: "#07070a", glow: "124,92,255", accent: "#a991ff" },
+    colors: {
+      wallTop: ["#121216", "#ecebe6"],
+      wallBottom: ["#08080a", "#dddbd4"],
+      wallGlow: ["#1c1a2b", "#f6f5f1"],
+      tableTop: ["#121216", "#ecebe6"],
+      tableFront: ["#121216", "#ecebe6"],
+      tableFrontLow: ["#121216", "#ecebe6"],
+      pad: ["#121216", "#ecebe6"],
+      padRule: ["#121216", "#ecebe6"],
+      padMargin: ["#121216", "#ecebe6"],
+      padBinding: ["#121216", "#ecebe6"],
+      padShadow: ["#121216", "#ecebe6"],
+      ink: ["#f4f3ef", "#16161a"],
+      ghost: ["#5b5a63", "#a9a7a0"],
+      accent: ["#3ee08f", "#13945a"],
+      eyebrow: ["#f4f3ef", "#16161a"],
+      line: ["#3a3942", "#c9c6bd"],
+      card: ["#17171c", "#f7f6f2"],
+      cardAlt: ["#24232b", "#e4e2dc"],
+      navy: ["#7c5cff", "#5b3fe0"],
+      navySoft: ["#24232b", "#e4e2dc"],
+      gold: ["#f6c445", "#e0a923"],
+      goldDeep: ["#e09a23", "#c47f12"],
+      amber: ["#7c5cff", "#5b3fe0"],
+      red: ["#ff5d5d", "#d23b3b"],
+      green: ["#3ee08f", "#13945a"],
+      greenSoft: ["#163326", "#dff3e8"],
+      sky: ["#2a2840", "#d9d6f2"],
+      muted: ["#8a8893", "#6b6962"],
+      shadow: ["#000000", "#c9c6bd"],
+    },
+  },
+
   // A warm evening palette for entertainment and gaming explainers: peach wall, plum table,
   // magenta accent, teal as the second colour. Dark mood is a neon night.
   sunset: {

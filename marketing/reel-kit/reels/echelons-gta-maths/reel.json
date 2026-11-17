@@ -1,0 +1,506 @@
+{
+  "id": "echelons-gta-maths",
+  "theme": "noir",
+  "fps": 30,
+  "eyebrow": "Echelons AI",
+  "disclaimer": "Not financial advice · not affiliated with Rockstar",
+  "voice": {
+    "engine": "kokoro",
+    "voice": "am_michael",
+    "speed": 1.13,
+    "lead": 0.1,
+    "gap": 0.18
+  },
+  "music": {
+    "until": "end"
+  },
+  "lint": {
+    "require": [
+      {
+        "field": "disclaimer",
+        "includes": ["not financial advice"]
+      },
+      {
+        "field": "endcard.disclaimer",
+        "includes": ["not financial advice", "not affiliated"]
+      }
+    ],
+    "banned": [
+      "guarantee",
+      "risk-free",
+      "/\\bfree\\b/",
+      "will make you",
+      "sure thing",
+      "can't lose",
+      "leak",
+      "get rich"
+    ]
+  },
+  "beats": [
+    {
+      "id": "hook",
+      "caption": "GTA 6 could actually *save* you *$5,968.*",
+      "prelit": 2,
+      "props": [
+        {
+          "type": "figure",
+          "y": 860,
+          "enter": "none",
+          "label": "Boy maths · hear me out",
+          "value": 5968,
+          "from": 1000,
+          "prefix": "$",
+          "countAt": 0,
+          "countDur": 2.3,
+          "color": "green",
+          "size": 180
+        }
+      ]
+    },
+    {
+      "id": "price",
+      "caption": "The game itself is *$79.99.*",
+      "props": [
+        {
+          "type": "price-tags",
+          "y": 880,
+          "tags": [
+            {
+              "label": "Standard edition",
+              "price": "$79.99",
+              "note": "US · PS5 / Xbox",
+              "at": 0.1
+            }
+          ],
+          "scale": 1.5
+        }
+      ]
+    },
+    {
+      "id": "hours",
+      "caption": "Rockstar's studio head said his own run took about *80 hours.*",
+      "props": [
+        {
+          "type": "quote",
+          "y": 900,
+          "source": "AS REPORTED",
+          "date": "AUG 2026",
+          "headline": "A Rockstar boss's own GTA 6 run took about 80 hours",
+          "quote": "Story plus some side goals: about 80 hours.",
+          "highlight": "80 hours",
+          "highlightAt": "w:80",
+          "by": "ROB NELSON",
+          "role": "CO-STUDIO HEAD, ROCKSTAR NORTH",
+          "scale": 1.08
+        }
+      ]
+    },
+    {
+      "id": "dollar",
+      "caption": "That's about a *dollar* an hour of fun.",
+      "props": [
+        {
+          "type": "maths",
+          "y": 870,
+          "lines": [
+            {
+              "text": "$79.99 ÷ 80 h",
+              "at": 0.15
+            },
+            {
+              "text": "= $1.00 / h",
+              "kind": "result",
+              "at": "w:dollar"
+            }
+          ],
+          "scale": 1.2
+        }
+      ]
+    },
+    {
+      "id": "double",
+      "caption": "Add the side stuff and say it *doubles* to *160.*",
+      "props": [
+        {
+          "type": "figure",
+          "y": 870,
+          "label": "Story + side missions · let's say",
+          "value": 160,
+          "from": 80,
+          "unit": "h",
+          "countAt": "w:doubles",
+          "countDur": 0.9,
+          "color": "ink",
+          "size": 170
+        }
+      ]
+    },
+    {
+      "id": "fifty",
+      "caption": "Now you're paying *50 cents* an hour.",
+      "props": [
+        {
+          "type": "maths",
+          "y": 870,
+          "lines": [
+            {
+              "text": "$79.99 ÷ 160 h",
+              "at": 0.15
+            },
+            {
+              "text": "= $0.50 / h",
+              "kind": "result",
+              "at": "w:50"
+            }
+          ],
+          "scale": 1.2
+        }
+      ]
+    },
+    {
+      "id": "nights",
+      "caption": "Play *five hours* a night and that's *32 nights* of it.",
+      "props": [
+        {
+          "type": "dots",
+          "y": 880,
+          "count": 32,
+          "cols": 8,
+          "size": 72,
+          "at": "w:five",
+          "step": 0.04,
+          "label": "{n} nights"
+        }
+      ]
+    },
+    {
+      "id": "date",
+      "caption": "The average *date night* in America? Now *$189.*",
+      "props": [
+        {
+          "type": "receipt",
+          "y": 900,
+          "title": "DATE NIGHT",
+          "subtitle": "USA · AVERAGE · ALL-IN",
+          "total": 189,
+          "totalAt": "w:$189",
+          "notes": ["incl. travel + getting ready", "source: BMO survey, Feb 2026"],
+          "scale": 1.25
+        }
+      ]
+    },
+    {
+      "id": "total",
+      "mood": "dark",
+      "moodSfx": false,
+      "caption": "32 date nights is *$6,048.*",
+      "props": [
+        {
+          "type": "maths",
+          "y": 880,
+          "enter": "pop",
+          "exit": "fade",
+          "lines": [
+            {
+              "text": "32 × $189",
+              "at": 0.15
+            },
+            {
+              "text": "= $6,048",
+              "kind": "result",
+              "at": "w:$6,048"
+            },
+            {
+              "text": "− $79.99",
+              "at": "beat:1"
+            },
+            {
+              "kind": "rule",
+              "text": "",
+              "at": "w:game"
+            },
+            {
+              "text": "$5,968",
+              "kind": "big",
+              "at": "w:$5,968"
+            }
+          ],
+          "scale": 1.12,
+          "span": 2
+        }
+      ]
+    },
+    {
+      "id": "saved",
+      "mood": "dark",
+      "moodSfx": false,
+      "caption": "Minus the game, that's *$5,968* saved."
+    },
+    {
+      "id": "crazy",
+      "caption": "But here's the *crazy* part.",
+      "props": [
+        {
+          "type": "figure",
+          "y": 860,
+          "enter": "pop",
+          "label": "Saved · boy maths",
+          "value": 5968,
+          "prefix": "$",
+          "color": "green",
+          "size": 180
+        }
+      ]
+    },
+    {
+      "id": "invest",
+      "caption": "Put it into *Take-Two,* the company behind GTA, the day *trailer one* dropped,",
+      "props": [
+        {
+          "type": "chart",
+          "span": 4,
+          "y": 900,
+          "data": [
+            ["2023-12-04", 157.56],
+            ["2023-12-11", 152.56],
+            ["2023-12-18", 158.57],
+            ["2023-12-26", 161.62],
+            ["2024-01-03", 158.4],
+            ["2024-01-10", 159.21],
+            ["2024-01-18", 159.86],
+            ["2024-01-25", 168.5],
+            ["2024-02-01", 166.33],
+            ["2024-02-08", 169.6],
+            ["2024-02-15", 156.96],
+            ["2024-02-23", 151.01],
+            ["2024-03-01", 150.34],
+            ["2024-03-08", 143.73],
+            ["2024-03-15", 143.91],
+            ["2024-03-22", 152.46],
+            ["2024-04-01", 150.0],
+            ["2024-04-08", 153.65],
+            ["2024-04-15", 145.3],
+            ["2024-04-22", 139.96],
+            ["2024-04-29", 144.27],
+            ["2024-05-06", 148.34],
+            ["2024-05-13", 143.95],
+            ["2024-05-20", 150.9],
+            ["2024-05-28", 156.79],
+            ["2024-06-04", 165.96],
+            ["2024-06-11", 158.51],
+            ["2024-06-18", 155.37],
+            ["2024-06-26", 157.54],
+            ["2024-07-03", 153.5],
+            ["2024-07-11", 151.52],
+            ["2024-07-18", 150.3],
+            ["2024-07-25", 150.3],
+            ["2024-08-01", 145.96],
+            ["2024-08-08", 138.78],
+            ["2024-08-15", 146.38],
+            ["2024-08-22", 158.7],
+            ["2024-08-29", 160.5],
+            ["2024-09-06", 156.61],
+            ["2024-09-13", 152.18],
+            ["2024-09-20", 148.78],
+            ["2024-09-27", 153.05],
+            ["2024-10-04", 151.69],
+            ["2024-10-11", 155.09],
+            ["2024-10-18", 155.27],
+            ["2024-10-25", 161.79],
+            ["2024-11-01", 163.78],
+            ["2024-11-08", 177.9],
+            ["2024-11-15", 177.62],
+            ["2024-11-22", 188.15],
+            ["2024-12-02", 187.95],
+            ["2024-12-09", 187.9],
+            ["2024-12-16", 187.18],
+            ["2024-12-23", 183.22],
+            ["2024-12-31", 184.08],
+            ["2025-01-08", 183.74],
+            ["2025-01-16", 183.37],
+            ["2025-01-24", 185.49],
+            ["2025-01-31", 185.51],
+            ["2025-02-07", 208.77],
+            ["2025-02-14", 208.76],
+            ["2025-02-24", 212.02],
+            ["2025-03-03", 208.05],
+            ["2025-03-10", 201.93],
+            ["2025-03-17", 206.5],
+            ["2025-03-24", 213.51],
+            ["2025-03-31", 207.25],
+            ["2025-04-07", 197.53],
+            ["2025-04-14", 212.95],
+            ["2025-04-22", 209.97],
+            ["2025-04-29", 230.71],
+            ["2025-05-06", 231.84],
+            ["2025-05-13", 226.16],
+            ["2025-05-20", 237.5],
+            ["2025-05-28", 228.33],
+            ["2025-06-04", 229.18],
+            ["2025-06-11", 234.74],
+            ["2025-06-18", 238.5],
+            ["2025-06-26", 239.33],
+            ["2025-07-03", 240.11],
+            ["2025-07-11", 233.92],
+            ["2025-07-18", 231.18],
+            ["2025-07-25", 224.75],
+            ["2025-08-01", 220.58],
+            ["2025-08-08", 217.37],
+            ["2025-08-15", 232.18],
+            ["2025-08-22", 229.03],
+            ["2025-08-29", 233.27],
+            ["2025-09-08", 248.78],
+            ["2025-09-15", 247.25],
+            ["2025-09-22", 251.64],
+            ["2025-09-29", 259.96],
+            ["2025-10-06", 256.98],
+            ["2025-10-13", 256.68],
+            ["2025-10-20", 262.29],
+            ["2025-10-27", 254.27],
+            ["2025-11-03", 255.65],
+            ["2025-11-10", 234.06],
+            ["2025-11-17", 233.58],
+            ["2025-11-24", 239.07],
+            ["2025-12-02", 246.83],
+            ["2025-12-09", 248.73],
+            ["2025-12-16", 244.53],
+            ["2025-12-23", 249.23],
+            ["2025-12-31", 256.03],
+            ["2026-01-08", 252.38],
+            ["2026-01-15", 244.34],
+            ["2026-01-23", 245.73],
+            ["2026-01-30", 220.3],
+            ["2026-02-06", 195.59],
+            ["2026-02-13", 193.67],
+            ["2026-02-23", 195.59],
+            ["2026-03-02", 213.88],
+            ["2026-03-09", 214.63],
+            ["2026-03-16", 207.69],
+            ["2026-03-23", 200.84],
+            ["2026-03-30", 193.08],
+            ["2026-04-07", 198.33],
+            ["2026-04-14", 205.1],
+            ["2026-04-21", 217.65],
+            ["2026-04-28", 213.01],
+            ["2026-05-05", 223.11],
+            ["2026-05-12", 225.99],
+            ["2026-05-19", 238.14],
+            ["2026-05-27", 218.46],
+            ["2026-06-03", 215.8],
+            ["2026-06-10", 210.46],
+            ["2026-06-17", 228.03],
+            ["2026-06-25", 238.72],
+            ["2026-07-02", 254.99],
+            ["2026-07-10", 243.2],
+            ["2026-07-17", 236.68],
+            ["2026-07-24", 231.65],
+            ["2026-07-31", 242.92],
+            ["2026-08-07", 246.5],
+            ["2026-08-14", 246.95],
+            ["2026-08-21", 239.62],
+            ["2026-08-28", 235.39],
+            ["2026-09-04", 214.69],
+            ["2026-09-14", 222.91],
+            ["2026-09-21", 209.92],
+            ["2026-09-28", 202.35],
+            ["2026-10-05", 203.46],
+            ["2026-10-12", 208.82],
+            ["2026-10-19", 204.92],
+            ["2026-10-26", 203.35],
+            ["2026-11-02", 192.1],
+            ["2026-11-09", 207.4],
+            ["2026-11-16", 213.47],
+            ["2026-11-17", 203.93]
+          ],
+          "amount": 5968,
+          "title": "$TTWO · VALUE OF $5,968 · PRICE ONLY",
+          "startLabel": "TRAILER 1 · DEC 4, 2023",
+          "foot": "NOV 17, 2026 CLOSE",
+          "drawAt": "beat:1",
+          "drawDur": 1.9,
+          "second": {
+            "from": "2025-12-31",
+            "label": "JAN 1, 2026",
+            "at": "beat:2+0.1",
+            "dur": 2.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "today",
+      "caption": "and today it'd be worth *$7,724.*"
+    },
+    {
+      "id": "january",
+      "caption": "Bought on *January 1st* this year instead?"
+    },
+    {
+      "id": "jan-value",
+      "caption": "*$4,754.*"
+    },
+    {
+      "id": "same",
+      "caption": "Same stock. *Different timing.*",
+      "props": [
+        {
+          "type": "figure",
+          "y": 760,
+          "enter": "pop",
+          "label": "Bought Dec 4, 2023",
+          "value": 7724,
+          "prefix": "$",
+          "color": "green",
+          "size": 140
+        },
+        {
+          "type": "figure",
+          "y": 1010,
+          "enter": "pop",
+          "delay": "w:different",
+          "label": "Bought Jan 1, 2026",
+          "value": 4754,
+          "prefix": "$",
+          "color": "ink",
+          "size": 140,
+          "sub": "same $5,968 · same stock",
+          "subAt": 0.3
+        }
+      ]
+    },
+    {
+      "id": "brand",
+      "caption": "Timing is the hard part. So we built *Echelons AI,*",
+      "props": [
+        {
+          "type": "brand",
+          "span": 2,
+          "y": 900,
+          "enter": "pop",
+          "name": "Echelons",
+          "suffix": "AI",
+          "tagline": "your own AI market research assistant",
+          "at": "w:echelons",
+          "taglineAt": "beat:1",
+          "field": {
+            "at": "beat:1+0.5",
+            "cols": 40,
+            "rows": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "pitch",
+      "caption": "your own AI *market research* assistant."
+    }
+  ],
+  "endcard": {
+    "headline": "Follow for more\n*money maths*",
+    "say": "Follow for more money maths.",
+    "brand": "echelons ai",
+    "disclaimer": "For education only. Not financial advice. Past performance does not predict future results. Not affiliated with Rockstar Games or Take-Two Interactive.",
+    "hold": 4.4,
+    "lead": 0.4
+  }
+}
