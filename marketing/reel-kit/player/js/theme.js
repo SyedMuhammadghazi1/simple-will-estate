@@ -55,6 +55,68 @@ export const THEMES = {
     },
   },
 
+  // Sunset city: an animated retro-sunset backdrop (scene.js) with palms, skyline and traffic;
+  // poster captions; mood "dark" is neon night. For gaming and pop-culture explainers.
+  "sunset-city": {
+    fonts: {
+      caption: '"Anton", Impact, sans-serif',
+      ui: '"Inter", system-ui, sans-serif',
+      mono: '"DM Mono", ui-monospace, monospace',
+    },
+    stage: "scene",
+    mascot: false,
+    float: 7,
+    moodFade: 0.9,
+    caption: {
+      align: "center",
+      size: 80,
+      line: 86,
+      y: 352,
+      left: 80,
+      width: 920,
+      className: "poster",
+    },
+    mark: `<svg viewBox="0 0 40 34" width="40" height="34"><rect x="0" y="22" width="11" height="12" rx="2" fill="currentColor" opacity="0.6"/><rect x="14" y="12" width="11" height="22" rx="2" fill="currentColor" opacity="0.85"/><rect x="28" y="0" width="12" height="34" rx="2" fill="#7c5cff"/></svg>`,
+    // translucent, so the city keeps moving behind the follow card
+    endcard: {
+      top: "rgba(26,9,52,0.62)",
+      bottom: "rgba(8,4,22,0.86)",
+      glow: "255,79,168",
+      accent: "#ff6fc0",
+    },
+    colors: {
+      wallTop: ["#1b0b3f", "#04030d"],
+      wallBottom: ["#ffb35c", "#4a1a6e"],
+      wallGlow: ["#ff6a74", "#341565"],
+      tableTop: ["#12071f", "#12071f"],
+      tableFront: ["#12071f", "#12071f"],
+      tableFrontLow: ["#12071f", "#12071f"],
+      pad: ["#12071f", "#12071f"],
+      padRule: ["#12071f", "#12071f"],
+      padMargin: ["#12071f", "#12071f"],
+      padBinding: ["#12071f", "#12071f"],
+      padShadow: ["#12071f", "#12071f"],
+      ink: ["#fff6e8", "#fff6e8"],
+      ghost: ["#e9a6d2", "#8a78c2"],
+      accent: ["#ffe45c", "#ff4fd8"],
+      eyebrow: ["#fff6e8", "#fff6e8"],
+      line: ["#ff7ac8", "#3ef2ff"],
+      card: ["#1d0c33", "#120a2e"],
+      cardAlt: ["#33174f", "#241552"],
+      navy: ["#7c5cff", "#7c5cff"],
+      navySoft: ["#33174f", "#241552"],
+      gold: ["#ffd24a", "#ffd24a"],
+      goldDeep: ["#ff9a3c", "#ff9a3c"],
+      amber: ["#ff4fa8", "#ff4fd8"],
+      red: ["#ff5d6c", "#ff5d6c"],
+      green: ["#7dffa8", "#5dffb0"],
+      greenSoft: ["#16402c", "#16402c"],
+      sky: ["#3a1d5c", "#241552"],
+      muted: ["#d8b4e2", "#a99ad8"],
+      shadow: ["#0b0516", "#03020a"],
+    },
+  },
+
   // Minimal dark: no pad, table or mascot; centred captions; props float on near-black. Mood
   // "dark" flips to a pale paper page instead (used for the beat where the maths lands).
   noir: {

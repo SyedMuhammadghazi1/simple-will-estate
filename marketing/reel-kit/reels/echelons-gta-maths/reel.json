@@ -1,6 +1,6 @@
 {
   "id": "echelons-gta-maths",
-  "theme": "noir",
+  "theme": "sunset-city",
   "fps": 30,
   "eyebrow": "Echelons AI",
   "disclaimer": "Not financial advice · not affiliated with Rockstar",
@@ -12,7 +12,28 @@
     "gap": 0.18
   },
   "music": {
-    "until": "end"
+    "until": "end",
+    "style": "synthwave",
+    "db": -17
+  },
+  "hud": {
+    "money": [
+      {
+        "beat": "hook",
+        "at": "w:$5,968",
+        "value": 5968
+      },
+      {
+        "beat": "today",
+        "at": "w:$7,724",
+        "value": 7724
+      },
+      {
+        "beat": "jan-value",
+        "at": 0.05,
+        "value": 4754
+      }
+    ]
   },
   "lint": {
     "require": [
@@ -36,6 +57,17 @@
       "get rich"
     ]
   },
+  "variants": {
+    "minimal": {
+      "about": "The earlier dark minimal look (noir theme, lo-fi bed).",
+      "theme": "noir",
+      "music": {
+        "until": "end",
+        "style": null
+      },
+      "hud": null
+    }
+  },
   "beats": [
     {
       "id": "hook",
@@ -44,7 +76,7 @@
       "props": [
         {
           "type": "figure",
-          "y": 860,
+          "y": 880,
           "enter": "none",
           "label": "Boy maths · hear me out",
           "value": 5968,
@@ -53,7 +85,8 @@
           "countAt": 0,
           "countDur": 2.3,
           "color": "green",
-          "size": 180
+          "size": 170,
+          "plate": true
         }
       ]
     },
@@ -91,7 +124,8 @@
           "highlightAt": "w:80",
           "by": "ROB NELSON",
           "role": "CO-STUDIO HEAD, ROCKSTAR NORTH",
-          "scale": 1.08
+          "scale": 1.08,
+          "plate": true
         }
       ]
     },
@@ -113,7 +147,8 @@
               "at": "w:dollar"
             }
           ],
-          "scale": 1.2
+          "scale": 1.2,
+          "plate": true
         }
       ]
     },
@@ -131,7 +166,8 @@
           "countAt": "w:doubles",
           "countDur": 0.9,
           "color": "ink",
-          "size": 170
+          "size": 170,
+          "plate": true
         }
       ]
     },
@@ -153,7 +189,8 @@
               "at": "w:50"
             }
           ],
-          "scale": 1.2
+          "scale": 1.2,
+          "plate": true
         }
       ]
     },
@@ -163,13 +200,14 @@
       "props": [
         {
           "type": "dots",
-          "y": 880,
+          "y": 900,
           "count": 32,
           "cols": 8,
           "size": 72,
           "at": "w:five",
           "step": 0.04,
-          "label": "{n} nights"
+          "label": "{n} nights",
+          "plate": true
         }
       ]
     },
@@ -191,15 +229,11 @@
     },
     {
       "id": "total",
-      "mood": "dark",
-      "moodSfx": false,
       "caption": "32 date nights is *$6,048.*",
       "props": [
         {
           "type": "maths",
           "y": 880,
-          "enter": "pop",
-          "exit": "fade",
           "lines": [
             {
               "text": "32 × $189",
@@ -226,14 +260,13 @@
             }
           ],
           "scale": 1.12,
-          "span": 2
+          "span": 2,
+          "plate": true
         }
       ]
     },
     {
       "id": "saved",
-      "mood": "dark",
-      "moodSfx": false,
       "caption": "Minus the game, that's *$5,968* saved."
     },
     {
@@ -248,9 +281,11 @@
           "value": 5968,
           "prefix": "$",
           "color": "green",
-          "size": 180
+          "size": 170,
+          "plate": true
         }
-      ]
+      ],
+      "mood": "dark"
     },
     {
       "id": "invest",
@@ -423,21 +458,26 @@
             "label": "JAN 1, 2026",
             "at": "beat:2+0.1",
             "dur": 2.2
-          }
+          },
+          "plate": true
         }
-      ]
+      ],
+      "mood": "dark"
     },
     {
       "id": "today",
-      "caption": "and today it'd be worth *$7,724.*"
+      "caption": "and today it'd be worth *$7,724.*",
+      "mood": "dark"
     },
     {
       "id": "january",
-      "caption": "Bought on *January 1st* this year instead?"
+      "caption": "Bought on *January 1st* this year instead?",
+      "mood": "dark"
     },
     {
       "id": "jan-value",
-      "caption": "*$4,754.*"
+      "caption": "*$4,754.*",
+      "mood": "dark"
     },
     {
       "id": "same",
@@ -445,28 +485,31 @@
       "props": [
         {
           "type": "figure",
-          "y": 760,
+          "y": 735,
           "enter": "pop",
           "label": "Bought Dec 4, 2023",
           "value": 7724,
           "prefix": "$",
           "color": "green",
-          "size": 140
+          "size": 120,
+          "plate": true
         },
         {
           "type": "figure",
-          "y": 1010,
+          "y": 1040,
           "enter": "pop",
           "delay": "w:different",
           "label": "Bought Jan 1, 2026",
           "value": 4754,
           "prefix": "$",
           "color": "ink",
-          "size": 140,
+          "size": 120,
           "sub": "same $5,968 · same stock",
-          "subAt": 0.3
+          "subAt": 0.3,
+          "plate": true
         }
-      ]
+      ],
+      "mood": "dark"
     },
     {
       "id": "brand",
@@ -488,11 +531,13 @@
             "rows": 10
           }
         }
-      ]
+      ],
+      "mood": "dark"
     },
     {
       "id": "pitch",
-      "caption": "your own AI *market research* assistant."
+      "caption": "your own AI *market research* assistant.",
+      "mood": "dark"
     }
   ],
   "endcard": {

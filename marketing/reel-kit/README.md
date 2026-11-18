@@ -187,9 +187,9 @@ Add `"hop": 12` to a cue for a small jump. Faces with a `talk` weight lip-flap t
 ### Themes
 
 Colours are `[light, dark]` pairs in [`player/js/theme.js`](player/js/theme.js); the stage blends
-between them with the current mood. Two themes ship: `plainwill` (cream, navy and gold, a desk
+between them with the current mood. Four themes ship: `sunset-city` (an animated retro-sunset city: palms, skyline, traffic, turning to neon night for `mood: "dark"`; poster captions in Anton; props float; reel.json `hud.money` adds a game-style cash counter; `music.style: "synthwave"` gives it a matching bed), `noir` (dark and minimal, no pad or mascot), `plainwill` (cream, navy and gold, a desk
 with books and a photo) and `sunset` (peach, plum and magenta, a desk with game cases and a
-gamepad). To re-skin for another brand, copy one and change the values. A theme can also set the
+gamepad). Props with `"plate": true` get a dark glass panel for legibility over a busy backdrop. To re-skin for another brand, copy one and change the values. A theme can also set the
 mascot's colours (`mascot`), the table set (`set`) and the follow card's colours (`endcard`).
 Layout numbers (safe zones, caption size, pad geometry) are in `LAYOUT`.
 

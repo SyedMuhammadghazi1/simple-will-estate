@@ -11,13 +11,13 @@ import { h } from "./props/_util.js";
 import { buildStage } from "./stage.js";
 import { LAYOUT, THEMES } from "./theme.js";
 import { buildTimeline, resolveAt } from "./timeline.js";
-import { clamp, prog } from "./timing.js";
+import { clamp, commas, prog } from "./timing.js";
 
 const params = new URLSearchParams(location.search);
 const reelDir = (params.get("reel") ?? "").replace(/\/$/, "");
 const renderMode = params.get("mode") === "render";
-const MOOD_IN = 4 / 30;
-const MOOD_OUT = 3 / 30;
+let MOOD_IN = 4 / 30;
+let MOOD_OUT = 3 / 30;
 const HOP = 36; // mascot hop on every caption cut (px)
 const EPS = 1e-6;
 
@@ -36,6 +36,8 @@ async function boot() {
   const timing = params.get("estimate") ? null : await getJson(`${reelDir}/timeline.json`, true);
   const theme = THEMES[reel.theme ?? "plainwill"];
   if (!theme) throw new Error(`unknown theme "${reel.theme}"`);
+  // a scenic theme fades between moods slowly (sunset to night) instead of the reference's snap
+  if (theme.moodFade) MOOD_IN = MOOD_OUT = theme.moodFade;
   const tl = buildTimeline(reel, timing);
   // The motion rules in motion.js are measured in frames of a 30 fps reel.
   if (tl.fps !== FPS) throw new Error(`reel.fps must be ${FPS} (got ${tl.fps})`);
@@ -53,6 +55,7 @@ async function boot() {
       '500 23px "DM Mono"',
       '400 23px "DM Mono"',
       '600 27px "Inter"',
+      '400 68px "Anton"',
     ].map((f) => document.fonts.load(f)),
   );
   await document.fonts.ready;
@@ -66,7 +69,7 @@ async function boot() {
 
   // ---- props -------------------------------------------------------------------------------
   // default prop anchor: the pad's centre, or the middle of the safe zone on a bare stage
-  const bare = theme.stage === "bare";
+  const bare = theme.stage === "bare" || theme.stage === "scene";
   const padCx = bare ? LAYOUT.W / 2 : LAYOUT.pad.x + LAYOUT.pad.w / 2;
   const padCy = bare ? 900 : (LAYOUT.pad.y + LAYOUT.pad.binding + LAYOUT.tableY) / 2;
   const instances = [];
@@ -100,7 +103,7 @@ async function boot() {
         seed: (i + 1) * 1000 + k * 37,
       };
       const wrap = h("div", { class: "prop", style: `z-index:${spec.z ?? 10 + i}` });
-      const body = h("div", { class: "prop-body" });
+      const body = h("div", { class: raw.plate ? "prop-body plate" : "prop-body" });
       wrap.appendChild(body);
       layers.props.appendChild(wrap);
       const state = mod.build(body, spec, ctx);
@@ -115,7 +118,7 @@ async function boot() {
             ? spec.x + half + 8
             : Math.max(200, LAYOUT.W - (spec.x - half + inset) + 8);
       }
-      instances.push({ mod, spec, ctx, wrap, state, tIn, tOut });
+      instances.push({ mod, spec, ctx, wrap, body, state, tIn, tOut, seed: ctx.seed });
 
       // Default sounds follow the motion: a travelling prop whooshes, a blur-pop pops quietly,
       // anything that appears in place is silent.
@@ -170,6 +173,8 @@ async function boot() {
     }
   }
   const endcard = buildEndcard(layers.endback, layers.overlay, reel.endcard, tl, theme.endcard);
+  const hud = reel.hud ? buildHud(layers.caption, reel.hud, tl) : null;
+  if (hud) sfx.push(...hud.sfx);
   if (tl.endcard) {
     const said = tl.endcard.words;
     if (said.length) {
@@ -232,10 +237,19 @@ async function boot() {
     for (const inst of instances) {
       const pose = propPose(inst.spec, t, inst.tIn, inst.tOut);
       applyPose(inst.wrap, pose);
-      if (pose.visible) inst.mod.update(inst.state, t - inst.tIn, inst.ctx);
+      if (pose.visible) {
+        inst.mod.update(inst.state, t - inst.tIn, inst.ctx);
+        // a scenic theme lets every prop float gently, so nothing on screen is ever still
+        if (theme.float) {
+          const f = theme.float;
+          const ph = inst.seed * 0.37;
+          inst.body.style.transform = `translate(-50%, -50%) translateY(${(Math.sin(t * 1.4 + ph) * f).toFixed(2)}px) rotate(${(Math.sin(t * 0.9 + ph) * f * 0.06).toFixed(3)}deg)`;
+        }
+      }
     }
 
     mascot.update(t, cues, voiceLevel(t, allWords), place ?? {});
+    hud?.update(t, place ? place.captionFade : 1);
     return t;
   }
 
@@ -262,6 +276,65 @@ async function boot() {
   if (renderMode) document.body.classList.add("render");
   else preview(reel, tl, seek);
   document.body.dataset.ready = "1";
+}
+
+/**
+ * Game-style cash counter in the top-right corner. reel.json "hud": { "money": [{ beat, at,
+ * value }] }: at each step the counter rolls to the new value and a "+$x" / "-$x" change
+ * pops under it, green or red.
+ */
+function buildHud(layer, spec, tl) {
+  const byId = Object.fromEntries(tl.beats.map((b) => [b.id, b]));
+  const steps = (spec.money ?? []).map((s) => {
+    const beat = byId[s.beat];
+    if (!beat) throw new Error(`hud: no beat "${s.beat}"`);
+    return { t: resolveAt(s.at ?? 0, beat), value: s.value };
+  });
+  steps.sort((a, b) => a.t - b.t);
+  const box = h("div", {
+    style:
+      "position:absolute;right:72px;top:290px;text-align:right;font-family:Anton, Impact, sans-serif;opacity:0",
+    html: `<div data-v style="font-size:64px;line-height:1;color:#7dffa8;letter-spacing:0.01em;-webkit-text-stroke:3px #0b0516;paint-order:stroke fill;font-variant-numeric:tabular-nums"></div>
+           <div data-d style="font-size:38px;line-height:1.1;margin-top:6px;-webkit-text-stroke:2.5px #0b0516;paint-order:stroke fill;opacity:0"></div>`,
+  });
+  layer.appendChild(box);
+  const v = box.querySelector("[data-v]");
+  const d = box.querySelector("[data-d]");
+  const fmt = (n) => `$${commas(Math.abs(n))}`;
+  function update(t, fade = 1) {
+    let val = 0;
+    let prev = 0;
+    let last = null;
+    for (const s of steps) {
+      if (t < s.t) break;
+      prev = val;
+      val = s.value;
+      last = s;
+    }
+    const first = steps[0]?.t ?? Infinity;
+    box.style.opacity = (clamp(prog(t, first - 0.2, first)) * fade).toFixed(3);
+    let shown = val;
+    if (last) {
+      const p = prog(t, last.t, last.t + 0.6);
+      shown = prev + (val - prev) * (1 - Math.pow(1 - p, 3));
+      const delta = val - prev;
+      const age = t - last.t;
+      d.textContent = delta ? `${delta > 0 ? "+" : "−"}${fmt(delta)}` : "";
+      d.style.color = delta >= 0 ? "#7dffa8" : "#ff5d6c";
+      d.style.opacity =
+        age < 1.6 ? clamp(prog(age, 0, 0.1) * (1 - prog(age, 1.2, 1.6))).toFixed(3) : "0";
+      const bump = age < 0.3 ? 1 + 0.12 * Math.sin((age / 0.3) * Math.PI) : 1;
+      v.style.transform = `scale(${bump.toFixed(4)})`;
+      v.style.transformOrigin = "100% 50%";
+    }
+    const txt = fmt(shown);
+    if (v._t !== txt) {
+      v.textContent = txt;
+      v._t = txt;
+    }
+  }
+  const sfx = steps.map((s) => ({ t: s.t, name: "coin" }));
+  return { update, sfx };
 }
 
 /** Two props leaving on the same cut should make one whoosh, not a louder one. */

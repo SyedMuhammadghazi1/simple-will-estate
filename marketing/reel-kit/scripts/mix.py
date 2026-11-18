@@ -352,6 +352,80 @@ def music_bed(n: int, until: float, seed: int = 7, fade: float | None = None) ->
     return out * env
 
 
+# ---- synthwave bed (music.style: "synthwave") ---------------------------------------------------
+# An original 100 BPM loop in A minor (Am - F - C - G): pulsing saw bass, a soft detuned pad, a
+# 16th-note arpeggio and a drum machine (kick on every beat, clap on 2 and 4, closed hats).
+
+SYNTH_BPM = 100
+SYNTH_PROG = [
+    (45, [57, 60, 64]),  # Am
+    (41, [53, 57, 60]),  # F
+    (48, [55, 60, 64]),  # C
+    (43, [55, 59, 62]),  # G
+]
+
+
+def saw(f: float, dur: float, harmonics: int = 10) -> np.ndarray:
+    t = t_axis(dur)
+    out = np.zeros_like(t)
+    for k in range(1, harmonics + 1):
+        if f * k > SR / 2.2:
+            break
+        out += np.sin(2 * np.pi * f * k * t) / k
+    return out * 0.6
+
+
+def synth_bed(n: int, until: float, fade: float = 1.0) -> np.ndarray:
+    beat = 60 / SYNTH_BPM
+    bar = beat * 4
+    bars = int(np.ceil(until / bar))
+    rng = np.random.default_rng(3)
+    # one buffer per instrument, each filtered once at the end
+    pad_bus, bass_bus, arp_bus, drum_bus = (np.zeros(n) for _ in range(4))
+
+    def add(bus: np.ndarray, sound: np.ndarray, at: float, gain: float = 1.0) -> None:
+        i = int(at * SR)
+        if i >= n:
+            return
+        sound = sound[: n - i]
+        bus[i : i + len(sound)] += sound * gain
+
+    hat = noise(int(0.04 * SR), 4)
+    hat = (hat - one_pole_lp(hat, 7000)) * env_exp(0.04, 0.012)
+    clap = noise(int(0.22 * SR), 5)
+    clap = svf_bandpass(clap, np.full(len(clap), 1500.0), 0.9) * env_exp(0.22, 0.07)
+    kick = sweep_sine(120, 42, 0.28) * env_exp(0.28, 0.09)
+    tp = t_axis(bar * 1.05)
+    pad_env = np.minimum(1, tp / 0.35) * np.exp(-tp / 3.0)
+    tb = t_axis(beat * 0.45)
+    ta = t_axis(beat * 0.22)
+    for b in range(bars):
+        root, chord = SYNTH_PROG[b % len(SYNTH_PROG)]
+        t0 = 0.02 + b * bar
+        for note in chord:  # pad: detuned saws an octave below the chord
+            for det in (-0.06, 0.06):
+                add(pad_bus, saw(midi(note - 12 + det), bar * 1.05, 6) * pad_env, t0, 0.07)
+        for k in range(8):  # bass: 8th-note pulses on the root
+            add(bass_bus, saw(midi(root - 12), beat * 0.45, 8) * np.exp(-tb / 0.16), t0 + k * beat / 2, 0.32)
+        pattern = [0, 1, 2, 1, 2, 0, 1, 2]
+        for k in range(16):  # arpeggio: 16ths, an octave up
+            note = chord[pattern[k % 8]] + 12
+            add(arp_bus, saw(midi(note), beat * 0.22, 5) * np.exp(-ta / 0.05), t0 + k * beat / 4, 0.09)
+        for k in range(4):
+            add(drum_bus, kick, t0 + k * beat, 0.55)
+            if k % 2 == 1:
+                add(drum_bus, clap, t0 + k * beat, 0.25)
+        for k in range(8):
+            add(drum_bus, hat, t0 + k * beat / 2 + beat / 4, 0.08 + 0.03 * rng.random())
+    out = one_pole_lp(pad_bus, 1400) + one_pole_lp(bass_bus, 700) + one_pole_lp(arp_bus, 2600) + drum_bus
+    fade_len = int(min(fade, until) * SR)
+    end = int(until * SR)
+    env = np.ones(n)
+    env[max(0, end - fade_len) : end] = np.linspace(1, 0, min(fade_len, end)) ** 1.5
+    env[end:] = 0
+    return out * env
+
+
 def ffmpeg(*args: str) -> str:
     proc = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", *args], capture_output=True, text=True)
     if proc.returncode != 0:
@@ -399,14 +473,15 @@ def main() -> int:
         if not args.no_music and isinstance(music_cfg, dict) and music_cfg.get("enabled", True):
             beats = timeline["beats"]
             stop_id = music_cfg.get("until")
+            synth = music_cfg.get("style") == "synthwave"
             if stop_id == "end":
                 # under a spoken end card too, fading out through the closing dissolve
-                bed = music_bed(n, duration, fade=1.0)
+                bed = synth_bed(n, duration) if synth else music_bed(n, duration, fade=1.0)
             else:
                 if stop_id is not None and stop_id not in {b["id"] for b in beats}:
                     raise SystemExit(f'music.until "{stop_id}" is not a beat id (or "end")')
                 stop = next((b["start"] for b in beats if b["id"] == stop_id), beats[-1]["start"])
-                bed = music_bed(n, stop)
+                bed = synth_bed(n, stop) if synth else music_bed(n, stop)
             # dip the bed under dark beats so the low hit owns the bottom end
             duck = np.ones(n)
             for b in beats:

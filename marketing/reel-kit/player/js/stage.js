@@ -3,6 +3,7 @@
 // makes a dozen beats read as one continuous shot.
 
 import { LAYOUT } from "./theme.js";
+import { buildScene } from "./scene.js";
 import { clamp, mix } from "./timing.js";
 
 const { W, H, pad: PAD, tableY } = LAYOUT;
@@ -210,9 +211,18 @@ function layer(parent, id, html = "") {
  */
 export function buildStage(root, theme, { disclaimer = "" } = {}) {
   const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
-  const bare = theme.stage === "bare";
+  // "scene" is a bare stage with an animated backdrop (scene.js) behind the props
+  const scenic = theme.stage === "scene";
+  const bare = theme.stage === "bare" || scenic;
   const fine = disclaimer ? esc(disclaimer.toUpperCase()) : "";
-  const back = layer(root, "l-back", bare ? bareSvg(fine) : backSvg(fine));
+  const back = layer(root, "l-back", bare ? (scenic ? "" : bareSvg(fine)) : backSvg(fine));
+  const scene = scenic ? buildScene(back) : null;
+  if (scenic && fine) {
+    back.insertAdjacentHTML(
+      "beforeend",
+      `<svg class="layer" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><text x="${W / 2}" y="1236" text-anchor="middle" font-family="DM Mono, monospace" font-weight="500" font-size="24" letter-spacing="2" fill="#fff6e8" opacity="0.85" style="paint-order:stroke;stroke:#12071f;stroke-width:6px">${fine}</text></svg>`,
+    );
+  }
   const dressing = layer(root, "l-dressing", bare ? "" : PAD_DRESSING_SVG);
   const props = layer(root, "l-props");
   const set = layer(root, "l-set", bare ? "" : (TABLE_SETS[theme.set ?? "desk"] ?? TABLE_SET_SVG));
@@ -254,6 +264,7 @@ export function buildStage(root, theme, { disclaimer = "" } = {}) {
 
   function update(t, { mood = 0 } = {}) {
     setMood(mood);
+    scene?.update(t, mood);
   }
 
   setMood(0);

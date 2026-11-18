@@ -68,7 +68,7 @@ export function buildCaptions(layerEl, beats, { eyebrow = "", style = {}, mark =
 
   const blocks = beats.map((beat) => {
     const block = document.createElement("div");
-    block.className = "cap";
+    block.className = S.className ? `cap ${S.className}` : "cap";
     block.style.left = `${S.left}px`;
     block.style.top = `${S.y}px`;
     block.style.width = `${S.width}px`;
