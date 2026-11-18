@@ -100,6 +100,7 @@ async function boot() {
         beat,
         dur: tOut - tIn,
         at: (cue) => resolveAt(cue, beat, spanned) - tIn,
+        asset: (file) => `${reelDir}/${file}`,
         seed: (i + 1) * 1000 + k * 37,
       };
       const wrap = h("div", { class: "prop", style: `z-index:${spec.z ?? 10 + i}` });
@@ -253,6 +254,8 @@ async function boot() {
     return t;
   }
 
+  // images (artwork, sticker sheets) must be decoded before the first frame is captured
+  await Promise.all([...document.images].map((img) => img.decode().catch(() => {})));
   seek(0);
   window.reel = {
     id: reel.id,

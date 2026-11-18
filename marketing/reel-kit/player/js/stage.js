@@ -217,12 +217,7 @@ export function buildStage(root, theme, { disclaimer = "" } = {}) {
   const fine = disclaimer ? esc(disclaimer.toUpperCase()) : "";
   const back = layer(root, "l-back", bare ? (scenic ? "" : bareSvg(fine)) : backSvg(fine));
   const scene = scenic ? buildScene(back) : null;
-  if (scenic && fine) {
-    back.insertAdjacentHTML(
-      "beforeend",
-      `<svg class="layer" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><text x="${W / 2}" y="1236" text-anchor="middle" font-family="DM Mono, monospace" font-weight="500" font-size="24" letter-spacing="2" fill="#fff6e8" opacity="0.85" style="paint-order:stroke;stroke:#12071f;stroke-width:6px">${fine}</text></svg>`,
-    );
-  }
+  const finePending = scenic && fine;
   const dressing = layer(root, "l-dressing", bare ? "" : PAD_DRESSING_SVG);
   const props = layer(root, "l-props");
   const set = layer(root, "l-set", bare ? "" : (TABLE_SETS[theme.set ?? "desk"] ?? TABLE_SET_SVG));
@@ -230,6 +225,13 @@ export function buildStage(root, theme, { disclaimer = "" } = {}) {
   const endback = layer(root, "l-endback");
   const mascot = layer(root, "l-mascot");
   const caption = layer(root, "l-caption");
+  // on a scene stage the fine print sits above the props, so full-bleed artwork can't hide it
+  if (finePending) {
+    caption.insertAdjacentHTML(
+      "beforeend",
+      `<svg class="layer" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><text x="${W / 2}" y="1236" text-anchor="middle" font-family="DM Mono, monospace" font-weight="500" font-size="24" letter-spacing="2" fill="#fff6e8" opacity="0.9" style="paint-order:stroke;stroke:#12071f;stroke-width:6px">${fine}</text></svg>`,
+    );
+  }
   const overlay = layer(root, "l-overlay");
 
   root.style.setProperty("--font-caption", theme.fonts.caption);

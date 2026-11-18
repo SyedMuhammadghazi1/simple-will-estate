@@ -36,3 +36,6 @@ marketing/reel-kit/reels/*/timeline.resolved.json
 __pycache__/
 # generated test versions of a reel (build.mjs --variant)
 marketing/reel-kit/reels/*--*/
+# third-party artwork fetched by a reel's fetch-assets.sh (not ours to commit)
+marketing/reel-kit/reels/echelons-gta-maths/assets/
+marketing/reel-kit/reels/echelons-gta-maths/.src/

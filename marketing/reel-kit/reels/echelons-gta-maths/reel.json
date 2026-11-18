@@ -75,8 +75,34 @@
       "prelit": 2,
       "props": [
         {
+          "type": "image",
+          "src": "assets/jason-lucia-car.jpg",
+          "fullbleed": true,
+          "x": 540,
+          "y": 960,
+          "z": 2,
+          "enter": "none",
+          "exit": "fade",
+          "zoom": [1.0, 1.08],
+          "pan": [0, -20],
+          "shade": 0.8
+        },
+        {
+          "type": "image",
+          "src": "assets/logo-gta6-wide.png",
+          "fit": "contain",
+          "frame": false,
+          "w": 640,
+          "h": 360,
+          "x": 540,
+          "y": 680,
+          "enter": "none",
+          "zoom": [1.0, 1.04],
+          "pan": [0, 0]
+        },
+        {
           "type": "figure",
-          "y": 880,
+          "y": 1050,
           "enter": "none",
           "label": "Boy maths · hear me out",
           "value": 5968,
@@ -85,8 +111,23 @@
           "countAt": 0,
           "countDur": 2.3,
           "color": "green",
-          "size": 170,
+          "size": 150,
           "plate": true
+        },
+        {
+          "type": "sticker",
+          "src": "assets/sticker-sun.webp",
+          "frames": 96,
+          "cols": 10,
+          "fw": 420,
+          "fh": 464,
+          "fps": 15,
+          "w": 230,
+          "x": 890,
+          "y": 1170,
+          "enter": "pop",
+          "at": 0.6,
+          "z": 40
         }
       ]
     },
@@ -95,8 +136,20 @@
       "caption": "The game itself is *$79.99.*",
       "props": [
         {
+          "type": "image",
+          "src": "assets/keyart-tall.jpg",
+          "w": 470,
+          "h": 520,
+          "x": 350,
+          "y": 900,
+          "rot": -4,
+          "zoom": [1.0, 1.08]
+        },
+        {
           "type": "price-tags",
+          "x": 800,
           "y": 880,
+          "scale": 1.15,
           "tags": [
             {
               "label": "Standard edition",
@@ -104,8 +157,7 @@
               "note": "US · PS5 / Xbox",
               "at": 0.1
             }
-          ],
-          "scale": 1.5
+          ]
         }
       ]
     },
@@ -126,6 +178,21 @@
           "role": "CO-STUDIO HEAD, ROCKSTAR NORTH",
           "scale": 1.08,
           "plate": true
+        },
+        {
+          "type": "sticker",
+          "src": "assets/sticker-flamingo.webp",
+          "frames": 38,
+          "cols": 10,
+          "fw": 420,
+          "fh": 638,
+          "fps": 15,
+          "w": 190,
+          "x": 950,
+          "y": 1110,
+          "enter": "pop",
+          "at": "w:80",
+          "z": 40
         }
       ]
     },
@@ -149,6 +216,21 @@
           ],
           "scale": 1.2,
           "plate": true
+        },
+        {
+          "type": "sticker",
+          "src": "assets/sticker-gator.webp",
+          "frames": 54,
+          "cols": 10,
+          "fw": 420,
+          "fh": 298,
+          "fps": 15,
+          "w": 370,
+          "x": 820,
+          "y": 1150,
+          "enter": "pop",
+          "at": "w:dollar",
+          "z": 40
         }
       ]
     },
@@ -168,6 +250,21 @@
           "color": "ink",
           "size": 170,
           "plate": true
+        },
+        {
+          "type": "sticker",
+          "src": "assets/sticker-truck.webp",
+          "frames": 22,
+          "cols": 10,
+          "fw": 420,
+          "fh": 236,
+          "fps": 15,
+          "w": 390,
+          "x": 280,
+          "y": 1160,
+          "enter": "pop",
+          "at": "w:doubles",
+          "z": 40
         }
       ]
     },
@@ -191,6 +288,21 @@
           ],
           "scale": 1.2,
           "plate": true
+        },
+        {
+          "type": "sticker",
+          "src": "assets/sticker-manatee.webp",
+          "frames": 48,
+          "cols": 10,
+          "fw": 420,
+          "fh": 328,
+          "fps": 15,
+          "w": 350,
+          "x": 840,
+          "y": 1150,
+          "enter": "pop",
+          "at": "w:50",
+          "z": 40
         }
       ]
     },
@@ -198,6 +310,19 @@
       "id": "nights",
       "caption": "Play *five hours* a night and that's *32 nights* of it.",
       "props": [
+        {
+          "type": "image",
+          "src": "assets/leonida-night.jpg",
+          "fullbleed": true,
+          "x": 540,
+          "y": 960,
+          "z": 2,
+          "enter": "none",
+          "exit": "fade",
+          "shade": 0.7,
+          "zoom": [1.02, 1.1],
+          "pan": [0, -24]
+        },
         {
           "type": "dots",
           "y": 900,
@@ -215,6 +340,19 @@
       "id": "date",
       "caption": "The average *date night* in America? Now *$189.*",
       "props": [
+        {
+          "type": "image",
+          "src": "assets/jason-lucia-sunset.jpg",
+          "fullbleed": true,
+          "x": 540,
+          "y": 960,
+          "z": 2,
+          "enter": "none",
+          "exit": "fade",
+          "shade": 0.7,
+          "zoom": [1.0, 1.1],
+          "pan": [0, -30]
+        },
         {
           "type": "receipt",
           "y": 900,
@@ -262,6 +400,22 @@
           "scale": 1.12,
           "span": 2,
           "plate": true
+        },
+        {
+          "type": "sticker",
+          "src": "assets/sticker-crab.webp",
+          "frames": 24,
+          "cols": 10,
+          "fw": 420,
+          "fh": 438,
+          "fps": 15,
+          "w": 300,
+          "x": 870,
+          "y": 1130,
+          "enter": "pop",
+          "at": "w:$6,048",
+          "span": 2,
+          "z": 40
         }
       ]
     },
@@ -275,7 +429,7 @@
       "props": [
         {
           "type": "figure",
-          "y": 860,
+          "y": 960,
           "enter": "pop",
           "label": "Saved · boy maths",
           "value": 5968,
@@ -283,6 +437,19 @@
           "color": "green",
           "size": 170,
           "plate": true
+        },
+        {
+          "type": "image",
+          "src": "assets/logo-vi.png",
+          "fit": "contain",
+          "frame": false,
+          "w": 300,
+          "h": 300,
+          "x": 540,
+          "y": 680,
+          "enter": "pop",
+          "zoom": [1.0, 1.06],
+          "pan": [0, 0]
         }
       ],
       "mood": "dark"
@@ -460,6 +627,20 @@
             "dur": 2.2
           },
           "plate": true
+        },
+        {
+          "type": "image",
+          "src": "assets/logo-vi.png",
+          "fit": "contain",
+          "frame": false,
+          "w": 130,
+          "h": 130,
+          "x": 930,
+          "y": 650,
+          "span": 4,
+          "enter": "pop",
+          "zoom": [1, 1],
+          "pan": [0, 0]
         }
       ],
       "mood": "dark"
@@ -530,6 +711,22 @@
             "cols": 40,
             "rows": 10
           }
+        },
+        {
+          "type": "sticker",
+          "src": "assets/sticker-palm.webp",
+          "frames": 24,
+          "cols": 10,
+          "fw": 420,
+          "fh": 554,
+          "fps": 15,
+          "w": 260,
+          "x": 150,
+          "y": 1090,
+          "enter": "pop",
+          "at": "w:echelons",
+          "span": 2,
+          "z": 40
         }
       ],
       "mood": "dark"

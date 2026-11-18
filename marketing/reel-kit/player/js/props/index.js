@@ -12,6 +12,7 @@ import download from "./download.js";
 import flipClock from "./flip-clock.js";
 import formulaCard from "./formula-card.js";
 import gavel from "./gavel.js";
+import image from "./image.js";
 import maths from "./maths.js";
 import meter from "./meter.js";
 import note from "./note.js";
@@ -23,6 +24,7 @@ import ratioPeople from "./ratio-people.js";
 import shareSheet from "./share-sheet.js";
 import signDoc from "./sign-doc.js";
 import statCard from "./stat-card.js";
+import sticker from "./sticker.js";
 import timer from "./timer.js";
 
 export const PROPS = {
@@ -37,6 +39,7 @@ export const PROPS = {
   "flip-clock": flipClock,
   "formula-card": formulaCard,
   gavel,
+  image,
   maths,
   meter,
   note,
@@ -48,5 +51,6 @@ export const PROPS = {
   "share-sheet": shareSheet,
   "sign-doc": signDoc,
   "stat-card": statCard,
+  sticker,
   timer,
 };
