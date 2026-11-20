@@ -165,7 +165,7 @@ export function buildEndcard(backLayer, frontLayer, spec, timeline, colors = {})
       const at = synced ? Math.max(0, spoken[i].t0 - 0.05 - t0) : T.head + i * 0.055;
       const p = ease.outCubic(prog(te, at, at + (synced ? 0.2 : 0.26)));
       wordEls[i].style.opacity = p.toFixed(3);
-      wordEls[i].style.transform = `translateY(${((1 - p) * 22).toFixed(2)}px)`;
+      wordEls[i].style.transform = `translateY(${((1 - p) * 12).toFixed(2)}px)`;
     });
 
     const pp = settle(te - T.pill, 18);

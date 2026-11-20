@@ -215,6 +215,11 @@ A full render also runs a **safe-zone check**: at the settled moment of each bea
 card it measures all visible text and warns about anything outside Instagram's safe box
 (`LAYOUT.SAFE`). Run it alone with `node scripts/render.mjs --reel <slug> --audit`.
 
+The same step runs a **collision check**: it samples the whole reel every 0.2 s and reports any
+text that overlaps other text, any text that runs over a card it does not belong to (the card's
+glass "plate" included), and any two cards that sit on each other for more than a moment. A
+clean render prints `overlap check: no text collisions`; fix every warning before posting.
+
 ### Rules for a regulated brand
 
 The Plainwill reels follow these, and the next one should too:

@@ -16,25 +16,6 @@
     "style": "synthwave",
     "db": -17
   },
-  "hud": {
-    "money": [
-      {
-        "beat": "hook",
-        "at": "w:$5,968",
-        "value": 5968
-      },
-      {
-        "beat": "today",
-        "at": "w:$7,724",
-        "value": 7724
-      },
-      {
-        "beat": "jan-value",
-        "at": 0.05,
-        "value": 4754
-      }
-    ]
-  },
   "backdrops": [
     {
       "beat": "hook",
@@ -103,17 +84,17 @@
           "src": "assets/logo-gta6-wide.png",
           "fit": "contain",
           "frame": false,
-          "w": 700,
-          "h": 394,
+          "w": 540,
+          "h": 300,
           "x": 540,
-          "y": 690,
+          "y": 700,
           "enter": "none",
           "zoom": [1.0, 1.04],
           "pan": [0, 0]
         },
         {
           "type": "figure",
-          "y": 1060,
+          "y": 1040,
           "enter": "none",
           "label": "Boy maths · hear me out",
           "value": 5968,
@@ -121,7 +102,7 @@
           "prefix": "$",
           "countAt": 0,
           "color": "green",
-          "size": 160,
+          "size": 130,
           "plate": true
         }
       ]
@@ -133,24 +114,25 @@
         {
           "type": "image",
           "src": "assets/keyart-tall.jpg",
-          "w": 420,
-          "h": 466,
-          "x": 300,
-          "y": 880,
+          "w": 380,
+          "h": 421,
+          "x": 290,
+          "y": 900,
           "rot": -4,
           "zoom": [1.0, 1.08],
-          "pan": [0, -10]
+          "pan": [0, -10],
+          "enter": "left"
         },
         {
           "type": "figure",
-          "x": 760,
-          "y": 880,
-          "w": 440,
+          "x": 785,
+          "y": 900,
+          "w": 360,
           "plate": true,
           "label": "Standard · US",
           "value": 79.99,
           "prefix": "$",
-          "size": 118,
+          "size": 104,
           "color": "ink",
           "sub": "PS5 · Xbox Series",
           "subAt": 0.2
@@ -162,18 +144,19 @@
       "caption": "Rockstar's studio head said his own run took about *80 hours.*",
       "props": [
         {
-          "type": "quote",
-          "y": 900,
-          "source": "AS REPORTED",
-          "date": "AUG 2026",
-          "headline": "A Rockstar boss's own GTA 6 run took about 80 hours",
-          "quote": "Story plus some side goals: about 80 hours.",
-          "highlight": "80 hours",
-          "highlightAt": "w:80",
-          "by": "ROB NELSON",
-          "role": "CO-STUDIO HEAD, ROCKSTAR NORTH",
-          "scale": 1.08,
-          "plate": true
+          "type": "figure",
+          "y": 930,
+          "plate": true,
+          "label": "Rob Nelson · Rockstar North",
+          "value": 80,
+          "from": 0,
+          "unit": "h",
+          "countAt": "w:about",
+          "countDur": 0.8,
+          "color": "ink",
+          "size": 170,
+          "sub": "his own playthrough, as reported",
+          "subAt": "w:hours"
         }
       ]
     },
@@ -267,13 +250,13 @@
       "props": [
         {
           "type": "receipt",
-          "y": 900,
+          "y": 870,
           "title": "DATE NIGHT",
           "subtitle": "USA · AVERAGE · ALL-IN",
           "total": 189,
           "totalAt": "w:$189",
           "notes": ["incl. travel + getting ready", "source: BMO survey, Feb 2026"],
-          "scale": 1.25
+          "scale": 1.15
         }
       ]
     },
@@ -326,7 +309,7 @@
       "props": [
         {
           "type": "figure",
-          "y": 960,
+          "y": 1000,
           "enter": "pop",
           "label": "Saved · boy maths",
           "value": 5968,
@@ -340,10 +323,10 @@
           "src": "assets/logo-vi.png",
           "fit": "contain",
           "frame": false,
-          "w": 300,
-          "h": 300,
+          "w": 220,
+          "h": 220,
           "x": 540,
-          "y": 680,
+          "y": 650,
           "enter": "pop",
           "zoom": [1.0, 1.06],
           "pan": [0, 0]
@@ -358,7 +341,7 @@
         {
           "type": "chart",
           "span": 4,
-          "y": 900,
+          "y": 915,
           "data": [
             ["2023-12-04", 157.56],
             ["2023-12-11", 152.56],
@@ -524,20 +507,6 @@
             "dur": 2.2
           },
           "plate": true
-        },
-        {
-          "type": "image",
-          "src": "assets/logo-vi.png",
-          "fit": "contain",
-          "frame": false,
-          "w": 130,
-          "h": 130,
-          "x": 930,
-          "y": 650,
-          "span": 4,
-          "enter": "pop",
-          "zoom": [1, 1],
-          "pan": [0, 0]
         }
       ],
       "mood": "dark"
@@ -566,25 +535,25 @@
       "props": [
         {
           "type": "figure",
-          "y": 735,
+          "y": 710,
           "enter": "pop",
           "label": "Bought Dec 4, 2023",
           "value": 7724,
           "prefix": "$",
           "color": "green",
-          "size": 120,
+          "size": 104,
           "plate": true
         },
         {
           "type": "figure",
-          "y": 1040,
+          "y": 1035,
           "enter": "pop",
           "delay": "w:different",
           "label": "Bought Jan 1, 2026",
           "value": 4754,
           "prefix": "$",
           "color": "ink",
-          "size": 120,
+          "size": 104,
           "sub": "same $5,968 · same stock",
           "subAt": 0.3,
           "plate": true

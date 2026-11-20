@@ -93,8 +93,13 @@ async function boot() {
       // ...except a prop on the final beat: it stays put and the end card rises over it, so the
       // pad is never empty while the last caption is still up
       const intoEndcard = tl.endcard && last.index === tl.beats.length - 1;
-      if (intoEndcard) spec.exit = "none";
-      const tOut = intoEndcard ? tl.endcard.start + 0.7 : last.end - EXIT_DUR + (spec.linger ?? 0);
+      // a solid end card rises over the last prop; over a see-through card (artwork or scene
+      // themes) the last prop fades out as the card arrives, so the two never overlap
+      const seeThrough = bare;
+      if (intoEndcard) spec.exit = seeThrough ? "fade" : "none";
+      const tOut = intoEndcard
+        ? tl.endcard.start + (seeThrough ? 0 : 0.7)
+        : last.end - EXIT_DUR + (spec.linger ?? 0);
       const ctx = {
         spec,
         beat,

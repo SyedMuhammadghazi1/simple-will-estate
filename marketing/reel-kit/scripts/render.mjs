@@ -233,6 +233,149 @@ async function auditSafeZone({ page }) {
   });
 }
 
+/**
+ * Collision check. Samples the whole reel (every 0.2 s) and reports, once per pair:
+ *  - two pieces of visible text that overlap (e.g. a counter drawn over a caption);
+ *  - visible text that runs over a prop it does not belong to (a caption over a card).
+ * Text is measured line by line, so a wrapped line never counts as one big box.
+ */
+async function auditOverlaps({ page }) {
+  return page.evaluate(async () => {
+    const tl = window.reel.timeline;
+    const step = 0.2;
+    const opacity = (el) => {
+      let o = 1;
+      for (let n = el; n && n.nodeType === 1; n = n.parentElement) {
+        const cs = getComputedStyle(n);
+        if (cs.display === "none" || cs.visibility === "hidden") return 0;
+        o *= parseFloat(cs.opacity);
+      }
+      return o;
+    };
+    const owner = (el) =>
+      el.closest(".prop") ?? el.closest(".cap") ?? el.closest(".eyebrow") ?? el.parentElement;
+    const name = (el) => {
+      if (el.classList?.contains("cap")) return "caption";
+      if (el.classList?.contains("prop"))
+        return `prop#${[...el.parentElement.children].indexOf(el)}`;
+      return el.id || el.className || el.tagName;
+    };
+    const hit = (a, b, pad = 2) =>
+      Math.min(a.right, b.right) - Math.max(a.left, b.left) > pad &&
+      Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > pad;
+    const seen = new Map();
+    const streak = new Map();
+    const report = (key, msg) => {
+      if (!seen.has(key)) seen.set(key, msg);
+    };
+    for (let t = 0; t < tl.duration; t += step) {
+      window.reel.seek(t);
+      const beat = [...tl.beats].reverse().find((b) => b.start <= t + 1e-6);
+      const where = tl.endcard && t >= tl.endcard.start ? "end card" : `beat "${beat?.id}"`;
+      const texts = [];
+      for (const id of ["l-caption", "l-props", "l-overlay"]) {
+        const root = document.getElementById(id);
+        if (!root) continue;
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          const text = node.textContent.trim();
+          if (!text || opacity(node.parentElement) < 0.35) continue;
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          // line boxes of tall display fonts overlap their neighbours; test the glyph band
+          const fs = parseFloat(getComputedStyle(node.parentElement).fontSize) || 16;
+          for (const box of range.getClientRects()) {
+            if (box.width < 2 || box.height < 2) continue;
+            const inset = Math.max(0, (box.height - fs * 0.8) / 2);
+            const r = {
+              left: box.left,
+              right: box.right,
+              top: box.top + inset,
+              bottom: box.bottom - inset,
+            };
+            texts.push({ r, text, own: owner(node.parentElement) });
+          }
+        }
+      }
+      for (let i = 0; i < texts.length; i++) {
+        for (let j = i + 1; j < texts.length; j++) {
+          const A = texts[i];
+          const B = texts[j];
+          if (A.own === B.own) continue;
+          if (hit(A.r, B.r)) {
+            report(
+              `t:${A.text}|${B.text}`,
+              `${where} at ${t.toFixed(1)}s: "${A.text.slice(0, 30)}" overlaps "${B.text.slice(0, 30)}"`,
+            );
+          }
+        }
+      }
+      // text over a card it doesn't belong to, and cards over each other. A card's box includes
+      // its "plate" (the glass panel drawn 44 x 34 px outside the prop body).
+      const cards = [...document.querySelectorAll("#l-props .prop")]
+        .filter((el) => opacity(el) > 0.5 && el.querySelector(".card, .plate, img"))
+        .map((el) => {
+          const body = el.querySelector(".prop-body") ?? el;
+          const b = body.getBoundingClientRect();
+          const k = body.offsetWidth ? b.width / body.offsetWidth : 1;
+          const px = body.classList.contains("plate") ? 44 * k : 0;
+          const py = body.classList.contains("plate") ? 34 * k : 0;
+          const full = b.width >= 1000 && b.height >= 1800; // full-bleed artwork is a backdrop
+          return {
+            el,
+            full,
+            r: { left: b.left - px, right: b.right + px, top: b.top - py, bottom: b.bottom + py },
+          };
+        })
+        .filter((c) => !c.full)
+        // a card under a solid end-card panel is covered, not colliding
+        .filter((c) => {
+          const cx = (c.r.left + c.r.right) / 2;
+          const cy = (c.r.top + c.r.bottom) / 2;
+          for (const el of document.elementsFromPoint(cx, cy)) {
+            if (c.el.contains(el)) return true;
+            if (
+              el.closest("#l-endback") &&
+              !getComputedStyle(el).backgroundImage.includes("rgba(")
+            ) {
+              return false;
+            }
+          }
+          return true;
+        });
+      for (const T of texts) {
+        for (const c of cards) {
+          if (T.own === c.el || c.el.contains(T.own)) continue;
+          if (hit(T.r, c.r, 4)) {
+            report(
+              `c:${T.text}|${name(c.el)}`,
+              `${where} at ${t.toFixed(1)}s: "${T.text.slice(0, 30)}" runs over ${name(c.el)}`,
+            );
+          }
+        }
+      }
+      // two cards must overlap for three samples in a row (0.6 s) to count: one passing the
+      // other during a cut is choreography, not a collision
+      for (let i = 0; i < cards.length; i++) {
+        for (let j = i + 1; j < cards.length; j++) {
+          const key = `p:${name(cards[i].el)}|${name(cards[j].el)}`;
+          if (hit(cards[i].r, cards[j].r, 4)) {
+            const n = (streak.get(key) ?? 0) + 1;
+            streak.set(key, n);
+            if (n === 3)
+              report(
+                key,
+                `${where} at ${t.toFixed(1)}s: ${name(cards[i].el)} and ${name(cards[j].el)} overlap`,
+              );
+          } else streak.delete(key);
+        }
+      }
+    }
+    window.reel.seek(0);
+    return [...seen.values()];
+  });
+}
+
 async function main() {
   const a = args();
   const slug = a.reel;
@@ -287,6 +430,13 @@ async function main() {
         issues.length
           ? `safe-zone check: ${issues.length} piece(s) of text outside the safe zone`
           : "safe-zone check: all text inside the safe zone",
+      );
+      const clashes = await auditOverlaps(first);
+      for (const c of clashes) console.warn(`warning: overlap: ${c}`);
+      console.log(
+        clashes.length
+          ? `overlap check: ${clashes.length} collision(s)`
+          : "overlap check: no text collisions",
       );
       if (a.audit) return;
     }
