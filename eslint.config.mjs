@@ -29,5 +29,7 @@ export default defineConfig([
     "test-results/**",
     "next-env.d.ts",
     "drizzle/meta/**",
+    "marketing/shorts-studio/skill/**",
+    "marketing/shorts-studio/projects/**",
   ]),
 ]);

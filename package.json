@@ -30,7 +30,8 @@
     "reel:validate": "node marketing/reel-kit/scripts/validate.mjs",
     "reel:build": "node marketing/reel-kit/scripts/build.mjs",
     "reel:render": "node marketing/reel-kit/scripts/render.mjs",
-    "reel:preview": "node marketing/reel-kit/scripts/preview.mjs"
+    "reel:preview": "node marketing/reel-kit/scripts/preview.mjs",
+    "shorts:studio": "python3 marketing/shorts-studio/server.py"
   },
   "dependencies": {
     "better-auth": "^1.7.6",

@@ -1,0 +1,16 @@
+{
+ "name": "Clean",
+ "about": "White cards, black type, one accent. Calm and readable on any footage.",
+ "style": {
+  "font": "Inter",
+  "caption": "#FFFFFF",
+  "accent": "#0B8F6A",
+  "panel": "#FFFFFF",
+  "ink": "#111111",
+  "line": "rgba(0,0,0,0.08)",
+  "radius": "28px",
+  "ground": "#0E0E0E",
+  "titlebg": "#FFFFFF",
+  "capaccent": "#FFD43B"
+ }
+}

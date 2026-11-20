@@ -1,0 +1,55 @@
+{
+ "format": "short",
+ "short_layout": "split",
+ "face": [
+  36,
+  6,
+  68,
+  62
+ ],
+ "keep_clear": [],
+ "style": {
+  "see": "styles/night.json"
+ },
+ "captions": {
+  "on": true,
+  "max_words": 3
+ },
+ "graphics": [
+  {
+   "type": "title",
+   "t": 0,
+   "text": "Update it in **one prompt**",
+   "hold": 3.0
+  },
+  {
+   "type": "callout",
+   "word_i": 56,
+   "text": "Paste **one prompt**",
+   "hold": 2.6
+  },
+  {
+   "type": "stat",
+   "word_i": 83,
+   "value": 0,
+   "label": "data lost",
+   "hold": 2.6
+  },
+  {
+   "type": "end",
+   "t": 31.6,
+   "kicker": "Comment",
+   "text": "**UPDATE**",
+   "hold": 2.8
+  }
+ ],
+ "panel": {
+  "file": "work/screen-cut.mp4",
+  "crop": [
+   33,
+   40,
+   97,
+   100
+  ]
+ }
+}

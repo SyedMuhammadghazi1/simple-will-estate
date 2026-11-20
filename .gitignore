@@ -39,3 +39,5 @@ marketing/reel-kit/reels/*--*/
 # third-party artwork fetched by a reel's fetch-assets.sh (not ours to commit)
 marketing/reel-kit/reels/echelons-gta-maths/assets/
 marketing/reel-kit/reels/echelons-gta-maths/.src/
+# shorts studio web app: uploaded recordings and renders stay on the computer
+marketing/shorts-studio/projects/

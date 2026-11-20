@@ -1,0 +1,1118 @@
+{
+ "ref_event_lufs": -20.0,
+ "note": "Every SFX file is normalised to the same event loudness (loudest 100 ms, K-weighted) = ref_event_lufs. Gain at placement = target_db_vs_voice + voice integrated LUFS - ref_event_lufs.",
+ "levels_source": "~/code/sound-research/SOUND.md + kit/roles_epidemic.json (21 Oct 2026)",
+ "mix": {
+  "master_lufs": -14.0,
+  "true_peak_max_db": -1.0,
+  "bed_under_voice_db": 14,
+  "bed_duck_db": 4,
+  "sfx_cap_per_10s": 5,
+  "sfx_min_gap_s": 0.22,
+  "whoosh_share_of_cuts": "about 1 in 3",
+  "bed_fade_out_s": 0.8,
+  "why": "SOUND.md: viral master -14.4 LUFS (-14.6 to -14.2), Jack -16.0; bed 13.3 dB under the voice (Jack 17.3 = too quiet); SFX -11.7 dB vs voice (-14.9 to -8.4), biggest hits -4.2; 20% of cuts get a sound (10 to 50%), starting on the cut; audible SFX 1.8 per 10 s measured, the detector undercounts 2 to 4x, so aim 4 to 5."
+ },
+ "roles": {
+  "transition_whoosh": {
+   "target_db_vs_voice": -10,
+   "use": "layout change / hard cut; peak lands on the cut",
+   "align": "peak",
+   "offset_s": -0.03,
+   "max_s": 1.2,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/transition_whoosh_1.wav",
+      "id": "72d49db7-34bc-4f3c-b73d-00db66e7ce08",
+      "title": "Swooshes, Whoosh, Designed, Swoosh, Wide",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 1.125,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/transition_whoosh_2.wav",
+      "id": "14f0f3a4-cc2b-4d8b-b453-49fd070c591d",
+      "title": "Swooshes, Whoosh, Short, Deep Reversed, Dry",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.662,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/transition_whoosh_3.wav",
+      "id": "073cf199-3d1b-4a67-9128-a5abd13870ff",
+      "title": "Designed, Whoosh, Soft Airy",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.859,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/transition_whoosh_1.wav",
+      "id": null,
+      "title": "pixabay: whoosh.mp3",
+      "source": "https://pixabay.com/sound-effects/ (bundled copy: ~/.claude/skills/media-use/audio/assets/sfx, see CREDITS.md)",
+      "licence": "Pixabay Content License (commercial use OK, no attribution; do not claim it in Content ID)",
+      "dur_s": 0.512,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/transition_whoosh_2.wav",
+      "id": null,
+      "title": "pixabay: whoosh.mp3",
+      "source": "https://pixabay.com/sound-effects/ (bundled copy: ~/.claude/skills/media-use/audio/assets/sfx, see CREDITS.md)",
+      "licence": "Pixabay Content License (commercial use OK, no attribution; do not claim it in Content ID)",
+      "dur_s": 0.575,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/transition_whoosh_3.wav",
+      "id": null,
+      "title": "pixabay: whoosh.mp3",
+      "source": "https://pixabay.com/sound-effects/ (bundled copy: ~/.claude/skills/media-use/audio/assets/sfx, see CREDITS.md)",
+      "licence": "Pixabay Content License (commercial use OK, no attribution; do not claim it in Content ID)",
+      "dur_s": 0.456,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "return_swish": {
+   "target_db_vs_voice": -14,
+   "use": "cut back to Jack's face; lighter than a full whoosh",
+   "align": "peak",
+   "offset_s": -0.03,
+   "max_s": 0.8,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/return_swish_1.wav",
+      "id": "3e9598e8-9b58-4f11-baae-1e6ce5762f12",
+      "title": "Cartoon, Swish, Whoosh, Fast Pass",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.217,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/return_swish_2.wav",
+      "id": "0777d9b6-0728-4c50-ba5f-a2eb8028a9ae",
+      "title": "Swooshes, Swish, Stick, Fast Swipe Through Air 01",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.161,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/return_swish_1.wav",
+      "id": null,
+      "title": "pixabay: whoosh.mp3",
+      "source": "https://pixabay.com/sound-effects/ (bundled copy: ~/.claude/skills/media-use/audio/assets/sfx, see CREDITS.md)",
+      "licence": "Pixabay Content License (commercial use OK, no attribution; do not claim it in Content ID)",
+      "dur_s": 0.406,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "card_slide": {
+   "target_db_vs_voice": -12,
+   "use": "card or sheet slides in or is knocked away",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.6,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/card_slide_1.wav",
+      "id": "b9760116-dd8f-4a76-93d1-1d1fa119062f",
+      "title": "User Interface, Motion, Swipe 07",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.6,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/card_slide_2.wav",
+      "id": "95b67468-46da-4709-baf2-52da9491d845",
+      "title": "User Interface, Motion, Swipe 02",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.6,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/card_slide_3.wav",
+      "id": "fe8bc994-bf82-4488-b320-2c4710adf02c",
+      "title": "User Interface, Motion, Swipe 05",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.275,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/card_slide_1.wav",
+      "id": null,
+      "title": "kenney_interface: maximize_004.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.398,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/card_slide_2.wav",
+      "id": null,
+      "title": "kenney_interface: minimize_004.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.418,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "pop_in": {
+   "target_db_vs_voice": -12,
+   "use": "a graphic (tile, chip, node, card) pops in",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.5,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/pop_in_1.wav",
+      "id": "ba6ef87a-a4ea-4901-bf6e-1311b3e3ddfa",
+      "title": "User Interface, Alert, Pops, Plastic, Tap, Pops",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.321,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/pop_in_2.wav",
+      "id": "ae397789-f558-4e6f-975b-d9aed7258bee",
+      "title": "User Interface, Alert, Pops, Wobble, Bloop, Pops",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.247,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/pop_in_3.wav",
+      "id": "7d8af4cd-8adf-48c6-9197-1cd659c2393d",
+      "title": "User Interface, Alert, Pops, Cute, Zap, Pops",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.07,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/pop_in_4.wav",
+      "id": "7cce069c-4a3a-4746-b5c8-94a653fab587",
+      "title": "User Interface, Click, UI Buttons, Bubbly, Select",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.193,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/pop_in_1.wav",
+      "id": null,
+      "title": "kenney_interface: drop_002.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.188,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/pop_in_2.wav",
+      "id": null,
+      "title": "kenney_interface: drop_003.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.188,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/pop_in_3.wav",
+      "id": null,
+      "title": "kenney_interface: drop_004.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.284,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/pop_in_4.wav",
+      "id": null,
+      "title": "pixabay: pop.mp3",
+      "source": "https://pixabay.com/sound-effects/ (bundled copy: ~/.claude/skills/media-use/audio/assets/sfx, see CREDITS.md)",
+      "licence": "Pixabay Content License (commercial use OK, no attribution; do not claim it in Content ID)",
+      "dur_s": 0.5,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "cursor_click": {
+   "target_db_vs_voice": -16,
+   "use": "cursor click, send, play, toggle",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.3,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/cursor_click_1.wav",
+      "id": "78e23a2d-c645-491d-b826-c5ca15d1efdd",
+      "title": "Computers, Keyboard & Mouse, Mouse, Apple, Mighty Mouse, Click",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.198,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/cursor_click_1.wav",
+      "id": null,
+      "title": "kenney_ui: mouseclick1.ogg",
+      "source": "https://kenney.nl/assets/ui-audio",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.056,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/cursor_click_2.wav",
+      "id": null,
+      "title": "kenney_interface: click_002.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.012,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/cursor_click_3.wav",
+      "id": null,
+      "title": "kenney_ui: click2.ogg",
+      "source": "https://kenney.nl/assets/ui-audio",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.053,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "tick_done": {
+   "target_db_vs_voice": -12,
+   "use": "done tick / check lands",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.6,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/tick_done_1.wav",
+      "id": "998fe887-42ea-4d38-9fd2-f430d8475bb1",
+      "title": "User Interface, Click, UI Buttons, Confirm, Menu",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.6,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/tick_done_2.wav",
+      "id": "33de2a84-df01-40c5-aba9-2d28f584ea12",
+      "title": "User Interface, Misc, Completions, Accepted, Subtle",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.6,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/tick_done_1.wav",
+      "id": null,
+      "title": "kenney_interface: confirmation_001.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.29,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/tick_done_2.wav",
+      "id": null,
+      "title": "kenney_interface: select_003.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.369,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "count_tick": {
+   "target_db_vs_voice": -18,
+   "use": "one tick per count-up step",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.1,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/count_tick_1.wav",
+      "id": "d637e4e8-6846-496b-84f9-19f3f7b59539",
+      "title": "User Interface, Click, UI Buttons, Simple, Select",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.1,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/count_tick_2.wav",
+      "id": "45c94b43-2fb0-4970-98db-cc0fe6ea3678",
+      "title": "User Interface, Click, UI Buttons, Glassy, Touch",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.1,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/count_tick_1.wav",
+      "id": null,
+      "title": "kenney_interface: tick_002.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.02,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/count_tick_2.wav",
+      "id": null,
+      "title": "kenney_interface: tick_001.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.045,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "typing": {
+   "target_db_vs_voice": -20,
+   "use": "keystrokes while text types (random 65 to 120 ms apart)",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.12,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/typing_1.wav",
+      "id": "d58cda3c-28d1-49af-86f1-0a400fd35a54",
+      "title": "Computers, Keyboard & Mouse, Keyboard, Apple, Key Press, Single",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.12,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/typing_2.wav",
+      "id": "f94a21b7-3e53-4cf8-b3b3-4cb0ce73febd",
+      "title": "Computers, Keyboard & Mouse, Keyboard, Laptop, Key Press, Single",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.12,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/typing_3.wav",
+      "id": "d1f8f0bb-4a2f-4bf6-b308-b21b18b169f7",
+      "title": "Computers, Keyboard & Mouse, Keyboard, Small, Bluetooth, Type, Key Press, Spacebar 01",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.12,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/typing_4.wav",
+      "id": "67dabac0-00ae-485e-acfa-c2e45b11cb4d",
+      "title": "Computers, Keyboard & Mouse, Keyboard, Apple Magic, Key Press",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.12,
+      "event_loudness_lufs": -21.4
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/typing_1.wav",
+      "id": null,
+      "title": "kenney_ui: click1.ogg",
+      "source": "https://kenney.nl/assets/ui-audio",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.091,
+      "event_loudness_lufs": -20.1
+     },
+     {
+      "file": "sfx/free/typing_2.wav",
+      "id": null,
+      "title": "kenney_ui: click3.ogg",
+      "source": "https://kenney.nl/assets/ui-audio",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.076,
+      "event_loudness_lufs": -22.6
+     },
+     {
+      "file": "sfx/free/typing_3.wav",
+      "id": null,
+      "title": "kenney_ui: click4.ogg",
+      "source": "https://kenney.nl/assets/ui-audio",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.038,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/typing_4.wav",
+      "id": null,
+      "title": "kenney_ui: click5.ogg",
+      "source": "https://kenney.nl/assets/ui-audio",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.035,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/typing_5.wav",
+      "id": null,
+      "title": "kenney_interface: click_003.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.007,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "logo_land": {
+   "target_db_vs_voice": -5,
+   "use": "logo or hero word lands (the one big hit per section)",
+   "align": "peak",
+   "offset_s": 0.0,
+   "max_s": 2.2,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/logo_land_1.wav",
+      "id": "9cdc2e7a-72ee-42b7-b2b3-61548d8f965c",
+      "title": "Designed, Stinger, Cinematic, Hit, Impact, Small Riser, Futuristic, Scifi 04",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 1.986,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/logo_land_2.wav",
+      "id": "8810519e-df1c-4839-9869-772ec64cb766",
+      "title": "Designed, Impact, Percussive, Simple Hit",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 2.147,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/logo_land_1.wav",
+      "id": null,
+      "title": "pixabay: impact-bass-1.mp3",
+      "source": "https://pixabay.com/sound-effects/ (bundled copy: ~/.claude/skills/media-use/audio/assets/sfx, see CREDITS.md)",
+      "licence": "Pixabay Content License (commercial use OK, no attribution; do not claim it in Content ID)",
+      "dur_s": 1.2,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "strike": {
+   "target_db_vs_voice": -10,
+   "use": "strike-through / cross-out",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.4,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/strike_1.wav",
+      "id": "e55a339f-f8dd-4143-b7c5-110aeb7a4cf7",
+      "title": "Objects, Writing, Marker Pen, Scribble On Cardboard Sheet, Short",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.4,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/strike_2.wav",
+      "id": "fa77255b-35e9-447d-a5dd-f9f0f1f57e32",
+      "title": "Swooshes, Swish, Stick, Whip, Swoosh, Air Swipe",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.118,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/strike_1.wav",
+      "id": null,
+      "title": "kenney_interface: scratch_002.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.139,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/strike_2.wav",
+      "id": null,
+      "title": "kenney_interface: scratch_001.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.139,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "confetti": {
+   "target_db_vs_voice": -12,
+   "use": "confetti / hearts burst",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 1.0,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/confetti_1.wav",
+      "id": "9e530be5-c2a9-4c81-891e-5ea83a16134d",
+      "title": "Cartoon, Pop, Pops x6",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.925,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/confetti_1.wav",
+      "id": null,
+      "title": "pixabay: sparkle.mp3",
+      "source": "https://pixabay.com/sound-effects/ (bundled copy: ~/.claude/skills/media-use/audio/assets/sfx, see CREDITS.md)",
+      "licence": "Pixabay Content License (commercial use OK, no attribution; do not claim it in Content ID)",
+      "dur_s": 1.2,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "sparkle": {
+   "target_db_vs_voice": -16,
+   "use": "sparkles over an output",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 1.2,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/sparkle_1.wav",
+      "id": "3b59d502-740d-4c71-b0ea-cd58d78383b0",
+      "title": "Musical, Chime, Twinkle, Wood, Positive, Short 03",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 1.2,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/sparkle_2.wav",
+      "id": "97bec4af-9d96-43bb-9d8d-8143b5200586",
+      "title": "Cartoon, Musical, Tiptoe, Twinkle, Run",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 1.19,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/sparkle_1.wav",
+      "id": null,
+      "title": "kenney_interface: glass_004.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.692,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "level_up": {
+   "target_db_vs_voice": -10,
+   "use": "scene done / comment posted / success",
+   "align": "peak",
+   "offset_s": 0.0,
+   "max_s": 1.4,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/level_up_1.wav",
+      "id": "2c7c4bf9-2f4d-40c9-9ab3-c4381b1a634b",
+      "title": "Games, Video, Level Up, Micro Ascend, Tonal",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 1.378,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/level_up_2.wav",
+      "id": "92c6776f-81b7-428d-b614-0bd4275bf8c6",
+      "title": "User Interface, Misc, Completions, Digital, Achievement",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 1.037,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/level_up_1.wav",
+      "id": null,
+      "title": "kenney_interface: confirmation_002.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.539,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/level_up_2.wav",
+      "id": null,
+      "title": "kenney_digital: powerUp2.ogg",
+      "source": "https://kenney.nl/assets/digital-audio",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.35,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "coin": {
+   "target_db_vs_voice": -12,
+   "use": "coin / money icon",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.9,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/coin_1.wav",
+      "id": "52bea5d4-3c9a-4ed3-bb64-6e79660f9454",
+      "title": "Objects, Coin, Money, Drop Coins",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.282,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/coin_1.wav",
+      "id": null,
+      "title": "pixabay: ping.mp3",
+      "source": "https://pixabay.com/sound-effects/ (bundled copy: ~/.claude/skills/media-use/audio/assets/sfx, see CREDITS.md)",
+      "licence": "Pixabay Content License (commercial use OK, no attribution; do not claim it in Content ID)",
+      "dur_s": 0.9,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "tick_clock": {
+   "target_db_vs_voice": -14,
+   "use": "clock icon",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.2,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/tick_clock_1.wav",
+      "id": "538586fa-29cc-4545-84c3-cd7ad20f1a3b",
+      "title": "Pocket Watch, Click, Open",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.106,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/tick_clock_1.wav",
+      "id": null,
+      "title": "kenney_interface: tick_004.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.055,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "data_blip": {
+   "target_db_vs_voice": -18,
+   "use": "packet travels / code line runs / render",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.4,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/data_blip_1.wav",
+      "id": "7762db67-eb05-432b-8662-a9e448f9cab2",
+      "title": "User Interface, Data, Data Process 03",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.4,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/data_blip_2.wav",
+      "id": "fc1a1ef7-14f3-49ac-8a3a-9db1b588c68f",
+      "title": "User Interface, Beep, Computer, Generic Digital Noise 02",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.311,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/data_blip_1.wav",
+      "id": null,
+      "title": "kenney_digital: phaserUp4.ogg",
+      "source": "https://kenney.nl/assets/digital-audio",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.292,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/data_blip_2.wav",
+      "id": null,
+      "title": "kenney_digital: phaserUp5.ogg",
+      "source": "https://kenney.nl/assets/digital-audio",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.224,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "drop": {
+   "target_db_vs_voice": -12,
+   "use": "download arrow drops in",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.4,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/drop_1.wav",
+      "id": "65d863cc-c4e5-4474-b960-ebb47598915c",
+      "title": "User Interface, Motion, Short, Plop, Tiny Sweep",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.4,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/drop_1.wav",
+      "id": null,
+      "title": "kenney_interface: drop_004.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.337,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "shimmer": {
+   "target_db_vs_voice": -20,
+   "use": "border beam / shimmer sweep (very quiet)",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.8,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/shimmer_1.wav",
+      "id": "5d61aee3-99c1-475d-b36f-4502966d9114",
+      "title": "Designed, Synthetic, Sweep, White Noise Filter 02",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.786,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/shimmer_2.wav",
+      "id": "93505bfe-e95d-4b5f-96aa-508d405b7013",
+      "title": "Swooshes, Swish, Short, Bright, Fast, Flyby",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.8,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/shimmer_1.wav",
+      "id": null,
+      "title": "kenney_interface: glass_004.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.582,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "ui_blip": {
+   "target_db_vs_voice": -18,
+   "use": "small UI change: word swap, underline, timecode, theme flip",
+   "align": null,
+   "offset_s": 0.0,
+   "max_s": 0.15,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/ui_blip_1.wav",
+      "id": "19edc18a-387f-4987-9110-75d1abecc3fa",
+      "title": "User Interface, Click, UI Buttons, Bubbly, Option",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.15,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/ui_blip_2.wav",
+      "id": "7d87eb08-8097-4abc-ac2a-c6d6b1c1d4c6",
+      "title": "Cartoon, Pop, Pull Out, Release, Plop",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.076,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/epidemic/ui_blip_3.wav",
+      "id": "557d5e3b-ac3b-4e62-91cf-c698f5a3baa5",
+      "title": "User Interface, Beep, Notification, Button, Confirm, Video Game 03",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 0.15,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/ui_blip_1.wav",
+      "id": null,
+      "title": "kenney_interface: select_001.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.04,
+      "event_loudness_lufs": -20.0
+     },
+     {
+      "file": "sfx/free/ui_blip_2.wav",
+      "id": null,
+      "title": "kenney_interface: select_002.ogg",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licence": "CC0 1.0 (Kenney, kenney.nl)",
+      "dur_s": 0.04,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  },
+  "end_card": {
+   "target_db_vs_voice": -5,
+   "use": "end card lands (swell peaks on the card)",
+   "align": "peak",
+   "offset_s": 0.0,
+   "max_s": 3.4,
+   "sets": {
+    "epidemic": [
+     {
+      "file": "sfx/epidemic/end_card_1.wav",
+      "id": "e5b8d45f-f166-4550-b002-1247a1c817e5",
+      "title": "Designed, Stinger, Riser, Impact, Softs",
+      "source": "Epidemic Sound",
+      "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim.",
+      "dur_s": 3.208,
+      "event_loudness_lufs": -20.0
+     }
+    ],
+    "free": [
+     {
+      "file": "sfx/free/end_card_1.wav",
+      "id": null,
+      "title": "pixabay: whoosh-cinematic.mp3",
+      "source": "https://pixabay.com/sound-effects/ (bundled copy: ~/.claude/skills/media-use/audio/assets/sfx, see CREDITS.md)",
+      "licence": "Pixabay Content License (commercial use OK, no attribution; do not claim it in Content ID)",
+      "dur_s": 2.35,
+      "event_loudness_lufs": -20.0
+     }
+    ]
+   }
+  }
+ },
+ "music": [
+  {
+   "file": "music/4cb08b97.wav",
+   "id": "4cb08b97-fa28-4f38-9b9c-3e71a2d98b5f",
+   "title": "Mindscape",
+   "artists": [
+    "Lennon Hutton"
+   ],
+   "bpm": 108,
+   "tags": [
+    "dark",
+    "electronic",
+    "no vocals",
+    "pulses",
+    "suspense"
+   ],
+   "source": "Epidemic Sound",
+   "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim."
+  },
+  {
+   "file": "music/941039ee.wav",
+   "id": "941039ee-edf6-4fde-9e9c-87be01025399",
+   "title": "Glorious (Instrumental Version)",
+   "artists": [
+    "Adelyn Paik"
+   ],
+   "bpm": 116,
+   "tags": [
+    "2010s",
+    "2020s",
+    "dreamy",
+    "korea",
+    "k-pop",
+    "no vocals",
+    "sentimental"
+   ],
+   "source": "Epidemic Sound",
+   "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim."
+  },
+  {
+   "file": "music/b40c6266.wav",
+   "id": "b40c6266-de82-4a0f-a624-0760e3efc750",
+   "title": "Me Time (Instrumental Version)",
+   "artists": [
+    "Zorro"
+   ],
+   "bpm": 109,
+   "tags": [
+    "dreamy",
+    "happy",
+    "indie pop",
+    "no vocals"
+   ],
+   "source": "Epidemic Sound",
+   "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim."
+  },
+  {
+   "file": "music/66265c07.wav",
+   "id": "66265c07-2718-3650-8064-a24ff89223ce",
+   "title": "Conclusion",
+   "artists": [
+    "Max Anson"
+   ],
+   "bpm": 112,
+   "tags": [
+    "build",
+    "dreamy",
+    "mysterious",
+    "no vocals",
+    "suspense"
+   ],
+   "source": "Epidemic Sound",
+   "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim."
+  },
+  {
+   "file": "music/72ead9c2.wav",
+   "id": "72ead9c2-60c5-4e9f-9f5d-bbdb4aeaaca3",
+   "title": "Moving Up",
+   "artists": [
+    "Origo"
+   ],
+   "bpm": 110,
+   "tags": [
+    "corporate",
+    "happy",
+    "hopeful",
+    "no vocals"
+   ],
+   "source": "Epidemic Sound",
+   "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim."
+  },
+  {
+   "file": "music/f29bc514.wav",
+   "id": "f29bc514-a2bd-4a6d-b520-3c67fa59c6d2",
+   "title": "Take Me Away",
+   "artists": [
+    "dvine"
+   ],
+   "bpm": 115,
+   "tags": [
+    "beats",
+    "electronic",
+    "happy",
+    "hopeful",
+    "laid back",
+    "soft house",
+    "tropical house",
+    "vocal presence"
+   ],
+   "source": "Epidemic Sound",
+   "licence": "Epidemic Sound subscription licence (Jack Roberts account): cleared for his YouTube and social channels while the subscription is active when the video is published. Keep the id: it clears a Content ID claim."
+  },
+  {
+   "file": "music/free_bed_112bpm.wav",
+   "id": null,
+   "title": "bed_112bpm (made by sound-research/scripts/make_bed.py)",
+   "bpm": 112,
+   "tags": [
+    "free"
+   ],
+   "source": "generated locally from CC0 parts",
+   "licence": "made locally, no third-party rights (see sound-research make_bed.py)"
+  }
+ ],
+ "default_music": {
+  "short": "f29bc514-a2bd-4a6d-b520-3c67fa59c6d2",
+  "long": "72ead9c2-60c5-4e9f-9f5d-bbdb4aeaaca3",
+  "why": "short: \"Take Me Away\" by dvine, 115 BPM, the SOUND.md draft bed (hopeful electronic, 110 to 125 BPM); long: \"Moving Up\" by Origo, 110 BPM, hopeful, no vocals (calmer under a talking intro). Change per video in edit.json audio.music."
+ }
+}

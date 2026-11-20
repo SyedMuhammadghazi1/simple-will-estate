@@ -1,0 +1,17 @@
+{
+ "name": "Bold",
+ "about": "Loud headline blocks, heavy captions. For hooks, lists and big claims.",
+ "style": {
+  "font": "Archivo Black",
+  "caption": "#FFFFFF",
+  "accent": "#E5261F",
+  "panel": "#FFFFFF",
+  "ink": "#0A0A0A",
+  "line": "rgba(0,0,0,0)",
+  "radius": "6px",
+  "ground": "#000000",
+  "titlebg": "#FFFFFF",
+  "fonturl": "https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap",
+  "capaccent": "#FFE14D"
+ }
+}
