@@ -19,9 +19,18 @@ const prop = {
     const heights = lines.map((l) => (l.kind === "rule" ? 26 : l.kind === "big" ? 150 : 72));
     const hgt = 56 + heights.reduce((a, b) => a + b, 0);
     box(el, w, hgt);
+    const tops = [];
+    let acc = 56;
+    for (const hh of heights) {
+      acc += hh;
+      tops.push(acc);
+    }
     const label = h(
       "div",
-      { class: "mono", style: "font-size:21px;color:var(--muted);text-align:center;height:56px" },
+      {
+        class: "mono",
+        style: "font-size:26px;line-height:34px;color:var(--muted);text-align:center;height:56px",
+      },
       spec.label ?? "The maths",
     );
     el.appendChild(label);
@@ -66,11 +75,24 @@ const prop = {
     const pad = Math.max(0, (w - textW) / 2);
     for (const r of rows)
       if (r.kind === "line" || r.kind === "result") r.row.style.paddingLeft = `${pad}px`;
-    return { rows };
+    return { rows, el, tops };
   },
 
   update(state, t, ctx) {
     const lines = ctx.spec.lines ?? [];
+    // the card is as tall as the lines shown so far, and grows as each one arrives
+    let hNow = state.tops[0] ?? 56;
+    let bigAt = Infinity;
+    lines.forEach((l, i) => {
+      const at = ctx.at(l.at ?? 0.2 + i * 0.6);
+      const prev = i > 0 ? state.tops[i - 1] : 56;
+      hNow = Math.max(
+        hNow,
+        lerp(prev, state.tops[i], ease.outCubic(prog(t, at - 0.12, at + 0.12))),
+      );
+      if (l.kind === "big") bigAt = Math.min(bigAt, at);
+    });
+    state.el.style.height = `${hNow.toFixed(1)}px`;
     let lastTyping = -1;
     state.rows.forEach((r, i) => {
       const at = ctx.at(lines[i].at ?? 0.2 + i * 0.6);
@@ -92,7 +114,7 @@ const prop = {
       if (!r.caret) return;
       const at = ctx.at(lines[i].at ?? 0.2 + i * 0.6);
       const done = t >= at + (lines[i].text ?? "").length * STEP;
-      const on = i === lastTyping && (!done || Math.floor(t * 2.4) % 2 === 0);
+      const on = t < bigAt && i === lastTyping && (!done || Math.floor(t * 2.4) % 2 === 0);
       r.caret.style.opacity = on ? "1" : "0";
     });
   },

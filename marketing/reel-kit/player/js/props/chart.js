@@ -22,8 +22,8 @@ const prop = {
     const H = spec.h ?? 470;
     const PL = 20;
     const PR = 190; // room for the value label at the right end
-    const PT = 70;
-    const PB = 70;
+    const PT = 86;
+    const PB = 84;
     box(el, W, H);
     const data = spec.data ?? [];
     const amt = spec.amount ?? 1000;
@@ -32,7 +32,7 @@ const prop = {
     const j = spec.second ? data.findIndex(([d]) => d >= spec.second.from) : -1;
     const valsB = j >= 0 ? data.map(([, c], i) => (i < j ? null : (amt * c) / data[j][1])) : [];
     const all = [...valsA, ...valsB.filter((v) => v != null)];
-    const lo = Math.min(...all) * 0.92;
+    const lo = Math.min(...all) * 0.86;
     const hi = Math.max(...all) * 1.04;
     const X = (i) => PL + ((W - PL - PR) * i) / (data.length - 1);
     const Y = (v) => PT + (H - PT - PB) * (1 - (v - lo) / (hi - lo));
@@ -54,13 +54,13 @@ const prop = {
       style: "position:absolute;inset:0",
       html: `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="overflow:visible">
         <line x1="${PL}" x2="${W - PR}" y1="${H - PB}" y2="${H - PB}" style="stroke:var(--line)" stroke-width="2"/>
-        ${ticks.map(([i, y]) => `<line x1="${X(i)}" x2="${X(i)}" y1="${H - PB}" y2="${H - PB + 10}" style="stroke:var(--line)" stroke-width="2"/><text x="${X(i)}" y="${H - PB + 36}" text-anchor="middle" font-family="DM Mono, monospace" font-size="20" style="fill:var(--muted)">${y}</text>`).join("")}
+        ${ticks.map(([i, y]) => `<line x1="${X(i)}" x2="${X(i)}" y1="${H - PB}" y2="${H - PB + 10}" style="stroke:var(--line)" stroke-width="2"/><text x="${X(i)}" y="${H - PB + 34}" text-anchor="middle" font-family="DM Mono, monospace" font-size="22" style="fill:var(--muted)">${y}</text>`).join("")}
         <line data-ref x1="${PL}" x2="${W - PR}" y1="${Y(amt)}" y2="${Y(amt)}" style="stroke:var(--muted)" stroke-width="2" stroke-dasharray="4 8" opacity="0.6"/>
         <path data-a d="${path(valsA)}" fill="none" style="stroke:var(--ink)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
         ${
           j >= 0
-            ? `<line data-jl x1="${X(j)}" x2="${X(j)}" y1="${PT - 20}" y2="${H - PB}" style="stroke:var(--muted)" stroke-width="2" stroke-dasharray="3 7" opacity="0"/>
-        <path data-b d="${path(valsB, j)}" fill="none" style="stroke:var(--red)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>`
+            ? `<line data-jl x1="${X(j)}" x2="${X(j)}" y1="${PT - 12}" y2="${H - PB}" style="stroke:var(--muted)" stroke-width="2" stroke-dasharray="3 7" opacity="0"/>
+        <path data-b d="${path(valsB, j)}" fill="none" style="stroke:var(--red)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" opacity="0"/>`
             : ""
         }
         <circle data-ha r="9" style="fill:var(--ink)"/>
@@ -71,7 +71,7 @@ const prop = {
       "div",
       {
         class: "mono",
-        style: `position:absolute;left:${PL}px;top:0;font-size:22px;color:var(--muted);white-space:nowrap`,
+        style: `position:absolute;left:${PL}px;top:0;font-size:24px;color:var(--muted);white-space:nowrap`,
       },
       spec.title ?? "",
     );
@@ -79,7 +79,7 @@ const prop = {
       "div",
       {
         class: "mono",
-        style: `position:absolute;left:${PL}px;top:${H - PB + 46}px;font-size:19px;color:var(--muted);white-space:nowrap`,
+        style: `position:absolute;left:${PL}px;top:${H - PB + 52}px;font-size:21px;color:var(--muted);white-space:nowrap`,
       },
       spec.startLabel ?? "",
     );
@@ -87,26 +87,26 @@ const prop = {
       "div",
       {
         class: "mono",
-        style: `position:absolute;right:${PR - 150}px;top:${H - PB + 46}px;font-size:19px;color:var(--muted);white-space:nowrap`,
+        style: `position:absolute;right:${PR - 150}px;top:${H - PB + 52}px;font-size:21px;color:var(--muted);white-space:nowrap`,
       },
       spec.foot ?? "",
     );
     const la = h("div", {
       class: "serif",
       style:
-        "position:absolute;left:0;top:0;font-size:58px;font-weight:500;white-space:nowrap;color:var(--green);font-variant-numeric:tabular-nums",
+        "position:absolute;left:0;top:0;font-size:56px;line-height:64px;font-weight:500;white-space:nowrap;color:var(--green);font-variant-numeric:tabular-nums",
     });
     const lb = h("div", {
       class: "serif",
       style:
-        "position:absolute;left:0;top:0;font-size:58px;font-weight:500;white-space:nowrap;color:var(--red);opacity:0;font-variant-numeric:tabular-nums",
+        "position:absolute;left:0;top:0;font-size:56px;line-height:64px;font-weight:500;white-space:nowrap;color:var(--red);opacity:0;font-variant-numeric:tabular-nums",
     });
     const jlab = h(
       "div",
       {
         class: "mono",
         style:
-          "position:absolute;left:0;top:36px;font-size:19px;color:var(--ink);white-space:nowrap;opacity:0;transform:translateX(-50%)",
+          "position:absolute;left:0;top:42px;font-size:21px;color:var(--ink);white-space:nowrap;opacity:0;transform:translateX(-50%)",
       },
       spec.second?.label ?? "",
     );
@@ -116,6 +116,7 @@ const prop = {
     return {
       W,
       H,
+      floor: H - PB,
       X,
       Y,
       j,
@@ -139,7 +140,8 @@ const prop = {
     const n = s.valsA.length;
     // phase A: reveal the line by index so the head follows the data, not the path length
     const aAt = ctx.at(spec.drawAt ?? 0.3);
-    const pA = ease.inOutCubic(prog(t, aAt, aAt + (spec.drawDur ?? 2)));
+    const aEnd = spec.drawEnd != null ? ctx.at(spec.drawEnd) : aAt + (spec.drawDur ?? 2);
+    const pA = ease.inOutCubic(prog(t, aAt, Math.max(aAt + 0.3, aEnd)));
     const fa = pA * (n - 1);
     const ia = Math.floor(fa);
     const va = ia >= n - 1 ? s.valsA[n - 1] : lerp(s.valsA[ia], s.valsA[ia + 1], fa - ia);
@@ -149,7 +151,8 @@ const prop = {
     s.ha.setAttribute("cx", xa.toFixed(1));
     s.ha.setAttribute("cy", s.Y(va).toFixed(1));
     setText(s.la, money(va));
-    s.la.style.transform = `translate(${(xa + 22).toFixed(1)}px, ${(s.Y(va) - 44).toFixed(1)}px)`;
+    const labelY = (y) => Math.min(y - 36, s.floor - 78);
+    s.la.style.transform = `translate(${(xa + 22).toFixed(1)}px, ${labelY(s.Y(va)).toFixed(1)}px)`;
     // phase B
     if (spec.second && s.pb) {
       const bAt = ctx.at(spec.second.at ?? 2);
@@ -168,11 +171,12 @@ const prop = {
       const vb = ib >= n - 1 ? s.valsB[n - 1] : lerp(s.valsB[ib], s.valsB[ib + 1], fb - ib);
       const xb = lerp(s.X(ib), s.X(Math.min(n - 1, ib + 1)), fb - ib);
       s.hb.setAttribute("opacity", on.toFixed(3));
+      s.pb.setAttribute("opacity", on.toFixed(3));
       s.hb.setAttribute("cx", xb.toFixed(1));
       s.hb.setAttribute("cy", s.Y(vb).toFixed(1));
       s.lb.style.opacity = on.toFixed(3);
       setText(s.lb, money(vb));
-      s.lb.style.transform = `translate(${(xb + 22).toFixed(1)}px, ${(s.Y(vb) + 4).toFixed(1)}px)`;
+      s.lb.style.transform = `translate(${(xb + 22).toFixed(1)}px, ${labelY(s.Y(vb)).toFixed(1)}px)`;
     }
   },
 

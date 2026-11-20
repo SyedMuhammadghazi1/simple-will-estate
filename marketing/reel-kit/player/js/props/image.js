@@ -4,6 +4,7 @@
 // spec: { src, w, h, fit: "cover" | "contain", frame, radius, fullbleed,
 //         zoom: [from, to], pan: [x, y] (px over the prop's life), shade, label }
 //   fullbleed  fills the whole 1080x1920 frame (use "z": 2 so the beat's other props sit on top)
+//   shadow     soft dark halo behind a transparent image such as a logo (0-1)
 //   shade      darkens the top and bottom so captions and fine print stay readable (0-1)
 
 import { clamp, ease, lerp, prog } from "../timing.js";
@@ -22,7 +23,7 @@ const prop = {
     const img = h("img", {
       src: ctx.asset(spec.src),
       alt: "",
-      style: `position:absolute;left:0;top:0;width:100%;height:100%;object-fit:${spec.fit ?? "cover"};object-position:${spec.position ?? "50% 50%"};transform-origin:50% 50%`,
+      style: `position:absolute;left:0;top:0;width:100%;height:100%;object-fit:${spec.fit ?? "cover"};object-position:${spec.position ?? "50% 50%"};transform-origin:50% 50%${spec.shadow ? `;filter:drop-shadow(0 14px 46px rgba(6,3,14,${spec.shadow})) drop-shadow(0 4px 10px rgba(6,3,14,${spec.shadow}))` : ""}`,
     });
     frame.appendChild(img);
     if (full || spec.shade) {

@@ -14,6 +14,23 @@ mkdir -p assets .src
 BASE="https://www.rockstargames.com/VI/_next/static/media"
 get() { [ -s ".src/$1" ] || curl -fsS -A "Mozilla/5.0" "$BASE/$1" -o ".src/$1"; }
 
+# The logo files are mostly transparent padding. Crop each to its artwork (plus a small margin)
+# so the size set in reel.json is the size the logo is drawn at.
+trim() {
+  local c w h x y m=16
+  c=$(ffmpeg -hide_banner -loop 1 -i "$1" -frames:v 3 \
+    -vf "format=rgba,alphaextract,cropdetect=limit=0.02:round=2:skip=0:reset=0" -f null - 2>&1 |
+    grep -o "crop=[0-9:]*" | tail -1 || true)
+  if [ -z "$c" ]; then
+    cp "$1" "$2"
+    return
+  fi
+  IFS=: read -r w h x y <<<"${c#crop=}"
+  x=$((x > m ? x - m : 0))
+  y=$((y > m ? y - m : 0))
+  ffmpeg -v error -y -i "$1" -vf "crop='min($((w + 2 * m)),iw-$x)':'min($((h + 2 * m)),ih-$y)':$x:$y" "$2"
+}
+
 # name in this reel -> file on rockstargames.com
 declare -A ART=(
   [logo-gta6-wide.png]="poster_logo.0m-7c805zusl7.png"
@@ -28,13 +45,19 @@ declare -A ART=(
   [leonida-night.jpg]="onlyInLeonidaMobile.0mupfnk-x6x~r.jpg"
   [leonida-pool.jpg]="screenshotsMobile.01nsldjqbta4u.jpg"
   [vice-city-poster.jpg]="intro-mobile.0.97ufm766d4x.png"
+  [walk.jpg]="an-extended-look-mobile.0f0-3vo3w9u26.jpg"
+  [couple-sunset.jpg]="musicMobile.16pdg34v6lit..jpg"
+  [rooftop.jpg]="pre-load-mobile.0w0e-.3-xgjgh.jpg"
+  [city-night.jpg]="mobile.0mi46.hy2kwfa.jpg"
+  [city-night-wide.jpg]="desktop.00.5pzu2sm-z4.jpg"
+  [neon-car.jpg]="VINTAGE_VICE_CITY_PACK_VAPID_STANIER_01.004m_8d1~qngy.jpg"
 )
 for out in "${!ART[@]}"; do
   src="${ART[$out]}"
   get "$src"
   case "$out" in
-    *.png) cp ".src/$src" "assets/$out" ;;
-    *) ffmpeg -v error -y -i ".src/$src" -vf "scale='min(2560,iw)':-1" -q:v 3 "assets/$out" ;;
+    *.png) trim ".src/$src" "assets/$out" ;;
+    *) ffmpeg -v error -y -i ".src/$src" -vf "scale='min(3840,iw)':-2" -q:v 3 "assets/$out" ;;
   esac
 done
 

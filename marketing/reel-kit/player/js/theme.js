@@ -78,8 +78,10 @@ export const THEMES = {
       className: "poster",
     },
     endcard: {
-      top: "rgba(10,5,24,0.55)",
-      bottom: "rgba(6,3,14,0.88)",
+      fade: true,
+      upper: true,
+      top: "rgba(10,5,24,0.5)",
+      bottom: "rgba(6,3,14,0.8)",
       glow: "255,79,168",
       accent: "#ff6fc0",
     },

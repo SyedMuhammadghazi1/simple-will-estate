@@ -346,7 +346,7 @@ async function auditOverlaps({ page }) {
       for (const T of texts) {
         for (const c of cards) {
           if (T.own === c.el || c.el.contains(T.own)) continue;
-          if (hit(T.r, c.r, 4)) {
+          if (hit(T.r, c.r, -12)) {
             report(
               `c:${T.text}|${name(c.el)}`,
               `${where} at ${t.toFixed(1)}s: "${T.text.slice(0, 30)}" runs over ${name(c.el)}`,

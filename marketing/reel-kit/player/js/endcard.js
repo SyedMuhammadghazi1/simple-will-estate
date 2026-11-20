@@ -100,6 +100,7 @@ export function buildEndcard(backLayer, frontLayer, spec, timeline, colors = {})
   if (!spec.sub) sub.style.display = "none";
   if (!spec.brand) brand.style.display = "none";
 
+  if (C.upper) headline.style.textTransform = "uppercase";
   const front = h("div", { id: "endcard" }, headline, pill, sub, brand, legal);
   front.style.setProperty("--end-accent", C.accent);
   frontLayer.appendChild(front);
@@ -159,7 +160,9 @@ export function buildEndcard(backLayer, frontLayer, spec, timeline, colors = {})
     // the table rises: clip the navy panel from the table line up to the top of the frame
     const rp = ease.inOutCubic(prog(te, T.rise, T.rise + T.riseDur));
     const topY = lerp(tableY, 0, rp);
-    rise.style.clipPath = `inset(${topY.toFixed(1)}px 0 0 0)`;
+    // a see-through card fades in (a rising edge would show as a hard seam over artwork)
+    if (C.fade) rise.style.opacity = rp.toFixed(3);
+    else rise.style.clipPath = `inset(${topY.toFixed(1)}px 0 0 0)`;
 
     words.forEach((_, i) => {
       const at = synced ? Math.max(0, spoken[i].t0 - 0.05 - t0) : T.head + i * 0.055;

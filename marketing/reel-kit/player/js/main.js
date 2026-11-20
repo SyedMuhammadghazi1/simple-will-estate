@@ -214,7 +214,8 @@ async function boot() {
     const beat = tl.beats[active];
     const here = moodOf(beat);
     const before = active > 0 ? moodOf(tl.beats[active - 1]) : 0;
-    const after = moodOf(tl.beats[active + 1]);
+    // the last beat keeps its mood: the end card takes over, there is nothing to fade back to
+    const after = active === tl.beats.length - 1 ? here : moodOf(tl.beats[active + 1]);
     let m = here;
     if (here > before) m = before + (here - before) * prog(t, beat.start, beat.start + MOOD_IN);
     if (here > after)
@@ -231,7 +232,7 @@ async function boot() {
 
     const place = endcard.update(t);
     let mood = moodAt(t, active);
-    if (place) mood *= place.captionFade;
+    if (place && !theme.backdrop) mood *= place.captionFade;
     stage.update(t, { mood });
 
     captions.update(t, inEnd && place.captionFade <= 0 ? -1 : active);
@@ -297,7 +298,8 @@ function buildBackdrops(layer, list, tl) {
   const byId = Object.fromEntries(tl.beats.map((b) => [b.id, b]));
   const wrap = h("div", { style: "position:absolute;inset:0;overflow:hidden;background:#07040f" });
   const items = list.map((b) => {
-    const beat = byId[b.beat];
+    // "@end" starts with the end card
+    const beat = b.beat === "@end" && tl.endcard ? { start: tl.endcard.start } : byId[b.beat];
     if (!beat) throw new Error(`backdrops: no beat "${b.beat}"`);
     const img = h("img", {
       src: `${reelDir}/${b.src}`,
@@ -329,7 +331,9 @@ function buildBackdrops(layer, list, tl) {
       const [px, py] = it.spec.pan ?? [0, -40];
       const p = clamp(prog(t, it.t - FADE, it.end + FADE));
       const e = p * p * (3 - 2 * p);
-      it.img.style.transform = `translate(${(px * e).toFixed(2)}px, ${(py * e).toFixed(2)}px) scale(${(z0 + (z1 - z0) * e).toFixed(4)})`;
+      // `shift` re-frames the picture (px), e.g. to lift faces clear of the captions
+      const [sx, sy] = it.spec.shift ?? [0, 0];
+      it.img.style.transform = `translate(${(sx + px * e).toFixed(2)}px, ${(sy + py * e).toFixed(2)}px) scale(${(z0 + (z1 - z0) * e).toFixed(4)})`;
     });
   }
   return { update };

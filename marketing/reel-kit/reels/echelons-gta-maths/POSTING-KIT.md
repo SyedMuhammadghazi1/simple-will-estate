@@ -6,7 +6,7 @@ depending on when it was bought. No brand on screen.
 
 | File                            | What it is                                                  |
 | ------------------------------- | ----------------------------------------------------------- |
-| `export/echelons-gta-maths.mp4` | the reel: 1080 × 1920, 30 fps, H.264 High, AAC 48 kHz, 63 s |
+| `export/echelons-gta-maths.mp4` | the reel: 1080 × 1920, 30 fps, H.264 High, AAC 48 kHz, 62 s |
 | `export/cover.png`              | cover: a real frame of the reel (the hook figure)           |
 | `export/captions.srt`           | subtitles, plus the end card's on-screen disclaimer         |
 

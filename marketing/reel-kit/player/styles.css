@@ -111,7 +111,10 @@ body {
   font-variation-settings: normal;
 }
 .cap.poster .w {
-  text-shadow: 0 5px 0 rgba(10, 4, 22, 0.55);
+  text-shadow:
+    0 5px 0 rgba(10, 4, 22, 0.6),
+    0 0 26px rgba(7, 4, 15, 0.95),
+    0 0 10px rgba(7, 4, 15, 0.8);
 }
 .cap.poster .w.acc {
   font-style: normal;
@@ -121,8 +124,9 @@ body {
 .cap.poster .w.acc.on {
   background: none;
   text-shadow:
-    0 0 22px var(--accent),
-    0 5px 0 rgba(10, 4, 22, 0.55);
+    0 5px 0 rgba(10, 4, 22, 0.6),
+    0 0 26px rgba(7, 4, 15, 0.95),
+    0 0 20px var(--accent);
 }
 .eyebrow-mark {
   display: inline-block;
@@ -279,6 +283,7 @@ body {
   line-height: 35px;
   color: rgba(246, 239, 224, 0.88);
   text-wrap: balance;
+  white-space: pre-line;
 }
 #loop-img {
   position: absolute;
