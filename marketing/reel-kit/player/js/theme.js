@@ -55,6 +55,67 @@ export const THEMES = {
     },
   },
 
+  // Artwork-led: the reel's own images as full-frame backdrops (reel.json "backdrops"), poster
+  // captions, floating cards. No drawn scenery and no brand mark.
+  leonida: {
+    fonts: {
+      caption: '"Anton", Impact, sans-serif',
+      ui: '"Inter", system-ui, sans-serif',
+      mono: '"DM Mono", ui-monospace, monospace',
+    },
+    stage: "bare",
+    backdrop: true,
+    mascot: false,
+    float: 5,
+    moodFade: 0.6,
+    caption: {
+      align: "center",
+      size: 80,
+      line: 86,
+      y: 352,
+      left: 80,
+      width: 920,
+      className: "poster",
+    },
+    endcard: {
+      top: "rgba(10,5,24,0.55)",
+      bottom: "rgba(6,3,14,0.88)",
+      glow: "255,79,168",
+      accent: "#ff6fc0",
+    },
+    colors: {
+      wallTop: ["#07040f", "#07040f"],
+      wallBottom: ["#07040f", "#07040f"],
+      wallGlow: ["#07040f", "#07040f"],
+      tableTop: ["#07040f", "#07040f"],
+      tableFront: ["#07040f", "#07040f"],
+      tableFrontLow: ["#07040f", "#07040f"],
+      pad: ["#07040f", "#07040f"],
+      padRule: ["#07040f", "#07040f"],
+      padMargin: ["#07040f", "#07040f"],
+      padBinding: ["#07040f", "#07040f"],
+      padShadow: ["#07040f", "#07040f"],
+      ink: ["#fff6e8", "#fff6e8"],
+      ghost: ["#d9b9d6", "#9d90c8"],
+      accent: ["#ffe45c", "#ff4fd8"],
+      eyebrow: ["#fff6e8", "#fff6e8"],
+      line: ["#ff7ac8", "#3ef2ff"],
+      card: ["#170b29", "#0f0a26"],
+      cardAlt: ["#2c1647", "#221650"],
+      navy: ["#7c5cff", "#7c5cff"],
+      navySoft: ["#2c1647", "#221650"],
+      gold: ["#ffd24a", "#ffd24a"],
+      goldDeep: ["#ff9a3c", "#ff9a3c"],
+      amber: ["#ff4fa8", "#ff4fd8"],
+      red: ["#ff5d6c", "#ff5d6c"],
+      green: ["#7dffa8", "#5dffb0"],
+      greenSoft: ["#16402c", "#16402c"],
+      sky: ["#3a1d5c", "#241552"],
+      muted: ["#e0c4e8", "#b3a6e0"],
+      shadow: ["#05030c", "#03020a"],
+    },
+  },
+
   // Sunset city: an animated retro-sunset backdrop (scene.js) with palms, skyline and traffic;
   // poster captions; mood "dark" is neon night. For gaming and pop-culture explainers.
   "sunset-city": {

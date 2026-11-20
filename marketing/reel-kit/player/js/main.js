@@ -175,6 +175,7 @@ async function boot() {
   }
   const endcard = buildEndcard(layers.endback, layers.overlay, reel.endcard, tl, theme.endcard);
   const hud = reel.hud ? buildHud(layers.caption, reel.hud, tl) : null;
+  const backdrops = reel.backdrops ? buildBackdrops(layers.back, reel.backdrops, tl) : null;
   if (hud) sfx.push(...hud.sfx);
   if (tl.endcard) {
     const said = tl.endcard.words;
@@ -251,6 +252,7 @@ async function boot() {
 
     mascot.update(t, cues, voiceLevel(t, allWords), place ?? {});
     hud?.update(t, place ? place.captionFade : 1);
+    backdrops?.update(t);
     return t;
   }
 
@@ -279,6 +281,53 @@ async function boot() {
   if (renderMode) document.body.classList.add("render");
   else preview(reel, tl, seek);
   document.body.dataset.ready = "1";
+}
+
+/**
+ * Full-frame artwork behind a reel: reel.json "backdrops": [{ beat, src, position, zoom, pan }].
+ * Each image starts at its beat and stays until the next one, which cross-fades in over it.
+ * Every image drifts slowly (Ken Burns); a fixed gradient keeps captions and numbers readable.
+ */
+function buildBackdrops(layer, list, tl) {
+  const byId = Object.fromEntries(tl.beats.map((b) => [b.id, b]));
+  const wrap = h("div", { style: "position:absolute;inset:0;overflow:hidden;background:#07040f" });
+  const items = list.map((b) => {
+    const beat = byId[b.beat];
+    if (!beat) throw new Error(`backdrops: no beat "${b.beat}"`);
+    const img = h("img", {
+      src: `${reelDir}/${b.src}`,
+      alt: "",
+      style: `position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${b.position ?? "50% 50%"};opacity:0;transform-origin:50% 45%`,
+    });
+    wrap.appendChild(img);
+    return { img, t: beat.start, spec: b };
+  });
+  items.forEach((it, i) => (it.end = items[i + 1]?.t ?? tl.duration));
+  // legibility: dark at the top (captions) and bottom (platform UI), clear in the middle
+  wrap.appendChild(
+    h("div", {
+      style:
+        "position:absolute;inset:0;background:linear-gradient(rgba(7,4,15,0.86) 0%, rgba(7,4,15,0.55) 22%, rgba(7,4,15,0.28) 42%, rgba(7,4,15,0.38) 62%, rgba(7,4,15,0.9) 100%)",
+    }),
+  );
+  layer.appendChild(wrap);
+  const FADE = 0.35;
+  function update(t) {
+    items.forEach((it, i) => {
+      const fadeIn = i === 0 ? 1 : clamp(prog(t, it.t - FADE / 2, it.t + FADE / 2));
+      // an image stays fully up under the next one until that one has finished fading in
+      const gone = t > it.end + FADE;
+      const op = gone ? 0 : fadeIn;
+      it.img.style.opacity = op.toFixed(3);
+      if (op <= 0) return;
+      const [z0, z1] = it.spec.zoom ?? [1.06, 1.16];
+      const [px, py] = it.spec.pan ?? [0, -40];
+      const p = clamp(prog(t, it.t - FADE, it.end + FADE));
+      const e = p * p * (3 - 2 * p);
+      it.img.style.transform = `translate(${(px * e).toFixed(2)}px, ${(py * e).toFixed(2)}px) scale(${(z0 + (z1 - z0) * e).toFixed(4)})`;
+    });
+  }
+  return { update };
 }
 
 /**

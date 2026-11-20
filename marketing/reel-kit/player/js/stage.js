@@ -215,9 +215,14 @@ export function buildStage(root, theme, { disclaimer = "" } = {}) {
   const scenic = theme.stage === "scene";
   const bare = theme.stage === "bare" || scenic;
   const fine = disclaimer ? esc(disclaimer.toUpperCase()) : "";
-  const back = layer(root, "l-back", bare ? (scenic ? "" : bareSvg(fine)) : backSvg(fine));
+  const lifted = scenic || !!theme.backdrop;
+  const back = layer(
+    root,
+    "l-back",
+    bare ? (scenic ? "" : bareSvg(lifted ? "" : fine)) : backSvg(fine),
+  );
   const scene = scenic ? buildScene(back) : null;
-  const finePending = scenic && fine;
+  const finePending = lifted && fine;
   const dressing = layer(root, "l-dressing", bare ? "" : PAD_DRESSING_SVG);
   const props = layer(root, "l-props");
   const set = layer(root, "l-set", bare ? "" : (TABLE_SETS[theme.set ?? "desk"] ?? TABLE_SET_SVG));

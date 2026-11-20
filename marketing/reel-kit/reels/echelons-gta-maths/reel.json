@@ -1,9 +1,9 @@
 {
   "id": "echelons-gta-maths",
-  "theme": "sunset-city",
+  "theme": "leonida",
   "fps": 30,
-  "eyebrow": "Echelons AI",
-  "disclaimer": "Not financial advice · not affiliated with Rockstar",
+  "eyebrow": "",
+  "disclaimer": "Not financial advice",
   "voice": {
     "engine": "kokoro",
     "voice": "am_michael",
@@ -35,6 +35,41 @@
       }
     ]
   },
+  "backdrops": [
+    {
+      "beat": "hook",
+      "src": "assets/jason-lucia-car.jpg",
+      "position": "50% 40%"
+    },
+    {
+      "beat": "hours",
+      "src": "assets/jason-lucia-car-wide.jpg",
+      "position": "38% 50%",
+      "pan": [60, -20]
+    },
+    {
+      "beat": "double",
+      "src": "assets/jason-lucia-dock.jpg",
+      "position": "50% 35%"
+    },
+    {
+      "beat": "nights",
+      "src": "assets/leonida-night.jpg",
+      "position": "50% 40%"
+    },
+    {
+      "beat": "date",
+      "src": "assets/jason-lucia-sunset.jpg",
+      "position": "50% 40%"
+    },
+    {
+      "beat": "crazy",
+      "src": "assets/leonida-pool.jpg",
+      "position": "50% 30%",
+      "zoom": [1.04, 1.24],
+      "pan": [0, -60]
+    }
+  ],
   "lint": {
     "require": [
       {
@@ -43,7 +78,7 @@
       },
       {
         "field": "endcard.disclaimer",
-        "includes": ["not financial advice", "not affiliated"]
+        "includes": ["not financial advice"]
       }
     ],
     "banned": [
@@ -57,17 +92,6 @@
       "get rich"
     ]
   },
-  "variants": {
-    "minimal": {
-      "about": "The earlier dark minimal look (noir theme, lo-fi bed).",
-      "theme": "noir",
-      "music": {
-        "until": "end",
-        "style": null
-      },
-      "hud": null
-    }
-  },
   "beats": [
     {
       "id": "hook",
@@ -76,58 +100,29 @@
       "props": [
         {
           "type": "image",
-          "src": "assets/jason-lucia-car.jpg",
-          "fullbleed": true,
-          "x": 540,
-          "y": 960,
-          "z": 2,
-          "enter": "none",
-          "exit": "fade",
-          "zoom": [1.0, 1.08],
-          "pan": [0, -20],
-          "shade": 0.8
-        },
-        {
-          "type": "image",
           "src": "assets/logo-gta6-wide.png",
           "fit": "contain",
           "frame": false,
-          "w": 640,
-          "h": 360,
+          "w": 700,
+          "h": 394,
           "x": 540,
-          "y": 680,
+          "y": 690,
           "enter": "none",
           "zoom": [1.0, 1.04],
           "pan": [0, 0]
         },
         {
           "type": "figure",
-          "y": 1050,
+          "y": 1060,
           "enter": "none",
           "label": "Boy maths · hear me out",
           "value": 5968,
-          "from": 1000,
+          "from": 5968,
           "prefix": "$",
           "countAt": 0,
-          "countDur": 2.3,
           "color": "green",
-          "size": 150,
+          "size": 160,
           "plate": true
-        },
-        {
-          "type": "sticker",
-          "src": "assets/sticker-sun.webp",
-          "frames": 96,
-          "cols": 10,
-          "fw": 420,
-          "fh": 464,
-          "fps": 15,
-          "w": 230,
-          "x": 890,
-          "y": 1170,
-          "enter": "pop",
-          "at": 0.6,
-          "z": 40
         }
       ]
     },
@@ -138,26 +133,27 @@
         {
           "type": "image",
           "src": "assets/keyart-tall.jpg",
-          "w": 470,
-          "h": 520,
-          "x": 350,
-          "y": 900,
+          "w": 420,
+          "h": 466,
+          "x": 300,
+          "y": 880,
           "rot": -4,
-          "zoom": [1.0, 1.08]
+          "zoom": [1.0, 1.08],
+          "pan": [0, -10]
         },
         {
-          "type": "price-tags",
-          "x": 800,
+          "type": "figure",
+          "x": 760,
           "y": 880,
-          "scale": 1.15,
-          "tags": [
-            {
-              "label": "Standard edition",
-              "price": "$79.99",
-              "note": "US · PS5 / Xbox",
-              "at": 0.1
-            }
-          ]
+          "w": 440,
+          "plate": true,
+          "label": "Standard · US",
+          "value": 79.99,
+          "prefix": "$",
+          "size": 118,
+          "color": "ink",
+          "sub": "PS5 · Xbox Series",
+          "subAt": 0.2
         }
       ]
     },
@@ -178,21 +174,6 @@
           "role": "CO-STUDIO HEAD, ROCKSTAR NORTH",
           "scale": 1.08,
           "plate": true
-        },
-        {
-          "type": "sticker",
-          "src": "assets/sticker-flamingo.webp",
-          "frames": 38,
-          "cols": 10,
-          "fw": 420,
-          "fh": 638,
-          "fps": 15,
-          "w": 190,
-          "x": 950,
-          "y": 1110,
-          "enter": "pop",
-          "at": "w:80",
-          "z": 40
         }
       ]
     },
@@ -216,21 +197,6 @@
           ],
           "scale": 1.2,
           "plate": true
-        },
-        {
-          "type": "sticker",
-          "src": "assets/sticker-gator.webp",
-          "frames": 54,
-          "cols": 10,
-          "fw": 420,
-          "fh": 298,
-          "fps": 15,
-          "w": 370,
-          "x": 820,
-          "y": 1150,
-          "enter": "pop",
-          "at": "w:dollar",
-          "z": 40
         }
       ]
     },
@@ -250,21 +216,6 @@
           "color": "ink",
           "size": 170,
           "plate": true
-        },
-        {
-          "type": "sticker",
-          "src": "assets/sticker-truck.webp",
-          "frames": 22,
-          "cols": 10,
-          "fw": 420,
-          "fh": 236,
-          "fps": 15,
-          "w": 390,
-          "x": 280,
-          "y": 1160,
-          "enter": "pop",
-          "at": "w:doubles",
-          "z": 40
         }
       ]
     },
@@ -288,21 +239,6 @@
           ],
           "scale": 1.2,
           "plate": true
-        },
-        {
-          "type": "sticker",
-          "src": "assets/sticker-manatee.webp",
-          "frames": 48,
-          "cols": 10,
-          "fw": 420,
-          "fh": 328,
-          "fps": 15,
-          "w": 350,
-          "x": 840,
-          "y": 1150,
-          "enter": "pop",
-          "at": "w:50",
-          "z": 40
         }
       ]
     },
@@ -311,28 +247,17 @@
       "caption": "Play *five hours* a night and that's *32 nights* of it.",
       "props": [
         {
-          "type": "image",
-          "src": "assets/leonida-night.jpg",
-          "fullbleed": true,
-          "x": 540,
-          "y": 960,
-          "z": 2,
-          "enter": "none",
-          "exit": "fade",
-          "shade": 0.7,
-          "zoom": [1.02, 1.1],
-          "pan": [0, -24]
-        },
-        {
-          "type": "dots",
+          "type": "figure",
           "y": 900,
-          "count": 32,
-          "cols": 8,
-          "size": 72,
-          "at": "w:five",
-          "step": 0.04,
-          "label": "{n} nights",
-          "plate": true
+          "plate": true,
+          "label": "160 h ÷ 5 h a night",
+          "value": 32,
+          "from": 0,
+          "unit": "nights",
+          "countAt": "w:five",
+          "countDur": 1.1,
+          "color": "green",
+          "size": 190
         }
       ]
     },
@@ -340,19 +265,6 @@
       "id": "date",
       "caption": "The average *date night* in America? Now *$189.*",
       "props": [
-        {
-          "type": "image",
-          "src": "assets/jason-lucia-sunset.jpg",
-          "fullbleed": true,
-          "x": 540,
-          "y": 960,
-          "z": 2,
-          "enter": "none",
-          "exit": "fade",
-          "shade": 0.7,
-          "zoom": [1.0, 1.1],
-          "pan": [0, -30]
-        },
         {
           "type": "receipt",
           "y": 900,
@@ -400,28 +312,13 @@
           "scale": 1.12,
           "span": 2,
           "plate": true
-        },
-        {
-          "type": "sticker",
-          "src": "assets/sticker-crab.webp",
-          "frames": 24,
-          "cols": 10,
-          "fw": 420,
-          "fh": 438,
-          "fps": 15,
-          "w": 300,
-          "x": 870,
-          "y": 1130,
-          "enter": "pop",
-          "at": "w:$6,048",
-          "span": 2,
-          "z": 40
         }
       ]
     },
     {
       "id": "saved",
-      "caption": "Minus the game, that's *$5,968* saved."
+      "caption": "Minus the game, that's *$5,968* saved.",
+      "props": []
     },
     {
       "id": "crazy",
@@ -648,17 +545,20 @@
     {
       "id": "today",
       "caption": "and today it'd be worth *$7,724.*",
-      "mood": "dark"
+      "mood": "dark",
+      "props": []
     },
     {
       "id": "january",
       "caption": "Bought on *January 1st* this year instead?",
-      "mood": "dark"
+      "mood": "dark",
+      "props": []
     },
     {
       "id": "jan-value",
       "caption": "*$4,754.*",
-      "mood": "dark"
+      "mood": "dark",
+      "props": []
     },
     {
       "id": "same",
@@ -693,55 +593,33 @@
       "mood": "dark"
     },
     {
-      "id": "brand",
-      "caption": "Timing is the hard part. So we built *Echelons AI,*",
+      "id": "swing",
+      "mood": "dark",
+      "caption": "A *$2,970* swing, just from *when* you bought.",
       "props": [
         {
-          "type": "brand",
-          "span": 2,
+          "type": "figure",
           "y": 900,
           "enter": "pop",
-          "name": "Echelons",
-          "suffix": "AI",
-          "tagline": "your own AI market research assistant",
-          "at": "w:echelons",
-          "taglineAt": "beat:1",
-          "field": {
-            "at": "beat:1+0.5",
-            "cols": 40,
-            "rows": 10
-          }
-        },
-        {
-          "type": "sticker",
-          "src": "assets/sticker-palm.webp",
-          "frames": 24,
-          "cols": 10,
-          "fw": 420,
-          "fh": 554,
-          "fps": 15,
-          "w": 260,
-          "x": 150,
-          "y": 1090,
-          "enter": "pop",
-          "at": "w:echelons",
-          "span": 2,
-          "z": 40
+          "plate": true,
+          "label": "$7,724 − $4,754",
+          "value": 2970,
+          "from": 0,
+          "prefix": "$",
+          "countAt": 0.15,
+          "countDur": 1.0,
+          "color": "green",
+          "size": 180,
+          "sub": "same stock · same $5,968",
+          "subAt": "w:when"
         }
-      ],
-      "mood": "dark"
-    },
-    {
-      "id": "pitch",
-      "caption": "your own AI *market research* assistant.",
-      "mood": "dark"
+      ]
     }
   ],
   "endcard": {
     "headline": "Follow for more\n*money maths*",
     "say": "Follow for more money maths.",
-    "brand": "echelons ai",
-    "disclaimer": "For education only. Not financial advice. Past performance does not predict future results. Not affiliated with Rockstar Games or Take-Two Interactive.",
+    "disclaimer": "For education only. Not financial advice. Past performance does not predict future results.",
     "hold": 4.4,
     "lead": 0.4
   }

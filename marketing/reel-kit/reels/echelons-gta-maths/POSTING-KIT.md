@@ -1,8 +1,8 @@
 # Posting kit: "Buying GTA 6 could actually save you $5,968."
 
-An Echelons AI reel in the "boy maths" format, styled as a neon sunset city with official GTA VI artwork (logo, key art, Jason and Lucia, the animated stickers), a game-style cash counter and a synthwave bed: what GTA 6 costs per hour, what the same
+A "boy maths" reel over official GTA VI artwork: what GTA 6 costs per hour, what the same
 nights would cost as date nights, and what that money would have done in Take-Two stock,
-depending on when it was bought.
+depending on when it was bought. No brand on screen.
 
 | File                            | What it is                                                  |
 | ------------------------------- | ----------------------------------------------------------- |
@@ -15,27 +15,17 @@ depending on when it was bought.
 1. **The stock figures are as of the 17 November 2026 close** ($203.93). The share price
    moves every day. If you post later, rebuild with the latest close (see "Updating the
    numbers"), or the "$7,724" and "$4,754" lines will be out of date.
-2. **No performance claims for Echelons AI.** The reel says what Echelons is ("your own AI
-   market research assistant") and nothing about returns, picks or accuracy. Keep it that way
-   unless you have documented results and a compliance review: financial promotions are
-   regulated.
-3. **The disclaimers stay on.** "Not financial advice · not affiliated with Rockstar" is on
-   screen for the whole reel, and the end card adds "For education only. Not financial
-   advice. Past performance does not predict future results."
-4. **Official GTA VI artwork, used under your permission.** The reel uses Rockstar's GTA VI
-   logo, key art, character art and the animated stickers from rockstargames.com/VI, on your
-   word that your creator agreement allows commercial use. Keep that agreement on file: this
-   reel promotes Echelons, and Rockstar's public fan-content policy on its own covers
-   non-commercial use and excludes advertisements. The artwork is not committed to the repo;
-   `fetch-assets.sh` downloads and prepares it before a rebuild. Keep the "not affiliated with
-   Rockstar" line unless your agreement says otherwise.
-5. **The voice is synthetic.** Turn on Instagram's AI label when you publish.
-6. **What is the kit's own:** the animated sunset city, the cash counter, the captions (Anton,
-   an open-licence font, not the GTA font) and the synthwave music.
-7. **The earlier minimal look** is still available: `npm run reel:build -- --reel echelons-gta-maths --variant minimal --export`.
-8. **On the reference reel:** this is a new reel in the same format, not a copy. The script,
-   the graphics and the numbers are new (the numbers are recalculated from today's prices and
-   a different assumption: 5 hours a night instead of 4).
+2. **"Not financial advice" stays on.** It is on screen for the whole reel, and the end card
+   adds "For education only. Not financial advice. Past performance does not predict future
+   results." The reel talks about a real stock's returns, so keep both.
+3. **Official GTA VI artwork, used under your permission.** Rockstar's GTA VI logo, key art and
+   character art from rockstargames.com/VI, used on your word that your creator agreement
+   allows it; keep that agreement on file. The artwork is not committed to the repo:
+   `fetch-assets.sh` downloads and prepares it before a rebuild.
+4. **The voice is synthetic.** Turn on Instagram's AI label when you publish.
+5. **On the reference reel:** this is a new reel in the same format, not a copy. The script,
+   the graphics and the numbers are new (recalculated from real prices, with 5 hours a night
+   instead of 4).
 
 ## Caption
 
@@ -48,9 +38,9 @@ At 5 hours a night that's 32 nights. The average US date night now costs $189 al
 
 Put $5,968 into Take-Two on December 4, 2023, the day GTA 6's first trailer dropped, and it's worth about $7,724 today. Put it in on January 1 this year and it's about $4,754. Same stock, different timing.
 
-Echelons AI is your own AI market research assistant. Follow for more money maths.
+That's a $2,970 swing just from timing. Follow for more money maths.
 
-For education only. Not financial advice. Past performance does not predict future results. Share prices are closing prices, price only, as of November 17, 2026. Not affiliated with Rockstar Games or Take-Two Interactive.
+For education only. Not financial advice. Past performance does not predict future results. Share prices are closing prices, price only, as of November 17, 2026.
 
 #gta6 #investing #stockmarket #personalfinance #moneytips
 ```

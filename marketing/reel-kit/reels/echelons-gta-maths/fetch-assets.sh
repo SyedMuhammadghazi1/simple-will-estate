@@ -24,6 +24,7 @@ declare -A ART=(
   [jason-lucia-sunset.jpg]="trailer-1.06b6paykx247w.jpg"
   [jason-lucia-dock.jpg]="trailer-2.0l.7aqib91fz6.jpg"
   [jason-lucia-car.jpg]="launch-trailer.0cq1gbt4507ty.jpg"
+  [jason-lucia-car-wide.jpg]="launch-trailer.0_q-sdrgufc.s.jpg"
   [leonida-night.jpg]="onlyInLeonidaMobile.0mupfnk-x6x~r.jpg"
   [leonida-pool.jpg]="screenshotsMobile.01nsldjqbta4u.jpg"
   [vice-city-poster.jpg]="intro-mobile.0.97ufm766d4x.png"
