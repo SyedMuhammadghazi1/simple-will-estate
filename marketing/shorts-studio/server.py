@@ -292,6 +292,12 @@ def step_cut(pid):
     run(pid, [sys.executable, os.path.join(SCRIPTS, "silence_cut.py"), rec, "--out", "work", "--words", use,
               "--drop", os.path.join("work", "drops.json"), "--noise", str(c.get("noise", -35)),
               "--min-silence", str(c.get("min_silence", 0.4)), "--pad", str(c.get("pad", 0.12))])
+    # the renderer seeks frame by frame and freezes on sparse keyframes, so give the cut one every second
+    kf = os.path.join("work", "cut-kf.mp4")
+    run(pid, ["ffmpeg", "-v", "error", "-y", "-i", os.path.join("work", "cut.mp4"), "-c:v", "libx264", "-crf", "16",
+              "-preset", "medium", "-pix_fmt", "yuv420p", "-g", "30", "-keyint_min", "30", "-c:a", "copy",
+              "-movflags", "+faststart", kf])
+    os.replace(os.path.join(d, kf), os.path.join(d, "work", "cut.mp4"))
     panel = src_path(pid, "panel")
     if panel and panel.lower().endswith(VIDEO_EXT):
         run(pid, [sys.executable, os.path.join(SCRIPTS, "follow_cut.py"), panel, "--edl",

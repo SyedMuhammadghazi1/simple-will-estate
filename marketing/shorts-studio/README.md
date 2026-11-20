@@ -41,12 +41,29 @@ faster-whisper, if it is not the one running the server), `HF_VERSION` (HyperFra
 5. **Make.** Preview frames in seconds, then render. The quality gate lists every check as pass,
    warn or fail, and the finished MP4, captions file and contact sheet are there to download.
 
+## Clipping a long video
+
+`clip.py` turns a moment from a long stream or video into a finished Short from a small plan file:
+
+```
+npm run shorts:clip -- marketing/shorts-studio/clips/<name>.json
+```
+
+A plan lists the pieces of the source to keep, the hook title and the words spoken. The script
+downloads only those seconds (yt-dlp), moves every cut to a quiet instant, re-frames each shot for
+a phone (the camera full height, or the camera box stacked over the game), adds captions and the
+title through the skill, levels the sound and runs the quality gate. `clips/*.md` explains each
+plan: why that moment, what to check, and the post caption. Renders go to `clips/out/`, which is
+not committed.
+
 ## What is in this folder
 
 | Path            | What it is                                                                        |
 | --------------- | --------------------------------------------------------------------------------- |
 | `server.py`     | The local server (Python standard library only). Runs the steps, serves the page. |
 | `transcribe.py` | Speech-to-text with faster-whisper, for computers without whisper.cpp.            |
+| `clip.py`       | Cuts a moment out of a long video and builds the Short from a plan in `clips/`.   |
+| `clips/`        | Clip plans (JSON) and their notes.                                                |
 | `web/`          | The page: plain HTML, CSS and JavaScript, no build step.                          |
 | `skill/`        | The `shorts-studio` skill exactly as delivered (scripts, rules, styles, licence). |
 | `projects/`     | Your uploads and renders. Created on first run, ignored by git.                   |

@@ -31,5 +31,6 @@ export default defineConfig([
     "drizzle/meta/**",
     "marketing/shorts-studio/skill/**",
     "marketing/shorts-studio/projects/**",
+    "marketing/shorts-studio/clips/out/**",
   ]),
 ]);
