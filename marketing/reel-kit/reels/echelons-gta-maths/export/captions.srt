@@ -59,15 +59,16 @@ Bought on January 1st this year instead?
 $4,754.
 
 16
-00:00:51,200 --> 00:00:52,980
+00:00:51,200 --> 00:00:53,613
 Same stock. Different timing.
 
 17
-00:00:53,000 --> 00:00:57,113
+00:00:53,633 --> 00:00:57,747
 A $2,970 swing, just from when you bought.
 
 18
-00:00:57,133 --> 00:01:01,513
+00:00:57,767 --> 00:01:02,147
 Follow for more money maths.
-[On screen] For education only. Not financial advice. Past performance does not predict future results.
+[On screen] For education only. Not financial advice.
+Past performance does not predict future results.
 
