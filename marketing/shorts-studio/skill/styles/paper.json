@@ -1,0 +1,17 @@
+{
+ "name": "Paper",
+ "about": "Warm off-white cards, ink type, a deep accent. Feels like a notebook.",
+ "style": {
+  "font": "DM Serif Display",
+  "caption": "#FFFFFF",
+  "accent": "#2F5BD3",
+  "panel": "#F4EFE6",
+  "ink": "#1C1B19",
+  "line": "rgba(28,27,25,0.10)",
+  "radius": "14px",
+  "ground": "#121110",
+  "titlebg": "#F4EFE6",
+  "fonturl": "https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap",
+  "capaccent": "#FFD27A"
+ }
+}

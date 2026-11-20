@@ -1,0 +1,554 @@
+{
+  "name": "kai-gta6-first-boot",
+  "source": {
+    "url": "https://www.youtube.com/watch?v=7mjhCbFi9Wk",
+    "title": "Kai Cenat's First Time Playing GTA 6!",
+    "channel": "Kai Cenat Live",
+    "credit": "Clip: Kai Cenat Live on YouTube"
+  },
+  "title": "Kai Cenat prays before **GTA 6**",
+  "title_hold": 3.0,
+  "style": "bold",
+  "snap": 0.22,
+  "cover_at": 1.0,
+  "face": [22, 22, 78, 54],
+  "stream": {
+    "cam_box": [0, 32.22, 20.31, 52.78],
+    "cam_center": 47,
+    "game_center": 55,
+    "threshold": 50
+  },
+  "segments": [
+    {
+      "from": 0.1,
+      "to": 1.85,
+      "say": "I did not sleep tonight, bro."
+    },
+    {
+      "from": 2.4,
+      "to": 5.22,
+      "say": "This is the first time in a long time where it felt like Christmas."
+    },
+    {
+      "from": 20.04,
+      "to": 28.66,
+      "say": "I'm just seeing GTA 6 is out. Everybody booting it up. I got FOMO immediately. So what I did, I changed servers immediately.",
+      "snap": 0.1
+    },
+    {
+      "from": 37.95,
+      "to": 41.98,
+      "say": "God, thank you so much for this moment. I waited 13 years. God, thank you so much for making me survive this long."
+    },
+    {
+      "from": 50.2,
+      "to": 51.9,
+      "say": "Our Father, who art in heaven, hallowed be thy name,"
+    },
+    {
+      "from": 60.32,
+      "to": 62.55,
+      "say": "Amen. God, thank you so much."
+    },
+    {
+      "from": 68.82,
+      "to": 76.15,
+      "say": "Everybody clap it up. Here we go. Oh my god. Oh my god. Oh my god."
+    }
+  ],
+  "captions": {
+    "max_words": 3,
+    "words": [
+      {
+        "text": "I",
+        "start": 0.24,
+        "end": 0.48
+      },
+      {
+        "text": "did",
+        "start": 0.48,
+        "end": 0.64
+      },
+      {
+        "text": "not",
+        "start": 0.64,
+        "end": 0.8
+      },
+      {
+        "text": "sleep",
+        "start": 0.8,
+        "end": 1.12
+      },
+      {
+        "text": "tonight,",
+        "start": 1.12,
+        "end": 1.439
+      },
+      {
+        "text": "bro.",
+        "start": 1.439,
+        "end": 1.85
+      },
+      {
+        "text": "This",
+        "start": 2.48,
+        "end": 2.639
+      },
+      {
+        "text": "is",
+        "start": 2.639,
+        "end": 2.8
+      },
+      {
+        "text": "the",
+        "start": 2.8,
+        "end": 3.04
+      },
+      {
+        "text": "first",
+        "start": 3.04,
+        "end": 3.28
+      },
+      {
+        "text": "time",
+        "start": 3.28,
+        "end": 3.439
+      },
+      {
+        "text": "in",
+        "start": 3.439,
+        "end": 3.679
+      },
+      {
+        "text": "a",
+        "start": 3.679,
+        "end": 3.84
+      },
+      {
+        "text": "long",
+        "start": 3.84,
+        "end": 4.0
+      },
+      {
+        "text": "time",
+        "start": 4.0,
+        "end": 4.16
+      },
+      {
+        "text": "where",
+        "start": 4.16,
+        "end": 4.319
+      },
+      {
+        "text": "it",
+        "start": 4.319,
+        "end": 4.56
+      },
+      {
+        "text": "felt",
+        "start": 4.56,
+        "end": 4.72
+      },
+      {
+        "text": "like",
+        "start": 4.72,
+        "end": 4.88
+      },
+      {
+        "text": "Christmas.",
+        "start": 4.88,
+        "end": 5.2
+      },
+      {
+        "text": "I'm",
+        "start": 20.08,
+        "end": 20.32
+      },
+      {
+        "text": "just",
+        "start": 20.32,
+        "end": 20.48
+      },
+      {
+        "text": "seeing",
+        "start": 20.48,
+        "end": 21.119
+      },
+      {
+        "text": "GTA",
+        "start": 21.119,
+        "end": 21.68
+      },
+      {
+        "text": "6",
+        "start": 21.68,
+        "end": 21.84
+      },
+      {
+        "text": "is",
+        "start": 21.84,
+        "end": 22.0
+      },
+      {
+        "text": "out.",
+        "start": 22.0,
+        "end": 22.9
+      },
+      {
+        "text": "Everybody",
+        "start": 22.96,
+        "end": 23.359
+      },
+      {
+        "text": "booting",
+        "start": 23.359,
+        "end": 23.68
+      },
+      {
+        "text": "it",
+        "start": 23.68,
+        "end": 23.84
+      },
+      {
+        "text": "up.",
+        "start": 23.84,
+        "end": 24.24
+      },
+      {
+        "text": "I",
+        "start": 24.24,
+        "end": 24.56
+      },
+      {
+        "text": "got",
+        "start": 24.56,
+        "end": 24.8
+      },
+      {
+        "text": "FOMO",
+        "start": 24.8,
+        "end": 25.439
+      },
+      {
+        "text": "immediately.",
+        "start": 25.439,
+        "end": 26.339
+      },
+      {
+        "text": "So",
+        "start": 26.48,
+        "end": 26.64
+      },
+      {
+        "text": "what",
+        "start": 26.64,
+        "end": 26.88
+      },
+      {
+        "text": "I",
+        "start": 26.88,
+        "end": 26.96
+      },
+      {
+        "text": "did,",
+        "start": 26.96,
+        "end": 27.199
+      },
+      {
+        "text": "I",
+        "start": 27.199,
+        "end": 27.359
+      },
+      {
+        "text": "changed",
+        "start": 27.359,
+        "end": 27.599
+      },
+      {
+        "text": "servers",
+        "start": 27.599,
+        "end": 28.16
+      },
+      {
+        "text": "immediately.",
+        "start": 28.16,
+        "end": 28.66
+      },
+      {
+        "text": "God,",
+        "start": 38.0,
+        "end": 38.32
+      },
+      {
+        "text": "thank",
+        "start": 38.32,
+        "end": 38.399
+      },
+      {
+        "text": "you",
+        "start": 38.399,
+        "end": 38.559
+      },
+      {
+        "text": "so",
+        "start": 38.559,
+        "end": 38.64
+      },
+      {
+        "text": "much",
+        "start": 38.64,
+        "end": 38.719
+      },
+      {
+        "text": "for",
+        "start": 38.719,
+        "end": 38.879
+      },
+      {
+        "text": "this",
+        "start": 38.879,
+        "end": 39.04
+      },
+      {
+        "text": "moment.",
+        "start": 39.04,
+        "end": 39.2
+      },
+      {
+        "text": "I",
+        "start": 39.2,
+        "end": 39.36
+      },
+      {
+        "text": "waited",
+        "start": 39.36,
+        "end": 39.68
+      },
+      {
+        "text": "13",
+        "start": 39.68,
+        "end": 39.92
+      },
+      {
+        "text": "years.",
+        "start": 39.92,
+        "end": 40.16
+      },
+      {
+        "text": "God,",
+        "start": 40.16,
+        "end": 40.399
+      },
+      {
+        "text": "thank",
+        "start": 40.399,
+        "end": 40.48
+      },
+      {
+        "text": "you",
+        "start": 40.48,
+        "end": 40.559
+      },
+      {
+        "text": "so",
+        "start": 40.559,
+        "end": 40.719
+      },
+      {
+        "text": "much",
+        "start": 40.719,
+        "end": 40.8
+      },
+      {
+        "text": "for",
+        "start": 40.8,
+        "end": 40.96
+      },
+      {
+        "text": "making",
+        "start": 40.96,
+        "end": 41.12
+      },
+      {
+        "text": "me",
+        "start": 41.12,
+        "end": 41.28
+      },
+      {
+        "text": "survive",
+        "start": 41.28,
+        "end": 41.6
+      },
+      {
+        "text": "this",
+        "start": 41.6,
+        "end": 41.76
+      },
+      {
+        "text": "long.",
+        "start": 41.76,
+        "end": 41.98
+      },
+      {
+        "text": "Our",
+        "start": 50.239,
+        "end": 50.48
+      },
+      {
+        "text": "Father,",
+        "start": 50.48,
+        "end": 50.64
+      },
+      {
+        "text": "who",
+        "start": 50.64,
+        "end": 50.8
+      },
+      {
+        "text": "art",
+        "start": 50.8,
+        "end": 50.879
+      },
+      {
+        "text": "in",
+        "start": 50.879,
+        "end": 50.96
+      },
+      {
+        "text": "heaven,",
+        "start": 50.96,
+        "end": 51.2
+      },
+      {
+        "text": "hallowed",
+        "start": 51.2,
+        "end": 51.52
+      },
+      {
+        "text": "be",
+        "start": 51.52,
+        "end": 51.6
+      },
+      {
+        "text": "thy",
+        "start": 51.6,
+        "end": 51.76
+      },
+      {
+        "text": "name,",
+        "start": 51.76,
+        "end": 51.9
+      },
+      {
+        "text": "Amen.",
+        "start": 60.399,
+        "end": 61.28
+      },
+      {
+        "text": "God,",
+        "start": 61.28,
+        "end": 61.68
+      },
+      {
+        "text": "thank",
+        "start": 61.68,
+        "end": 61.84
+      },
+      {
+        "text": "you",
+        "start": 61.84,
+        "end": 62.0
+      },
+      {
+        "text": "so",
+        "start": 62.0,
+        "end": 62.16
+      },
+      {
+        "text": "much.",
+        "start": 62.16,
+        "end": 62.55
+      },
+      {
+        "text": "Everybody",
+        "start": 68.88,
+        "end": 69.2
+      },
+      {
+        "text": "clap",
+        "start": 69.2,
+        "end": 69.439
+      },
+      {
+        "text": "it",
+        "start": 69.439,
+        "end": 69.52
+      },
+      {
+        "text": "up.",
+        "start": 69.52,
+        "end": 69.76
+      },
+      {
+        "text": "Here",
+        "start": 69.76,
+        "end": 69.92
+      },
+      {
+        "text": "we",
+        "start": 69.92,
+        "end": 70.08
+      },
+      {
+        "text": "go.",
+        "start": 70.08,
+        "end": 70.98
+      },
+      {
+        "text": "Oh",
+        "start": 71.76,
+        "end": 71.84
+      },
+      {
+        "text": "my",
+        "start": 71.84,
+        "end": 72.24
+      },
+      {
+        "text": "god.",
+        "start": 72.24,
+        "end": 72.88
+      },
+      {
+        "text": "Oh",
+        "start": 72.88,
+        "end": 73.04
+      },
+      {
+        "text": "my",
+        "start": 73.04,
+        "end": 73.2
+      },
+      {
+        "text": "god.",
+        "start": 73.2,
+        "end": 74.1
+      },
+      {
+        "text": "Oh",
+        "start": 75.04,
+        "end": 75.2
+      },
+      {
+        "text": "my",
+        "start": 75.2,
+        "end": 75.36
+      },
+      {
+        "text": "god.",
+        "start": 75.36,
+        "end": 76.15
+      }
+    ]
+  }
+}

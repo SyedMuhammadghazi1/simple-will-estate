@@ -1,0 +1,331 @@
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  src: url("./fonts/fraunces-latin-full-normal.woff2") format("woff2-variations");
+}
+@font-face {
+  font-family: "Fraunces";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: block;
+  src: url("./fonts/fraunces-latin-full-italic.woff2") format("woff2-variations");
+}
+@font-face {
+  font-family: "Anton";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("./fonts/anton-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  src: url("./fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
+}
+@font-face {
+  font-family: "DM Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("./fonts/dm-mono-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "DM Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;
+  src: url("./fonts/dm-mono-latin-500-normal.woff2") format("woff2");
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #111;
+  overflow: hidden;
+}
+
+/* The 1080x1920 design surface. Everything inside is positioned in these pixels. */
+#root {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+  transform-origin: 0 0;
+  background: #f9f6f0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+.layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1080px;
+  height: 1920px;
+  pointer-events: none;
+  /* each layer is its own stacking context, so a prop's z-index can never lift it over the
+     mascot or the captions */
+  isolation: isolate;
+}
+
+/* ---------- captions ---------- */
+.eyebrow {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  /* the eyebrow can carry a disclosure ("not a law firm"): same cap height as the pad strip */
+  font-size: 28px;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--eyebrow);
+  white-space: nowrap;
+}
+.cap {
+  position: absolute;
+  opacity: 0;
+  font-family: var(--font-caption);
+  font-weight: 560;
+  font-variation-settings:
+    "SOFT" 60,
+    "WONK" 0;
+  font-optical-sizing: auto;
+  letter-spacing: -0.012em;
+  color: var(--ghost);
+  text-wrap: balance;
+}
+/* poster captions: tall condensed capitals with a drop shadow; accent words glow */
+.cap.poster {
+  font-family: "Anton", Impact, sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.012em;
+  font-variation-settings: normal;
+}
+.cap.poster .w {
+  text-shadow:
+    0 5px 0 rgba(10, 4, 22, 0.6),
+    0 0 26px rgba(7, 4, 15, 0.95),
+    0 0 10px rgba(7, 4, 15, 0.8);
+}
+.cap.poster .w.acc {
+  font-style: normal;
+  font-weight: 400;
+  font-variation-settings: normal;
+}
+.cap.poster .w.acc.on {
+  background: none;
+  text-shadow:
+    0 5px 0 rgba(10, 4, 22, 0.6),
+    0 0 26px rgba(7, 4, 15, 0.95),
+    0 0 20px var(--accent);
+}
+.eyebrow-mark {
+  display: inline-block;
+  vertical-align: -0.28em;
+  margin-right: 14px;
+}
+.eyebrow-mark svg {
+  display: block;
+}
+.cap .w {
+  display: inline-block;
+  color: var(--ghost);
+}
+.cap .w.on {
+  color: var(--ink);
+}
+.cap .w.acc {
+  font-style: italic;
+  font-weight: 600;
+  font-variation-settings:
+    "SOFT" 80,
+    "WONK" 1;
+  padding-bottom: 2px;
+}
+.cap .w.acc.on {
+  color: var(--accent);
+  background: linear-gradient(var(--accent), var(--accent)) 0 93% / 100% 5px no-repeat;
+}
+.cap .w.acc + .w.tail.on {
+  color: var(--accent);
+}
+
+/* ---------- props ---------- */
+.prop {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  will-change: transform;
+}
+.prop > .prop-body {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+/* "plate": a dark glass panel behind a prop that has no card of its own (figures, maths), so it
+   stays legible over a bright animated backdrop */
+.prop > .prop-body.plate::before {
+  content: "";
+  position: absolute;
+  inset: -34px -44px;
+  z-index: -1;
+  border-radius: 34px;
+  background: rgba(18, 7, 34, 0.9);
+  border: 3px solid var(--line);
+  box-shadow:
+    0 0 38px color-mix(in srgb, var(--line) 45%, transparent),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+}
+/* the "sticker" look shared by every prop card: flat fill, ink outline, hard offset shadow */
+.card {
+  position: relative;
+  background: var(--card);
+  border: 3.5px solid var(--line);
+  border-radius: 22px;
+  box-shadow: 9px 10px 0 var(--shadow);
+  color: var(--ink);
+  font-family: var(--font-ui);
+}
+.card.alt {
+  background: var(--cardAlt);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.serif {
+  font-family: var(--font-caption);
+  font-variation-settings:
+    "SOFT" 60,
+    "WONK" 0;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+.tag {
+  display: inline-block;
+  padding: 9px 18px 8px;
+  border: 3.5px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 6px 7px 0 var(--shadow);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 25px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ---------- end card ---------- */
+#endcard {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+#endcard .rise {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+#endcard .headline {
+  position: absolute;
+  left: 90px;
+  width: 900px;
+  text-align: center;
+  font-family: var(--font-caption);
+  font-weight: 560;
+  font-size: 70px;
+  line-height: 84px;
+  letter-spacing: -0.012em;
+  font-variation-settings:
+    "SOFT" 60,
+    "WONK" 0;
+  color: #f6efe0;
+  text-wrap: balance;
+}
+#endcard .headline em {
+  font-style: italic;
+  font-weight: 600;
+  font-variation-settings:
+    "SOFT" 80,
+    "WONK" 1;
+  color: var(--end-accent, #f4b942);
+}
+#endcard .legal {
+  position: absolute;
+  left: 90px;
+  width: 900px;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 27px;
+  line-height: 35px;
+  color: rgba(246, 239, 224, 0.88);
+  text-wrap: balance;
+  white-space: pre-line;
+}
+#loop-img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1080px;
+  height: 1920px;
+  opacity: 0;
+}
+
+/* ---------- preview chrome (never visible in renders) ---------- */
+#hud {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.82);
+  color: #eee;
+  font:
+    13px/1.2 ui-monospace,
+    monospace;
+  z-index: 10;
+}
+#hud input[type="range"] {
+  flex: 1;
+}
+#hud button {
+  font: inherit;
+  padding: 5px 10px;
+}
+body.render #hud {
+  display: none;
+}
+.safe-guide {
+  position: absolute;
+  left: 0;
+  width: 1080px;
+  background: rgba(255, 0, 80, 0.14);
+  border: 2px dashed rgba(255, 0, 80, 0.7);
+  pointer-events: none;
+}

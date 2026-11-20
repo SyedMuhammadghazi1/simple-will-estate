@@ -1,0 +1,154 @@
+[
+ {
+  "id": "BL01",
+  "rule": "Text on screen in at most 70% of body frames. Aim for about 55%.",
+  "measure": "measured.body.frames_with_text_share",
+  "threshold": "<= 0.70",
+  "evidence": "CORE talking 0.53 (n=7) vs low-base outliers 0.92 (n=22), p=0.008. 10k+ median 0.79 (n=24) vs under 10k 0.93 (n=25), p=0.004. Under 70%: 6/7 vs 2/22. Reels DeP6zuMh75z, DeIIxY1htfk, Dd6k5N5qhg8, DeUzupxqKea.",
+  "confidence": "strong"
+ },
+ {
+  "id": "BL02",
+  "rule": "At most 2 words of overlay text per frame, median over the body.",
+  "measure": "measured.body.words_on_screen_per_frame_median",
+  "threshold": "<= 2",
+  "evidence": "CORE 1 (n=7) vs low base 4 (n=22), p=0.052. 10k+ 2 (n=24) vs under 10k 4 (n=25), p=0.061.",
+  "confidence": "medium"
+ },
+ {
+  "id": "BL03",
+  "rule": "At most 3 designed animations in 0 to 5 s. Target 2.",
+  "measure": "count of judged.animations with t < 5 and type != none",
+  "threshold": "<= 3",
+  "evidence": "CORE 2 (n=7) vs low base 5 (n=22), p=0.048. 10k+ 3 (n=24) vs 5 (n=25), p=0.082. Two or fewer: 12/24 vs 5/25, p=0.037.",
+  "confidence": "medium"
+ },
+ {
+  "id": "BL04",
+  "rule": "Do not force an animation in the first second. Let the proof move instead of decoration.",
+  "measure": "any judged.animations with t <= 1.0",
+  "threshold": "not required (flag decoration-only motion in 0 to 1 s)",
+  "evidence": "Animation by 1.0 s: 10k+ 12/24 vs under 10k 20/25, p=0.033. CORE 3/7.",
+  "confidence": "medium"
+ },
+ {
+  "id": "BL05",
+  "rule": "Body hard cuts at least 2 per 10 s.",
+  "measure": "measured.body.hard_cuts_per10",
+  "threshold": ">= 2.0",
+  "evidence": "CORE 3.27 (n=7) vs low base 1.68 (n=22), p=0.108. 10k+ 2.05 (n=24) vs 1.25 (n=25), p=0.145.",
+  "confidence": "medium"
+ },
+ {
+  "id": "BL06",
+  "rule": "Median shot length 3.0 s or less.",
+  "measure": "measured.body.median_shot_s",
+  "threshold": "<= 3.0",
+  "evidence": "CORE 2.67 s (n=7). 10k+ 3.05 s (n=24) vs under 10k 6.03 s (n=25), p=0.077. Matches RULES.md 16 (3.0 s).",
+  "confidence": "medium"
+ },
+ {
+  "id": "BL07",
+  "rule": "First cut by 3.5 s.",
+  "measure": "measured.hook.first_cut_s",
+  "threshold": "<= 3.5",
+  "evidence": "10k+ 3.34 s (n=24) vs under 10k 7.37 s (n=23), p=0.031. Hard cut in 0 to 3 s 10/24 vs 4/25, p=0.064. CORE alone 5.47 s (n=7) vs 4.69 s (n=20): groups disagree.",
+  "confidence": "weak"
+ },
+ {
+  "id": "BL08",
+  "rule": "Speaker face on screen in at most 70% of the body. Cut away to the proof.",
+  "measure": "measured.body.face_share",
+  "threshold": "<= 0.70",
+  "evidence": "10k+ 0.63 (n=24) vs under 10k 1.00 (n=25), p=0.033. CORE 0.84 (n=7) vs low base 0.85 (n=22): no gap.",
+  "confidence": "weak"
+ },
+ {
+  "id": "BL09",
+  "rule": "Open on the proof: greenscreen over the post, split with proof on top, or proof first.",
+  "measure": "judged.visual_open",
+  "threshold": "in [greenscreen_over_proof, split_proof_face, proof_first]",
+  "evidence": "CORE 6/7 vs low base 14/22, p=0.39. Greenscreen 3/7 vs 3/22. Reels DeP6zuMh75z, DeIIxY1htfk, Dd6k5N5qhg8, DdysDw5t4Km, DeB6QU6N4Ec, Dd4YlP-JEhh.",
+  "confidence": "weak"
+ },
+ {
+  "id": "BL10",
+  "rule": "First spoken line is a news drop: named product plus 'just launched / just got / just killed'.",
+  "measure": "first sentence of transcript, news pattern (see scripts/4_outlierlab_transcripts.py) or judged.verbal_hook == news_drop",
+  "threshold": "true",
+  "evidence": "Creator share of news first lines vs median views: Spearman 0.64, p < 0.001, n=36 creators, 1,962 transcripts. CORE 14% vs low base 4%. Hook lab 10k+ 9/24 vs 4/25, p=0.12. No link to Breakout rate (rho -0.07).",
+  "confidence": "strong"
+ },
+ {
+  "id": "BL11",
+  "rule": "Spoken pace at least 4.0 words per second. Cut pauses and dead air.",
+  "measure": "transcript words / duration_s (or measured.body.spoken_words_per_s)",
+  "threshold": ">= 4.0",
+  "evidence": "CORE 4.28 (n=430) vs others 3.51 (n=1,532). CORE outliers 4.52 (n=119) vs CORE typical 4.15 (n=257). Hook lab CORE 4.13 (n=7) vs 3.59 (n=22), p=0.45. Creator rho vs median 0.18, p=0.30.",
+  "confidence": "medium"
+ },
+ {
+  "id": "BL12",
+  "rule": "Speech, face and text all start at 0.0 s.",
+  "measure": "measured.hook.speech_start_s, face_on_screen_by_s, text_on_screen_by_s",
+  "threshold": "each <= 0.5",
+  "evidence": "Median 0.0 s in every group. Speech by 0.5 s in 87% of 55 viral reels. Norm, not a differentiator.",
+  "confidence": "strong"
+ },
+ {
+  "id": "BL13",
+  "rule": "10 to 14 spoken words in 0 to 3 s.",
+  "measure": "measured.hook.words_spoken_0_3",
+  "threshold": "10 to 14",
+  "evidence": "All 55 viral reels median 10 (IQR 8.5 to 14). CORE talking 13 (n=7). No group gap.",
+  "confidence": "medium"
+ },
+ {
+  "id": "BL14",
+  "rule": "Burned-in captions are optional. If used: word by word, no keyword colour.",
+  "measure": "judged.caption.style, judged.caption.keyword_highlight",
+  "threshold": "style in [none, word_by_word]; keyword_highlight == false",
+  "evidence": "CORE no captions 6/10 vs low base 5/24, p=0.048. Keyword colour 0/10 CORE, 8/55 overall. Conflicts with RULES.md 18 (grey pill).",
+  "confidence": "weak"
+ },
+ {
+  "id": "BL15",
+  "rule": "No more than 1 SFX per 10 s. None required in 0 to 5 s.",
+  "measure": "measured.body.sfx_per10",
+  "threshold": "<= 1.0",
+  "evidence": "CORE median 0 per 10 s (n=10). SFX in 0 to 5 s 2/7 vs 7/22, p=1.0. Detector catches about 1 in 4 SFX.",
+  "confidence": "weak"
+ },
+ {
+  "id": "BL16",
+  "rule": "Music is optional. If used: in from 0.0 s, 12 to 16 dB under the voice.",
+  "measure": "measured.hook.music_start_s, measured.body.bed_under_voice_db",
+  "threshold": "start <= 0.2 s; 12 to 16 dB under voice",
+  "evidence": "Bed in 2/7 CORE; 9/24 vs 9/25 by baseline, p=1.0. Start median 0.0 s (n=24). 14 dB under voice (n=18 talking reels with music).",
+  "confidence": "medium"
+ },
+ {
+  "id": "BL17",
+  "rule": "Mix at -14 LUFS, plus or minus 0.5.",
+  "measure": "measured.sound.mix_lufs",
+  "threshold": "-14.5 to -13.5",
+  "evidence": "Median -14.2 LUFS, n=55, range -15.2 to -14.1.",
+  "confidence": "strong"
+ },
+ {
+  "id": "BL18",
+  "rule": "Length 30 to 55 s. Do not cut short just to be short.",
+  "measure": "video.duration_s",
+  "threshold": "30 to 55",
+  "evidence": "CORE all reels median 43.4 s (IQR 31 to 55, n=436). Within creators, outliers 2.4 s longer than typical (19 of 33). Creator rho length vs median -0.14, p=0.44.",
+  "confidence": "medium"
+ },
+ {
+  "id": "BL19",
+  "rule": "End on 'follow me and comment [WORD]'. Keep as a default; do not expect lift.",
+  "measure": "judged.body.ending_cta_type; 'follow' and 'comment' in last 40 transcript words",
+  "threshold": "ending_cta_type == comment_keyword",
+  "evidence": "Comment-keyword ending in 37/55 viral reels and 8/10 CORE. Within creators no lift (median change 0, n=33). Follow ask in 53% of CORE reels vs 8% to 22% elsewhere (mavgpt 77%, kayvon.ai 63%, opusjake 54%). Creator rho follow vs median 0.09.",
+  "confidence": "weak"
+ }
+]

@@ -1,0 +1,16 @@
+{
+ "name": "Night",
+ "about": "Charcoal cards, white type, a bright accent. Good for tech and screen recordings.",
+ "style": {
+  "font": "Inter",
+  "caption": "#FFFFFF",
+  "accent": "#7CF29C",
+  "panel": "#16181D",
+  "ink": "#F2F3F5",
+  "line": "rgba(255,255,255,0.10)",
+  "radius": "22px",
+  "ground": "#0B0C0F",
+  "titlebg": "#16181D",
+  "capaccent": "#7CF29C"
+ }
+}

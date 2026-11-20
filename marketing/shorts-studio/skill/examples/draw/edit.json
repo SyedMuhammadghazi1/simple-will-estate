@@ -1,0 +1,166 @@
+{
+ "mode": "short",
+ "name": "draw",
+ "round": 1,
+ "title": "Draw short r1",
+ "fps": 30,
+ "size": [
+  1080,
+  1920
+ ],
+ "timeline": "pretrim",
+ "layout": [
+  [
+   0,
+   0.45,
+   "anim",
+   "A"
+  ],
+  [
+   0.45,
+   2.15,
+   "split",
+   "A"
+  ],
+  [
+   2.15,
+   3.65,
+   "anim",
+   "A"
+  ],
+  [
+   3.65,
+   5.26,
+   "split",
+   "A"
+  ],
+  [
+   5.26,
+   7.58,
+   "anim",
+   "A"
+  ],
+  [
+   7.58,
+   9.17,
+   "split",
+   "B"
+  ],
+  [
+   9.17,
+   13.0,
+   "anim",
+   "B"
+  ],
+  [
+   13.0,
+   15.32,
+   "jack",
+   "j1"
+  ],
+  [
+   15.32,
+   19.12,
+   "split",
+   "C"
+  ],
+  [
+   19.12,
+   21.05,
+   "anim",
+   "C"
+  ],
+  [
+   21.05,
+   22.85,
+   "split",
+   "C"
+  ],
+  [
+   22.85,
+   24.5,
+   "anim",
+   "C"
+  ],
+  [
+   24.5,
+   26.55,
+   "split",
+   "C"
+  ],
+  [
+   26.55,
+   28.2,
+   "jack",
+   "j2"
+  ],
+  [
+   28.2,
+   30.3,
+   "anim",
+   "D"
+  ],
+  [
+   30.3,
+   31.84,
+   "split",
+   "D"
+  ],
+  [
+   31.84,
+   99,
+   "anim",
+   "D"
+  ]
+ ],
+ "scenes": [
+  "scenes.js"
+ ],
+ "media": {},
+ "footage": [],
+ "captions": {
+  "chunks": "auto"
+ },
+ "trim": {
+  "detect_on": "raw",
+  "cuts": [
+   [
+    31.84,
+    32.8
+   ]
+  ],
+  "word_fixes": {
+   "99": {
+    "s": 32.83,
+    "e": 33.15
+   }
+  }
+ },
+ "assets": {},
+ "style": {
+  "font": "Manrope",
+  "font_accent": "Caveat",
+  "ink": "#1C1B19",
+  "accent": "#D9443A",
+  "accent2": "#3B5BDB",
+  "ground": "#F7F5F0",
+  "card": "#FFFFFF",
+  "soft": "#FBE3DF",
+  "tint": "#E7ECFB",
+  "caption_bg": "rgba(28,27,25,0.82)",
+  "caption_ink": "#FFFFFF"
+ },
+ "transitions": [
+  "grow",
+  "cut",
+  "cut",
+  "wipe",
+  "cut",
+  "grow",
+  "cut",
+  "wipeR",
+  "cut",
+  "wipe",
+  "cut"
+ ]
+}

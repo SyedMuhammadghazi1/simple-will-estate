@@ -8,3 +8,12 @@ drizzle/meta
 drizzle/*.sql
 package-lock.json
 next-env.d.ts
+# reel kit: generated timing/cue data, rendered output
+marketing/reel-kit/reels/*/timeline.json
+marketing/reel-kit/reels/*/timeline.resolved.json
+marketing/reel-kit/reels/*/cues.json
+marketing/reel-kit/out
+# shorts studio: the skill is third-party code, kept as delivered
+marketing/shorts-studio/skill
+marketing/shorts-studio/projects
+marketing/shorts-studio/clips/out

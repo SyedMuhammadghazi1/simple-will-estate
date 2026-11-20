@@ -16,7 +16,7 @@ export default defineConfig([
     },
   },
   {
-    files: ["scripts/**", "tests/**", "*.config.*"],
+    files: ["scripts/**", "tests/**", "*.config.*", "marketing/reel-kit/scripts/**"],
     rules: { "no-console": "off" },
   },
   globalIgnores([
@@ -29,5 +29,8 @@ export default defineConfig([
     "test-results/**",
     "next-env.d.ts",
     "drizzle/meta/**",
+    "marketing/shorts-studio/skill/**",
+    "marketing/shorts-studio/projects/**",
+    "marketing/shorts-studio/clips/out/**",
   ]),
 ]);

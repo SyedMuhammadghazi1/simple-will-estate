@@ -1,0 +1,648 @@
+{
+  "id": "gta6-launch-week",
+  "theme": "sunset",
+  "fps": 30,
+  "eyebrow": "GTA 6 · launch week",
+  "disclaimer": "Fan-made · not affiliated with Rockstar",
+  "voice": {
+    "engine": "kokoro",
+    "voice": "af_heart",
+    "speed": 1.0,
+    "lead": 0.1,
+    "gap": 0.24
+  },
+  "music": {
+    "until": "end"
+  },
+  "lint": {
+    "require": [
+      {
+        "field": "disclaimer",
+        "includes": ["not affiliated with Rockstar"]
+      },
+      {
+        "field": "endcard.disclaimer",
+        "includes": ["not affiliated", "Rockstar Games", "Take-Two"]
+      }
+    ],
+    "banned": [
+      "leak",
+      "insider",
+      "guaranteed",
+      "giveaway",
+      "/\\bfree\\b/",
+      "download link",
+      "early access",
+      "beta",
+      "cheapest",
+      "crack",
+      "60 fps",
+      "locked 30",
+      "gone gold",
+      "PC version in",
+      "2027",
+      "billion",
+      "biggest launch",
+      "Online 2",
+      "disc version"
+    ]
+  },
+  "variants": {
+    "out-now": {
+      "about": "For posting on or after launch day (19 Nov 2026): 'drops this Thursday' becomes 'out now', the pre-load beat becomes the download, and the midnight beat is dropped.",
+      "beats": {
+        "thursday": {
+          "caption": "And it's *out now.*",
+          "props": [
+            {
+              "type": "calendar",
+              "x": 690,
+              "y": 994,
+              "rot": 3,
+              "month": "NOV",
+              "day": 19,
+              "weekday": "Thursday",
+              "stamp": "Out now",
+              "stampAt": "w:out"
+            }
+          ],
+          "mascot": [
+            {
+              "at": 0,
+              "face": "smile",
+              "pose": "pointUp"
+            },
+            {
+              "at": "w:out",
+              "face": "happy",
+              "pose": "cheer",
+              "hop": 24
+            }
+          ]
+        },
+        "preload": {
+          "caption": "The download is *live.* Start it *tonight.*",
+          "props": [
+            {
+              "type": "download",
+              "x": 672,
+              "y": 968,
+              "rot": -2,
+              "title": "GTA 6",
+              "status": "Out since Nov 19",
+              "button": "Download",
+              "running": "Downloading…",
+              "size": "up to 212 GB",
+              "clickAt": "w:start+0.1"
+            },
+            {
+              "type": "note",
+              "x": 596,
+              "y": 1194,
+              "rot": -1,
+              "enter": "pop",
+              "delay": 0,
+              "text": "* needs a purchase\n  or a redeemed code"
+            }
+          ],
+          "breakAfter": "live"
+        },
+        "midnight": null,
+        "hook": {
+          "props": [
+            {
+              "type": "meter",
+              "span": 2,
+              "x": 668,
+              "y": 978,
+              "rot": -2,
+              "enter": "none",
+              "title": "GTA 6 download · up to",
+              "value": 212,
+              "unit": "GB",
+              "totalLabel": "212 GB",
+              "fillAt": -2,
+              "fillDur": 0.5,
+              "rescale": [
+                {
+                  "total": 667,
+                  "totalLabel": "of ~667 GB · original PS5",
+                  "at": "beat:1+0.3"
+                },
+                {
+                  "total": 364,
+                  "totalLabel": "of ~364 GB · base Series S",
+                  "at": "w:over-0.1"
+                }
+              ],
+              "tag": "over half",
+              "tagAt": "w:half"
+            },
+            {
+              "type": "note",
+              "x": 590,
+              "y": 1194,
+              "rot": 1,
+              "enter": "pop",
+              "delay": "w:needs",
+              "text": "* source: Rockstar\n  Newswire, Nov 3"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "beats": [
+    {
+      "id": "hook",
+      "caption": "GTA 6 needs up to *212 gigs.* Got *room?*",
+      "prelit": 2,
+      "props": [
+        {
+          "type": "meter",
+          "span": 2,
+          "x": 668,
+          "y": 978,
+          "rot": -2,
+          "enter": "none",
+          "title": "GTA 6 pre-load · up to",
+          "value": 212,
+          "unit": "GB",
+          "totalLabel": "212 GB",
+          "fillAt": -2,
+          "fillDur": 0.5,
+          "rescale": [
+            {
+              "total": 667,
+              "totalLabel": "of ~667 GB · original PS5",
+              "at": "beat:1+0.3"
+            },
+            {
+              "total": 364,
+              "totalLabel": "of ~364 GB · base Series S",
+              "at": "w:over-0.1"
+            }
+          ],
+          "tag": "over half",
+          "tagAt": "w:half"
+        },
+        {
+          "type": "note",
+          "x": 590,
+          "y": 1194,
+          "rot": 1,
+          "enter": "pop",
+          "delay": "w:needs",
+          "text": "* source: Rockstar\n  Newswire, Nov 3"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "talk",
+          "pose": "point"
+        },
+        {
+          "at": "w:212",
+          "face": "shock",
+          "pose": "gasp"
+        },
+        {
+          "at": "w:got",
+          "face": "look",
+          "pose": "shrug"
+        }
+      ],
+      "speed": 1.16,
+      "gap": 0.2,
+      "breakAfter": "gigs"
+    },
+    {
+      "id": "series-s",
+      "caption": "A *third* of an original PS5. Over *half* a base Series S.",
+      "props": [
+        {
+          "type": "note",
+          "x": 596,
+          "y": 1194,
+          "rot": -1,
+          "enter": "pop",
+          "delay": 0.1,
+          "text": "* usable space out of\n  the box, per reviewers"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "talk",
+          "pose": "point"
+        },
+        {
+          "at": "w:original",
+          "face": "look",
+          "pose": "pointUp"
+        },
+        {
+          "at": "w:over",
+          "face": "worried",
+          "pose": "rest"
+        },
+        {
+          "at": "w:half",
+          "face": "shock",
+          "pose": "chin"
+        }
+      ]
+    },
+    {
+      "id": "thursday",
+      "caption": "And it drops this *Thursday.*",
+      "gap": 0.4,
+      "props": [
+        {
+          "type": "calendar",
+          "x": 690,
+          "y": 994,
+          "rot": 3,
+          "month": "NOV",
+          "day": 19,
+          "weekday": "Thursday",
+          "stamp": "This week",
+          "stampAt": "w:thursday"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "smile",
+          "pose": "pointUp"
+        },
+        {
+          "at": "w:thursday",
+          "face": "happy",
+          "pose": "cheer",
+          "hop": 24
+        }
+      ]
+    },
+    {
+      "id": "box",
+      "caption": "Even the boxed copy is a *code.* No *disc.*",
+      "props": [
+        {
+          "type": "checklist",
+          "x": 674,
+          "y": 960,
+          "rot": -2,
+          "w": 620,
+          "scale": 0.96,
+          "title": "In the box",
+          "kicker": "physical edition",
+          "items": [
+            {
+              "text": "Download code",
+              "at": "w:code"
+            },
+            {
+              "text": "Disc",
+              "no": true,
+              "sub": "none",
+              "at": "w:no"
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "x": 580,
+          "y": 1194,
+          "rot": 1,
+          "enter": "pop",
+          "delay": 0.3,
+          "text": "* source:\n  Rockstar Store"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "talk",
+          "pose": "rest"
+        },
+        {
+          "at": "w:no",
+          "face": "shock",
+          "pose": "shrug"
+        }
+      ],
+      "gap": 0.45
+    },
+    {
+      "id": "preload",
+      "caption": "Pre-load is *already open.* Start it *tonight.*",
+      "props": [
+        {
+          "type": "download",
+          "x": 672,
+          "y": 968,
+          "rot": -2,
+          "title": "GTA 6 · pre-load",
+          "status": "Open since Nov 10",
+          "button": "Start pre-load",
+          "running": "Downloading…",
+          "size": "up to 212 GB",
+          "clickAt": "w:start+0.1"
+        },
+        {
+          "type": "note",
+          "x": 596,
+          "y": 1194,
+          "rot": -1,
+          "enter": "pop",
+          "delay": 0,
+          "text": "* needs a pre-order\n  or a redeemed code"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "talk",
+          "pose": "point"
+        },
+        {
+          "at": "w:tonight",
+          "face": "smile",
+          "pose": "pointUp"
+        }
+      ],
+      "breakAfter": "open"
+    },
+    {
+      "id": "midnight",
+      "caption": "Rockstar says it unlocks at *midnight,* local time.",
+      "props": [
+        {
+          "type": "flip-clock",
+          "x": 676,
+          "y": 972,
+          "rot": 2,
+          "label": "Wed, Nov 18 · local time",
+          "from": "11:59",
+          "fromSuffix": "PM",
+          "to": "12:00",
+          "toSuffix": "AM",
+          "flipAt": "w:midnight",
+          "tag": "unlocked",
+          "note": "source: Rockstar Support",
+          "labelTo": "Thu, Nov 19 · local time"
+        },
+        {
+          "type": "note",
+          "x": 590,
+          "y": 1194,
+          "rot": -1,
+          "enter": "pop",
+          "delay": 0.3,
+          "text": "* check the countdown\n  on your console"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "talk",
+          "pose": "rest"
+        },
+        {
+          "at": "w:midnight",
+          "face": "happy",
+          "pose": "cheer"
+        },
+        {
+          "at": "w:local",
+          "face": "talk",
+          "pose": "point"
+        }
+      ]
+    },
+    {
+      "id": "fps",
+      "caption": "It targets *thirty* frames a second.",
+      "props": [
+        {
+          "type": "stat-card",
+          "x": 668,
+          "y": 960,
+          "rot": -2,
+          "w": 540,
+          "label": "Frame rate target",
+          "value": 30,
+          "unit": "fps",
+          "note": "\"targeting 30 frames per second\"",
+          "countAt": "w:targets",
+          "countDur": 0.1,
+          "from": 30
+        },
+        {
+          "type": "note",
+          "x": 590,
+          "y": 1194,
+          "rot": 1,
+          "enter": "pop",
+          "delay": 0.1,
+          "text": "* Rockstar Newswire,\n  Nov 10"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "talk",
+          "pose": "rest"
+        },
+        {
+          "at": "w:thirty",
+          "face": "think",
+          "pose": "chin"
+        },
+        {
+          "at": "w:second",
+          "face": "look",
+          "pose": "shrug"
+        }
+      ],
+      "gap": 0.6
+    },
+    {
+      "id": "price",
+      "caption": "*Eighty* bucks. A *hundred* for Ultimate.",
+      "props": [
+        {
+          "type": "price-tags",
+          "x": 672,
+          "y": 1000,
+          "scale": 0.96,
+          "tags": [
+            {
+              "label": "Standard",
+              "price": "$79.99",
+              "at": 0.05
+            },
+            {
+              "label": "Ultimate",
+              "price": "$99.99",
+              "at": "w:hundred"
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "x": 580,
+          "y": 1206,
+          "rot": -1,
+          "enter": "pop",
+          "delay": 0,
+          "text": "* US list prices"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "talk",
+          "pose": "point"
+        },
+        {
+          "at": "w:hundred",
+          "face": "shock",
+          "pose": "chin"
+        }
+      ]
+    },
+    {
+      "id": "dark",
+      "mood": "dark",
+      "gap": 0.5,
+      "caption": "PC players? *Nothing* announced.",
+      "props": [
+        {
+          "type": "checklist",
+          "x": 674,
+          "y": 962,
+          "rot": -2,
+          "w": 640,
+          "scale": 0.94,
+          "enter": "pop",
+          "exit": "fade",
+          "title": "Platforms",
+          "kicker": "at launch",
+          "items": [
+            {
+              "text": "PlayStation 5",
+              "at": 0.3
+            },
+            {
+              "text": "Xbox Series X|S",
+              "at": 0.5
+            },
+            {
+              "text": "PC",
+              "no": true,
+              "sub": "not announced",
+              "at": "w:nothing"
+            }
+          ]
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "deadpan",
+          "pose": "rest",
+          "hop": 0
+        }
+      ]
+    },
+    {
+      "id": "wait",
+      "caption": "Two delays. *Thirteen years* since GTA 5.",
+      "props": [
+        {
+          "type": "calendar",
+          "x": 640,
+          "y": 1000,
+          "rot": -2,
+          "scale": 0.92,
+          "month": "NOV",
+          "day": 19,
+          "weekday": "Thursday",
+          "struck": [
+            {
+              "text": "Fall 2025",
+              "at": "w:two"
+            },
+            {
+              "text": "May 26, 2026",
+              "at": "w:delays"
+            }
+          ],
+          "stamp": "13 years",
+          "stampAt": "w:years",
+          "stampColor": "var(--amber)"
+        }
+      ],
+      "mascot": [
+        {
+          "at": 0,
+          "face": "talk",
+          "pose": "rest"
+        },
+        {
+          "at": "w:thirteen",
+          "face": "think",
+          "pose": "chin"
+        }
+      ],
+      "breakAfter": "delays"
+    },
+    {
+      "id": "ask",
+      "caption": "Send this to the friend who *hasn't cleared space.*",
+      "prop": {
+        "type": "share-sheet",
+        "x": 676,
+        "y": 992,
+        "scale": 1.02,
+        "title": "Send to",
+        "people": [
+          {
+            "label": "Duo partner"
+          },
+          {
+            "label": "That friend"
+          },
+          {
+            "label": "Group chat"
+          }
+        ],
+        "pick": 1,
+        "pickAt": "w:friend"
+      },
+      "mascot": [
+        {
+          "at": 0,
+          "face": "smile",
+          "pose": "point"
+        },
+        {
+          "at": "w:space",
+          "face": "happy",
+          "pose": "wave"
+        }
+      ]
+    }
+  ],
+  "endcard": {
+    "headline": "Follow for launch week,\n*minus the rumors*",
+    "say": "Follow for launch week, minus the rumors.",
+    "sub": "Unofficial fan explainer. Sources in the caption.",
+    "disclaimer": "Not affiliated with or endorsed by Rockstar Games or Take-Two Interactive.",
+    "hold": 4.2,
+    "lead": 0.4
+  }
+}

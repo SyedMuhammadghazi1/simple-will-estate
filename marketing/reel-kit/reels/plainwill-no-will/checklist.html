@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Before you write a will: the one-page checklist</title>
+    <style>
+      @font-face {
+        font-family: "Fraunces";
+        font-style: normal;
+        font-weight: 100 900;
+        src: url("../../player/fonts/fraunces-latin-full-normal.woff2") format("woff2-variations");
+      }
+      @font-face {
+        font-family: "Fraunces";
+        font-style: italic;
+        font-weight: 100 900;
+        src: url("../../player/fonts/fraunces-latin-full-italic.woff2") format("woff2-variations");
+      }
+      @font-face {
+        font-family: "Inter";
+        font-weight: 100 900;
+        src: url("../../player/fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
+      }
+      @font-face {
+        font-family: "DM Mono";
+        font-weight: 500;
+        src: url("../../player/fonts/dm-mono-latin-500-normal.woff2") format("woff2");
+      }
+      @page {
+        size: Letter;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        width: 8.5in;
+        height: 11in;
+        padding: 0.55in 0.65in 0.45in;
+        background: #f9f6f0;
+        color: #1c1917;
+        font:
+          400 10.6pt/1.42 "Inter",
+          system-ui,
+          sans-serif;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .eyebrow {
+        font:
+          500 8pt "DM Mono",
+          monospace;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #6b7a5e;
+      }
+      h1 {
+        margin: 6pt 0 4pt;
+        font:
+          560 30pt/1.08 "Fraunces",
+          Georgia,
+          serif;
+        letter-spacing: -0.012em;
+      }
+      h1 em {
+        font-weight: 600;
+        color: #b45309;
+      }
+      .lede {
+        max-width: 6.4in;
+        margin: 0 0 12pt;
+        color: #57534e;
+        font-size: 11pt;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10pt 14pt;
+      }
+      .card {
+        background: #fff;
+        border: 1.6pt solid #1c1917;
+        border-radius: 9pt;
+        box-shadow: 3pt 3.4pt 0 #1c1917;
+        padding: 10pt 12pt 9pt;
+        break-inside: avoid;
+      }
+      .card.wide {
+        grid-column: 1 / -1;
+      }
+      .num {
+        font:
+          500 7.6pt "DM Mono",
+          monospace;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #b45309;
+      }
+      h2 {
+        margin: 2pt 0 5pt;
+        font:
+          620 14.5pt/1.15 "Fraunces",
+          Georgia,
+          serif;
+      }
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      li {
+        position: relative;
+        padding-left: 17pt;
+        margin-bottom: 3.6pt;
+      }
+      li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 2.4pt;
+        width: 9pt;
+        height: 9pt;
+        border: 1.3pt solid #1c1917;
+        border-radius: 2.4pt;
+        background: #fffdf7;
+      }
+      .write {
+        display: block;
+        margin-top: 2pt;
+        border-bottom: 1pt solid #c9c2b6;
+        height: 13pt;
+      }
+      .cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 16pt;
+      }
+      .note {
+        color: #57534e;
+        font-size: 9.4pt;
+        margin: 5pt 0 0;
+      }
+      footer {
+        margin-top: 11pt;
+        padding-top: 7pt;
+        border-top: 1.2pt solid #1c1917;
+        display: flex;
+        justify-content: space-between;
+        gap: 18pt;
+        font-size: 8.2pt;
+        line-height: 1.38;
+        color: #57534e;
+      }
+      footer b {
+        color: #1c1917;
+      }
+      .brand {
+        flex: none;
+        font:
+          500 9pt "DM Mono",
+          monospace;
+        letter-spacing: 0.06em;
+        color: #1e3a5f;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="eyebrow">Plainwill · in plain English</div>
+    <h1>Before you write a will: <em>three decisions</em></h1>
+    <p class="lede">
+      If you don't have a will, your state's default rules decide who gets your things, and a judge
+      decides who raises your children if no parent is left. A will is how you put your own answers
+      on paper. These are the decisions to make first.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <div class="num">Decision 1</div>
+        <h2>Who gets what</h2>
+        <ul>
+          <li>The people (or charities) you want to receive your things</li>
+          <li>Anything specific going to someone specific: a ring, the car</li>
+          <li>Who gets "everything else"</li>
+          <li>A backup if your first choice can't inherit</li>
+        </ul>
+        <span class="write"></span>
+      </div>
+
+      <div class="card">
+        <div class="num">Decision 2</div>
+        <h2>Who you'd name for your kids</h2>
+        <ul>
+          <li>The person you'd want to raise your minor children</li>
+          <li>A backup, in case they can't</li>
+          <li>Ask them first: it is a big thing to say yes to</li>
+        </ul>
+        <p class="note">
+          A will lets you name your choice. How a guardian is appointed or confirmed depends on your
+          state, and a surviving parent normally keeps custody.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="num">Decision 3</div>
+        <h2>Who's in charge</h2>
+        <ul>
+          <li>Your executor: the person who carries out the will</li>
+          <li>Someone organized, whom you trust with paperwork and money</li>
+          <li>A backup, and a conversation so it isn't a surprise</li>
+        </ul>
+        <span class="write"></span>
+      </div>
+
+      <div class="card">
+        <div class="num">Then</div>
+        <h2>Sign it properly</h2>
+        <ul>
+          <li>In most states: in writing, signed by you and by two witnesses</li>
+          <li>Signing rules vary by state: check yours before you sign</li>
+          <li>An unsigned will has no legal effect</li>
+          <li>Tell your executor where the signed original is kept</li>
+        </ul>
+      </div>
+
+      <div class="card wide">
+        <div class="num">Good to know</div>
+        <h2>What a will doesn't do on its own</h2>
+        <div class="cols">
+          <ul>
+            <li>
+              Accounts with a named beneficiary (retirement plans, life insurance) usually follow
+              the form on file, not the will: check those forms are current
+            </li>
+            <li>Jointly owned property often passes to the other owner</li>
+          </ul>
+          <ul>
+            <li>Revisit after a marriage, a divorce, a new child or a move to another state</li>
+            <li>
+              Talk to an attorney if you own a business, have a beneficiary with special needs,
+              expect a dispute, hold property abroad, or have a large or complicated estate
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div>
+        <b>General information, not legal advice.</b> Plainwill is not a law firm and is not a
+        substitute for the advice of an attorney. Laws vary by state, and this checklist does not
+        cover every situation. Louisiana follows different rules for wills.
+      </div>
+      <div class="brand">plainwill</div>
+    </footer>
+  </body>
+</html>

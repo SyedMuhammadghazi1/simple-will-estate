@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shorts Studio</title>
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand"><span class="dot"></span>Shorts Studio</div>
+      <select id="project" aria-label="Project"></select>
+      <button id="new" class="ghost">New Short</button>
+      <button id="del" class="ghost danger" title="Delete this project and its files">
+        Delete
+      </button>
+      <div id="doctor" class="doctor"></div>
+    </header>
+    <main>
+      <section class="work">
+        <nav id="tabs" class="tabs"></nav>
+        <div id="panel" class="panel"></div>
+      </section>
+      <aside class="side">
+        <div class="phone">
+          <video id="player" controls playsinline preload="metadata"></video>
+          <div id="noplay" class="noplay">
+            Your Short plays here once there is something to show.
+          </div>
+        </div>
+        <div id="playing" class="muted small center"></div>
+        <div id="activity" class="activity"></div>
+      </aside>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
