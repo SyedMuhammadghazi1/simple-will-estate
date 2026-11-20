@@ -196,7 +196,11 @@ def compose(source, shots, out, st, credit, work):
                      f"afade=t=out:st={d - fd:.3f}:d={fd}[a{i}];")
         labels.append(f"[v{i}][a{i}]")
     fc = "".join(parts) + "".join(labels) + f"concat=n={len(shots)}:v=1:a=1[vc][a]"
-    if credit:
+    has_text = "drawtext" in subprocess.run(["ffmpeg", "-hide_banner", "-filters"], capture_output=True, text=True).stdout
+    if credit and not has_text:
+        print("  note: this ffmpeg has no drawtext filter, so the on-screen source credit is left out. "
+              "Credit the source in the post caption.")
+    if credit and has_text:
         tf = os.path.join(work, "credit.txt")
         open(tf, "w").write(credit)
         esc = lambda p: p.replace("\\", "/").replace(":", "\\:")
@@ -204,9 +208,8 @@ def compose(source, shots, out, st, credit, work):
                f"x=(w-text_w)/2:y=1550:shadowcolor=black@0.7:shadowx=0:shadowy=2[v]")
     else:
         fc += ";[vc]null[v]"
-    script = os.path.join(work, "compose_filter.txt")
-    open(script, "w").write(fc)
-    run(["ffmpeg", "-v", "error", "-y", "-i", source, "-filter_complex_script", script, "-map", "[v]", "-map", "[a]",
+    open(os.path.join(work, "compose_filter.txt"), "w").write(fc)      # kept for reading; passed inline below
+    run(["ffmpeg", "-v", "error", "-y", "-i", source, "-filter_complex", fc, "-map", "[v]", "-map", "[a]",
          "-r", str(FPS), "-c:v", "libx264", "-crf", "16", "-preset", "medium", "-pix_fmt", "yuv420p",
          "-g", str(FPS), "-keyint_min", str(FPS),      # a keyframe every second: the renderer seeks frame by frame
          "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-movflags", "+faststart", out])
